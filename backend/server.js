@@ -1,288 +1,493 @@
+require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cors = require('cors');
-const axios = require('axios');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+// ================================================================
+// 1.  إعدادات middleware
+// ================================================================
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true
+}));
 app.use(express.json());
 
-// تحديد حد الطلبات للوقاية من الهجمات
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 100, // حد أقصى 100 طلب لكل IP
+// ================================================================
+// 2.  الاتصال بقاعدة البيانات MongoDB
+// ================================================================
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not defined in environment variables');
+    process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err);
+        process.exit(1);
+    });
+
+// ================================================================
+// 3.  نماذج البيانات (Schemas)
+// ================================================================
+
+// 3.1 نموذج المستخدم
+const UserSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        enum: ['admin', 'user'],
+        default: 'user'
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    xtream: {
+        server: { type: String, default: '' },
+        username: { type: String, default: '' },
+        password: { type: String, default: '' }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
-app.use('/api/', limiter);
 
-// ============================================================
-// 1.  الاتصال بقاعدة البيانات
-// ============================================================
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+const User = mongoose.model('User', UserSchema);
 
-// ============================================================
-// 2.  نماذج (Schemas) قاعدة البيانات
-// ============================================================
-
-// نموذج المستخدم
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  isAdmin: { type: Boolean, default: false },
-  isActive: { type: Boolean, default: true },
-  xtream: {
-    server: { type: String, default: '' },
-    username: { type: String, default: '' },
-    password: { type: String, default: '' }
-  },
-  createdAt: { type: Date, default: Date.now }
+// 3.2 نموذج القنوات (لكل مستخدم)
+const ChannelSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    channels: {
+        type: Array,
+        default: []
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-// تشفير كلمة المرور قبل الحفظ
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+const Channel = mongoose.model('Channel', ChannelSchema);
 
-const User = mongoose.model('User', userSchema);
+// ================================================================
+// 4.  دوال المساعدة (Helper functions)
+// ================================================================
 
-// نموذج القنوات (اختياري لتخزين القنوات لكل مستخدم)
-// لكننا سنعتمد على جلب القنوات مباشرة من Xtream وقت الطلب.
+// 4.1 إنشاء token JWT
+function generateToken(userId, email, role) {
+    return jwt.sign(
+        { userId, email, role },
+        process.env.JWT_SECRET || 'hacene_tv_secret_key_2025',
+        { expiresIn: '30d' }
+    );
+}
 
-// ============================================================
-// 3.  الدوال المساعدة
-// ============================================================
+// 4.2 التحقق من صلاحية token (Middleware)
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
 
-// إنشاء توكن JWT
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, email: user.email, isAdmin: user.isAdmin },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-};
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hacene_tv_secret_key_2025');
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+}
 
-// التحقق من التوكن
-const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+// 4.3 التحقق من صلاحيات Admin
+function adminMiddleware(req, res, next) {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Forbidden: Admin access required' });
+    }
     next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid or expired token.' });
-  }
-};
-
-// التحقق من أن المستخدم مسؤول (Admin)
-const isAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admin access required.' });
-  next();
-};
-
-// دالة لجلب القنوات من خادم Xtream (تُستخدم للمستخدم العادي والمسؤول على حد سواء)
-async function fetchXtreamChannels(server, username, password) {
-  const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-  try {
-    const response = await axios.get(url, { timeout: 10000 });
-    if (response.data && Array.isArray(response.data)) {
-      return response.data.map(item => ({
-        name: item.name || 'بدون اسم',
-        category: item.category_name || 'عام',
-        stream_id: item.stream_id,
-        icon: item.stream_icon || '',
-        url: '' // لا نخزن الرابط
-      }));
-    }
-    return [];
-  } catch (error) {
-    console.error('Error fetching Xtream channels:', error.message);
-    throw new Error('Failed to fetch channels from Xtream server.');
-  }
 }
 
-// ============================================================
-// 4.  مسارات (Routes) API
-// ============================================================
+// ================================================================
+// 5.  نقاط النهاية (API Endpoints)
+// ================================================================
 
-// --- مسار التجربة (health check) ---
+// 5.1 تسجيل مستخدم جديد
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // التحقق من صحة الإدخال
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        // التحقق من وجود المستخدم
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already registered' });
+        }
+
+        // تشفير كلمة المرور
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // إنشاء المستخدم
+        const user = new User({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            role: 'user',
+            isActive: true,
+            xtream: { server: '', username: '', password: '' }
+        });
+
+        await user.save();
+
+        // إنشاء token
+        const token = generateToken(user._id, user.email, user.role);
+
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+                isActive: user.isActive,
+                xtream: user.xtream
+            }
+        });
+    } catch (err) {
+        console.error('Register error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 5.2 تسجيل الدخول
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // التحقق من أن الحساب نشط
+        if (!user.isActive) {
+            return res.status(403).json({ error: 'Account is disabled. Contact administrator.' });
+        }
+
+        // التحقق من كلمة المرور
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = generateToken(user._id, user.email, user.role);
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+                isActive: user.isActive,
+                xtream: user.xtream
+            }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 5.3 الحصول على بيانات المستخدم الحالي
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json({ user });
+    } catch (err) {
+        console.error('Get user error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 5.4 حفظ بيانات Xtream للمستخدم الحالي
+app.post('/api/user/xtream', authMiddleware, async (req, res) => {
+    try {
+        const { server, username, password } = req.body;
+        const userId = req.user.userId;
+
+        if (!server || !username || !password) {
+            return res.status(400).json({ error: 'Server, username, and password are required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.xtream = { server, username, password };
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Xtream settings saved successfully',
+            xtream: user.xtream
+        });
+    } catch (err) {
+        console.error('Save Xtream error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 5.5 جلب القنوات من Xtream (للمستخدم الحالي)
+app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const { server, username, password } = user.xtream;
+        if (!server || !username || !password) {
+            return res.status(400).json({ error: 'Xtream credentials not configured' });
+        }
+
+        // جلب القنوات من خادم Xtream
+        const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
+        const proxy = 'https://hacene-iptv.onrender.com/api?url=';
+        const finalUrl = proxy + encodeURIComponent(url);
+
+        const response = await fetch(finalUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error('Invalid response from Xtream server');
+        }
+
+        // تحويل البيانات إلى صيغة موحدة
+        const channels = data.map(item => ({
+            name: item.name || 'بدون اسم',
+            category: item.category_name || 'عام',
+            stream_id: item.stream_id,
+            icon: item.stream_icon || '',
+            url: ''
+        }));
+
+        // حفظ القنوات في قاعدة البيانات
+        await Channel.findOneAndUpdate(
+            { userId: user._id },
+            { userId: user._id, channels, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+
+        res.json({
+            success: true,
+            channels: channels,
+            count: channels.length
+        });
+    } catch (err) {
+        console.error('Fetch channels error:', err);
+        res.status(500).json({ error: err.message || 'Failed to fetch channels' });
+    }
+});
+
+// 5.6 الحصول على قنوات المستخدم المحفوظة
+app.get('/api/user/channels', authMiddleware, async (req, res) => {
+    try {
+        const channelDoc = await Channel.findOne({ userId: req.user.userId });
+        if (!channelDoc) {
+            return res.json({ channels: [] });
+        }
+        res.json({ channels: channelDoc.channels });
+    } catch (err) {
+        console.error('Get channels error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 5.7 حفظ قنوات المستخدم (للمزامنة)
+app.post('/api/user/channels', authMiddleware, async (req, res) => {
+    try {
+        const { channels } = req.body;
+        if (!Array.isArray(channels)) {
+            return res.status(400).json({ error: 'Channels must be an array' });
+        }
+
+        await Channel.findOneAndUpdate(
+            { userId: req.user.userId },
+            { userId: req.user.userId, channels, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+
+        res.json({ success: true, channels });
+    } catch (err) {
+        console.error('Save channels error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ================================================================
+// 6.  نقاط النهاية الخاصة بـ Admin
+// ================================================================
+
+// 6.1 الحصول على جميع المستخدمين (للـ Admin فقط)
+app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password');
+        res.json({ users });
+    } catch (err) {
+        console.error('Admin get users error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 6.2 تحديث مستخدم (للـ Admin فقط)
+app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { isActive, xtream, role } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // لا يمكن تعديل Admin نفسه أو تغيير دور Admin
+        if (userId === req.user.userId) {
+            return res.status(403).json({ error: 'Cannot modify your own account' });
+        }
+
+        if (isActive !== undefined) user.isActive = isActive;
+        if (role && role === 'admin') {
+            return res.status(403).json({ error: 'Cannot assign admin role' });
+        }
+        if (xtream) {
+            user.xtream = {
+                server: xtream.server || user.xtream.server || '',
+                username: xtream.username || user.xtream.username || '',
+                password: xtream.password || user.xtream.password || ''
+            };
+        }
+
+        await user.save();
+
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+                isActive: user.isActive,
+                xtream: user.xtream
+            }
+        });
+    } catch (err) {
+        console.error('Admin update user error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 6.3 حذف مستخدم (للـ Admin فقط)
+app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (userId === req.user.userId) {
+            return res.status(403).json({ error: 'Cannot delete your own account' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // حذف قنوات المستخدم
+        await Channel.findOneAndDelete({ userId });
+        // حذف المستخدم
+        await User.findByIdAndDelete(userId);
+
+        res.json({ success: true, message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('Admin delete user error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ================================================================
+// 7.  نقطة نهاية الـ Proxy (لجلب القنوات من Xtream)
+// ================================================================
+app.get('/api/proxy', async (req, res) => {
+    try {
+        const targetUrl = req.query.url;
+        if (!targetUrl) {
+            return res.status(400).json({ error: 'Missing url parameter' });
+        }
+
+        const response = await fetch(targetUrl);
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'Failed to fetch' });
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error('Proxy error:', err);
+        res.status(500).json({ error: 'Proxy error' });
+    }
+});
+
+// ================================================================
+// 8.  نقطة نهاية اختبار الصحة
+// ================================================================
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'IPTV Backend is running.' });
-});
-
-// --- تسجيل مستخدم جديد ---
-app.post('/api/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required.' });
-    }
-    // التحقق من أن البريد غير مستخدم
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'Email already registered.' });
-
-    const user = new User({ name, email, password });
-    await user.save();
-
-    const token = generateToken(user);
-    res.status(201).json({
-      message: 'User registered successfully.',
-      token,
-      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isActive: user.isActive }
-    });
-  } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Server error during registration.' });
-  }
-});
-
-// --- تسجيل الدخول ---
-app.post('/api/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
-
-    // تحقق من أن الحساب مفعّل
-    if (!user.isActive) {
-      return res.status(403).json({ error: 'Your account has been deactivated. Contact admin.' });
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(401).json({ error: 'Invalid email or password.' });
-
-    const token = generateToken(user);
     res.json({
-      message: 'Login successful.',
-      token,
-      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, isActive: user.isActive }
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error during login.' });
-  }
 });
 
-// --- الحصول على بيانات المستخدم الحالي (يتطلب توكن) ---
-app.get('/api/me', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-    res.json({ user });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error.' });
-  }
-});
-
-// --- جلب القنوات للمستخدم (يتطلب توكن) ---
-app.get('/api/channels', verifyToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-    if (!user.isActive) return res.status(403).json({ error: 'Account is deactivated.' });
-
-    // التحقق من وجود بيانات Xtream
-    if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
-      return res.status(400).json({ error: 'Xtream credentials not configured for this account. Contact admin.' });
-    }
-
-    const channels = await fetchXtreamChannels(user.xtream.server, user.xtream.username, user.xtream.password);
-    res.json({ channels });
-  } catch (error) {
-    console.error('Fetch channels error:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch channels.' });
-  }
-});
-
-// --- (للمسؤول) مسارات إدارة المستخدمين ---
-
-// الحصول على قائمة جميع المستخدمين (للمسؤول فقط)
-app.get('/api/admin/users', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const users = await User.find().select('-password');
-    res.json({ users });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error.' });
-  }
-});
-
-// تحديث بيانات المستخدم (للمسؤول فقط)
-app.put('/api/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const { name, email, isActive, xtream } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-
-    // لا نسمح بتعديل كلمة المرور عبر هذه الواجهة (يمكن إضافتها لاحقاً)
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (typeof isActive === 'boolean') user.isActive = isActive;
-    if (xtream) {
-      // نسمح بتحديث بيانات Xtream كاملة أو جزئية
-      if (xtream.server !== undefined) user.xtream.server = xtream.server;
-      if (xtream.username !== undefined) user.xtream.username = xtream.username;
-      if (xtream.password !== undefined) user.xtream.password = xtream.password;
-    }
-
-    await user.save();
-    res.json({ message: 'User updated successfully.', user: user.toObject({ getters: true, virtuals: false }) });
-  } catch (error) {
-    console.error('Admin update user error:', error);
-    res.status(500).json({ error: 'Server error.' });
-  }
-});
-
-// حذف مستخدم (للمسؤول فقط)
-app.delete('/api/admin/users/:id', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
-    res.json({ message: 'User deleted successfully.' });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error.' });
-  }
-});
-
-// --- إنشاء حساب المسؤول الافتراضي (إذا لم يكن موجوداً) ---
-async function createAdminIfNotExists() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Mario@1995';
-  const existing = await User.findOne({ email: adminEmail });
-  if (!existing) {
-    const admin = new User({
-      name: 'Admin',
-      email: adminEmail,
-      password: adminPassword,
-      isAdmin: true,
-      isActive: true
-    });
-    await admin.save();
-    console.log('✅ Admin user created with email:', adminEmail);
-  } else {
-    console.log('ℹ️ Admin user already exists.');
-  }
-}
-
-// ============================================================
-// 5.  تشغيل الخادم
-// ============================================================
+// ================================================================
+// 9.  تشغيل الخادم
+// ================================================================
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, async () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  await createAdminIfNotExists();
+app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📡 API URL: http://localhost:${PORT}/api`);
 });
