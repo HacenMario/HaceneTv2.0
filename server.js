@@ -8,34 +8,31 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // ================================================================
-// 1.  إعدادات CORS (تم تعديلها لحل مشكلة origin)
+// 1.  إعدادات CORS
 // ================================================================
 app.use(cors({
     origin: function (origin, callback) {
-        // السماح بكل origins في بيئة التطوير، يمكنك تقييدها لاحقاً
-        // إذا لم يكن هناك origin (مثل طلب من Postman) نسمح أيضاً
+        // السماح بكل origins في بيئة التطوير
         if (!origin) return callback(null, true);
-        // قائمة origins المسموحة (يمكنك إضافة المزيد)
         const allowedOrigins = [
             'https://hacene-tv2-0.vercel.app',
-            'https://hacene-tv2-0.vercel.app/',
             'http://localhost:3000',
             'http://localhost:5500',
             'https://hacenetv2-0.onrender.com'
         ];
-        // إزالة الشرطة المائلة من نهاية origin للمقارنة
         const originClean = origin.replace(/\/$/, '');
         if (allowedOrigins.includes(originClean) || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            // للتجربة نسمح الكل، يمكنك تغييره إلى callback(new Error('Not allowed by CORS'))
-            callback(null, true);
+            callback(null, true); // للتجربة نسمح الكل
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.use(express.json());
 
 // ================================================================
 // 2.  الاتصال بقاعدة البيانات MongoDB
@@ -56,66 +53,32 @@ mongoose.connect(MONGODB_URI)
 // ================================================================
 // 3.  نماذج البيانات (Schemas)
 // ================================================================
-
-// 3.1 نموذج المستخدم
 const UserSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'user'],
-        default: 'user'
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['admin', 'user'], default: 'user' },
+    isActive: { type: Boolean, default: true },
     xtream: {
         server: { type: String, default: '' },
         username: { type: String, default: '' },
         password: { type: String, default: '' }
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', UserSchema);
 
-// 3.2 نموذج القنوات (لكل مستخدم)
 const ChannelSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    channels: {
-        type: Array,
-        default: []
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    channels: { type: Array, default: [] },
+    updatedAt: { type: Date, default: Date.now }
 });
 
 const Channel = mongoose.model('Channel', ChannelSchema);
 
 // ================================================================
-// 4.  دوال المساعدة (Helper functions)
+// 4.  دوال المساعدة
 // ================================================================
-
-// 4.1 إنشاء token JWT
 function generateToken(userId, email, role) {
     return jwt.sign(
         { userId, email, role },
@@ -124,13 +87,11 @@ function generateToken(userId, email, role) {
     );
 }
 
-// 4.2 التحقق من صلاحية token (Middleware)
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Unauthorized: No token provided' });
     }
-
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hacene_tv_secret_key_2025');
@@ -141,7 +102,6 @@ function authMiddleware(req, res, next) {
     }
 }
 
-// 4.3 التحقق من صلاحيات Admin
 function adminMiddleware(req, res, next) {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Forbidden: Admin access required' });
@@ -158,7 +118,6 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // التحقق من صحة الإدخال
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
@@ -166,16 +125,12 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters' });
         }
 
-        // التحقق من وجود المستخدم
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
-        // تشفير كلمة المرور
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // إنشاء المستخدم
         const user = new User({
             email: email.toLowerCase(),
             password: hashedPassword,
@@ -185,8 +140,6 @@ app.post('/api/auth/register', async (req, res) => {
         });
 
         await user.save();
-
-        // إنشاء token
         const token = generateToken(user._id, user.email, user.role);
 
         res.status(201).json({
@@ -202,11 +155,11 @@ app.post('/api/auth/register', async (req, res) => {
         });
     } catch (err) {
         console.error('Register error:', err);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
-// 5.2 تسجيل الدخول
+// 5.2 تسجيل الدخول (المُعدّل لإعطاء رسائل خطأ أوضح)
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -220,12 +173,10 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        // التحقق من أن الحساب نشط
         if (!user.isActive) {
             return res.status(403).json({ error: 'Account is disabled. Contact administrator.' });
         }
 
-        // التحقق من كلمة المرور
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({ error: 'Invalid email or password' });
@@ -246,7 +197,8 @@ app.post('/api/auth/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ error: 'Server error' });
+        // إرسال رسالة خطأ مفصلة للمساعدة في التشخيص
+        res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
@@ -306,10 +258,10 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream credentials not configured' });
         }
 
-        // جلب القنوات من خادم Xtream
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        // استخدم خدمة الـ proxy الخاصة بنا (نفس الخادم) لتجنب CORS
-        const proxyUrl = `${req.protocol}://${req.get('host')}/api/proxy?url=${encodeURIComponent(url)}`;
+        // استخدام الرابط المطلق لتجنب مشاكل req.protocol
+        const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
+        
         const response = await fetch(proxyUrl);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -320,7 +272,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             throw new Error('Invalid response from Xtream server');
         }
 
-        // تحويل البيانات إلى صيغة موحدة
         const channels = data.map(item => ({
             name: item.name || 'بدون اسم',
             category: item.category_name || 'عام',
@@ -329,7 +280,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             url: ''
         }));
 
-        // حفظ القنوات في قاعدة البيانات
         await Channel.findOneAndUpdate(
             { userId: user._id },
             { userId: user._id, channels, updatedAt: Date.now() },
@@ -361,7 +311,7 @@ app.get('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// 5.7 حفظ قنوات المستخدم (للمزامنة)
+// 5.7 حفظ قنوات المستخدم
 app.post('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const { channels } = req.body;
@@ -385,8 +335,6 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
 // ================================================================
 // 6.  نقاط النهاية الخاصة بـ Admin
 // ================================================================
-
-// 6.1 الحصول على جميع المستخدمين (للـ Admin فقط)
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -397,7 +345,6 @@ app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) =>
     }
 });
 
-// 6.2 تحديث مستخدم (للـ Admin فقط)
 app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -408,7 +355,6 @@ app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req,
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // لا يمكن تعديل Admin نفسه أو تغيير دور Admin
         if (userId === req.user.userId) {
             return res.status(403).json({ error: 'Cannot modify your own account' });
         }
@@ -443,7 +389,6 @@ app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req,
     }
 });
 
-// 6.3 حذف مستخدم (للـ Admin فقط)
 app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
@@ -457,9 +402,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // حذف قنوات المستخدم
         await Channel.findOneAndDelete({ userId });
-        // حذف المستخدم
         await User.findByIdAndDelete(userId);
 
         res.json({ success: true, message: 'User deleted successfully' });
@@ -488,7 +431,7 @@ app.get('/api/proxy', async (req, res) => {
         res.json(data);
     } catch (err) {
         console.error('Proxy error:', err);
-        res.status(500).json({ error: 'Proxy error' });
+        res.status(500).json({ error: 'Proxy error: ' + err.message });
     }
 });
 
