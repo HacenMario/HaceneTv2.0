@@ -8,13 +8,34 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // ================================================================
-// 1.  إعدادات middleware
+// 1.  إعدادات CORS (تم تعديلها لحل مشكلة origin)
 // ================================================================
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
-    credentials: true
+    origin: function (origin, callback) {
+        // السماح بكل origins في بيئة التطوير، يمكنك تقييدها لاحقاً
+        // إذا لم يكن هناك origin (مثل طلب من Postman) نسمح أيضاً
+        if (!origin) return callback(null, true);
+        // قائمة origins المسموحة (يمكنك إضافة المزيد)
+        const allowedOrigins = [
+            'https://hacene-tv2-0.vercel.app',
+            'https://hacene-tv2-0.vercel.app/',
+            'http://localhost:3000',
+            'http://localhost:5500',
+            'https://hacenetv2-0.onrender.com'
+        ];
+        // إزالة الشرطة المائلة من نهاية origin للمقارنة
+        const originClean = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes(originClean) || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            // للتجربة نسمح الكل، يمكنك تغييره إلى callback(new Error('Not allowed by CORS'))
+            callback(null, true);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
 
 // ================================================================
 // 2.  الاتصال بقاعدة البيانات MongoDB
@@ -287,10 +308,9 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
 
         // جلب القنوات من خادم Xtream
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxy = 'https://hacene-iptv.onrender.com/api?url=';
-        const finalUrl = proxy + encodeURIComponent(url);
-
-        const response = await fetch(finalUrl);
+        // استخدم خدمة الـ proxy الخاصة بنا (نفس الخادم) لتجنب CORS
+        const proxyUrl = `${req.protocol}://${req.get('host')}/api/proxy?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
