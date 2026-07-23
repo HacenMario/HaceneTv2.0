@@ -6,7 +6,6 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* جميع الأنماط الحالية + تحسينات المشغل */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -417,6 +416,19 @@
             background: #000;
             display: block;
         }
+        #playerError {
+            display: none;
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #fff;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            font-size: 14px;
+        }
+        #playerError .btn { margin-top: 8px; }
 
         /* ===== لوحة المدير ===== */
         .admin-panel {
@@ -748,9 +760,16 @@
 
     <!-- MODAL: Player -->
     <div class="modal-overlay" id="playerModal">
-        <div class="modal-box">
+        <div class="modal-box" style="position:relative;">
             <button class="close-modal" onclick="closePlayer()" style="color:#fff; font-size:30px; top:8px; right:15px; z-index:10;">✕</button>
             <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:block;"></video>
+            <div id="playerError" style="display:none; position:absolute; bottom:70px; left:0; right:0; text-align:center; color:#fff; background:rgba(0,0,0,0.7); padding:15px; font-size:14px;">
+                تعذر تشغيل القناة مباشرة.
+                <br>
+                <button onclick="window.open(document.getElementById('playerVideo').src, '_blank')" class="btn btn-primary" style="margin-top:8px;">
+                    <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1907,7 +1926,6 @@
         let currentLang = 'ar';
         let displayedChunks = 1;
         let currentFilteredChannels = [];
-        let hls = null; // متغير HLS
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2081,50 +2099,38 @@
         }
 
         // ================================================================
-        // 7.  مشغل الفيديو المدمج
+        // 7.  مشغل الفيديو المدمج (باستخدام عنصر video الأصلي)
         // ================================================================
         function openPlayer(url) {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
-            // إيقاف أي تشغيل سابق
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
+            const errorDiv = document.getElementById('playerError');
+            
+            // إخفاء رسالة الخطأ السابقة
+            errorDiv.style.display = 'none';
+            
+            // إيقاف التشغيل السابق
             video.pause();
             video.src = '';
             video.load();
 
-            // إذا كان HLS مدعوماً (m3u8)
-            if (url.includes('.m3u8') || url.includes('m3u8')) {
-                if (Hls.isSupported()) {
-                    hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        video.play();
-                    });
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        console.error('HLS Error:', data);
-                        // محاولة إعادة التحميل أو عرض رسالة
-                    });
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari native HLS
-                    video.src = url;
-                    video.play();
-                } else {
-                    alert('المتصفح لا يدعم تشغيل تدفقات HLS.');
-                    closePlayer();
-                    return;
-                }
-            } else {
-                // رابط مباشر (mp4 أو غيره)
-                video.src = url;
-                video.play();
-            }
+            // تعيين المصدر الجديد
+            video.src = url;
+            
+            // محاولة التشغيل
+            video.play().catch(err => {
+                console.error('تشغيل فشل:', err);
+                // عرض رسالة الخطأ مع زر لفتح الرابط في نافذة جديدة
+                errorDiv.style.display = 'block';
+                // تعيين الرابط في الزر
+                const btn = errorDiv.querySelector('button');
+                btn.onclick = function() {
+                    window.open(url, '_blank');
+                };
+            });
 
+            // إظهار النافذة
             modal.classList.add('active');
-            // عند إغلاق النافذة، إيقاف التشغيل
             modal.onclick = function(e) {
                 if (e.target === modal) {
                     closePlayer();
@@ -2135,10 +2141,6 @@
         function closePlayer() {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
             video.pause();
             video.src = '';
             video.load();
@@ -2379,7 +2381,7 @@
                 return;
             }
 
-            // فتح المشغل بدلاً من الانتقال
+            // فتح المشغل
             openPlayer(url);
         }
 
@@ -2917,7 +2919,7 @@
             }
         });
 
-        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل مدمج وإحصائيات!');
+        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل مدمج (عنصر video) وإحصائيات!');
     </script>
 </body>
 </html>
