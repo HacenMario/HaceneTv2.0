@@ -967,10 +967,12 @@
                 // إظهار نافذة التحميل
                 showLoadingModal();
 
-                // بعد 5 ثوانٍ إخفاء النافذة وإعادة تهيئة التطبيق
+                // بدء تحميل القنوات في الخلفية (بدون انتظار)
+                initializeApp(true).catch(err => console.error('Error loading channels:', err));
+
+                // بعد 5 ثوانٍ إخفاء النافذة (التحميل مستمر في الخلفية)
                 setTimeout(() => {
                     hideLoadingModal();
-                    initializeApp(true);
                 }, 5000);
 
             } catch (err) {
@@ -1007,10 +1009,12 @@
                 // إظهار نافذة التحميل
                 showLoadingModal();
 
-                // بعد 5 ثوانٍ إخفاء النافذة وإعادة تهيئة التطبيق
+                // بدء تحميل القنوات في الخلفية (بدون انتظار)
+                initializeApp(true).catch(err => console.error('Error loading channels:', err));
+
+                // بعد 5 ثوانٍ إخفاء النافذة
                 setTimeout(() => {
                     hideLoadingModal();
-                    initializeApp(true);
                 }, 5000);
 
             } catch (err) {
