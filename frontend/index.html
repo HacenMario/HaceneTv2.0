@@ -815,7 +815,7 @@
             <button class="close-modal" onclick="closeContactModal()">✕</button>
             <h2 id="contactModalTitle"><i class="fas fa-envelope" style="color:var(--accent);"></i> تواصل معنا</h2>
             <div class="contact-content" id="contactContent">
-                <p>يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:</p>
+                <p>للتواصل معنا، يمكنك استخدام المعلومات التالية:</p>
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
                     <span>stevenhacen@gmail.com</span>
@@ -1889,7 +1889,8 @@
                 "contact": "تواصل معنا",
                 "aboutTitle": "من نحن",
                 "contactTitle": "تواصل معنا",
-                "aboutDesc": "HACENE TV هي منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر ، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر مثل Xtream Codes، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
                 "email": "البريد الإلكتروني",
                 "phone": "الهاتف",
                 "facebook": "فيسبوك",
@@ -1984,7 +1985,8 @@
                 "contact": "Nous contacter",
                 "aboutTitle": "À propos de nous",
                 "contactTitle": "Nous contacter",
-                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources telles que Xtream Codes, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
                 "email": "Email",
                 "phone": "Téléphone",
                 "facebook": "Facebook",
@@ -2100,7 +2102,6 @@
                 </button>
             `;
 
-            // أزرار من نحن و تواصل معنا (دائماً ظاهرة)
             const aboutBtn = `
                 <button class="btn btn-outline btn-sm" onclick="openAboutModal()">
                     <i class="fas fa-info-circle"></i> ${getTranslation('about')}
@@ -2898,8 +2899,9 @@
             const modal = document.getElementById('contactModal');
             modal.classList.add('active');
             document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
+            // محتوى مخصص بدون استدعاء contactDesc
             document.getElementById('contactContent').innerHTML = `
-                <p>${getTranslation('contactDesc')}</p>
+                <p>للتواصل معنا، يمكنك استخدام المعلومات التالية:</p>
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
                     <span>stevenhacen@gmail.com</span>
@@ -2908,7 +2910,7 @@
                     <i class="fas fa-phone-alt"></i>
                     <span>0542163526</span>
                 </div>
-                <p style="margin-top:15px;">${getTranslation('contactDesc')}</p>
+                <p style="margin-top:15px;">نحن في انتظار استفساراتكم واقتراحاتكم.</p>
             `;
         }
 
@@ -3025,7 +3027,6 @@
                 if (wrapper && !wrapper.contains(e.target) && dropdown) {
                     dropdown.classList.remove('active');
                 }
-                // إغلاق مودالات about/contact عند النقر خارجها
                 const aboutModal = document.getElementById('aboutModal');
                 const contactModal = document.getElementById('contactModal');
                 if (aboutModal.classList.contains('active') && e.target === aboutModal) {
