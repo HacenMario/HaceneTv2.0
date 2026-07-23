@@ -1251,73 +1251,55 @@
         // 9.  التهيئة (Initialization)
         // ================================================================
 
-        async function initializeApp() {
-            if (appInitialized) return;
-            appInitialized = true;
+async function initializeApp() {
+    if (appInitialized) return;
+    appInitialized = true;
 
-            const token = getToken();
-            const user = getUser();
+    const token = getToken();
+    const user = getUser();
 
-            // التحقق من صحة التوكن
-            if (token && user) {
-                try {
-                    const data = await apiCall('GET', '/auth/me');
-                    setUser(data.user);
-                    // تحميل القنوات من الخادم
-                    const channelsData = await apiCall('GET', '/user/channels');
-                    if (channelsData.channels && channelsData.channels.length > 0) {
-                        allChannels = channelsData.channels;
-                        localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-                    } else {
-                        // محاولة تحميل من التخزين المحلي
-                        const stored = localStorage.getItem('hacene_channels');
-                        if (stored) {
-                            try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
-                        } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
-                            // إذا كانت القنوات الافتراضية موجودة، استخدمها
-                            allChannels = DEFAULT_CHANNELS.map(ch => ({
-                                name: ch.name || 'بدون اسم',
-                                category: ch.category_name || ch.category || 'عام',
-                                stream_id: ch.stream_id,
-                                icon: ch.stream_icon || '',
-                                url: ''
-                            }));
-                            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-                            await saveChannelsToServer();
-                        }
+    if (token && user) {
+        try {
+            const data = await apiCall('GET', '/auth/me');
+            setUser(data.user);
+            const channelsData = await apiCall('GET', '/user/channels');
+            if (channelsData.channels && channelsData.channels.length > 0) {
+                allChannels = channelsData.channels;
+                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+            } else {
+                // استخدام القنوات الافتراضية إذا لم توجد قنوات محفوظة
+                if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
+                    allChannels = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+                    // حفظها في الخادم
+                    try {
+                        await apiCall('POST', '/user/channels', { channels: allChannels });
+                    } catch (e) {
+                        console.warn('Could not save default channels to server:', e);
                     }
-                } catch (err) {
-                    // التوكن غير صالح
-                    setToken(null);
-                    setUser(null);
+                    localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                } else {
                     allChannels = [];
                 }
-            } else {
-                // محاولة تحميل من التخزين المحلي
-                const stored = localStorage.getItem('hacene_channels');
-                if (stored) {
-                    try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
-                } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
-                    // إذا كانت القنوات الافتراضية موجودة، استخدمها
-                    allChannels = DEFAULT_CHANNELS.map(ch => ({
-                        name: ch.name || 'بدون اسم',
-                        category: ch.category_name || ch.category || 'عام',
-                        stream_id: ch.stream_id,
-                        icon: ch.stream_icon || '',
-                        url: ''
-                    }));
-                    localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-                }
             }
-
-            // تحميل المفضلة
-            favorites = getFavorites();
-
-            renderHeader();
-            buildSidebar();
-            applyFilters();
+        } catch (err) {
+            setToken(null);
+            setUser(null);
+            allChannels = [];
         }
+    } else {
+        const stored = localStorage.getItem('hacene_channels');
+        if (stored) {
+            try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
+        } else {
+            allChannels = [];
+        }
+    }
 
+    favorites = getFavorites();
+    renderHeader();
+    buildSidebar();
+    applyFilters();
+}
         // ================================================================
         // 10.  بدء التطبيق
         // ================================================================
