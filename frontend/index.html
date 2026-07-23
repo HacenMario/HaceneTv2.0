@@ -6,8 +6,8 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* جميع الأنماط السابقة مع تعديلات بسيطة */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -243,7 +243,6 @@
         }
         .load-more-btn:hover { border-color: #00d4ff; color: #fff; }
 
-        /* ===== النوافذ المنبثقة ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -354,7 +353,6 @@
         }
         #playerError .btn { margin-top: 8px; }
 
-        /* ===== لوحة المدير ===== */
         .admin-panel {
             background: #11161f;
             border-radius: 12px;
@@ -405,7 +403,6 @@
         .stat-card .num { font-size: 28px; font-weight: 700; color: #00d4ff; }
         .stat-card .label { font-size: 13px; color: #888; margin-top: 4px; }
 
-        /* ===== تحسينات الشاشات الصغيرة ===== */
         @media (max-width: 768px) {
             .app-container { flex-direction: column; height: auto; }
             .sidebar {
@@ -1800,9 +1797,6 @@
         let currentPlayerUrl = '';
         let retryCount = 0;
         const MAX_RETRIES = 3;
-        let detectIframe = null;
-        let detectInterval = null;
-        let detectTimeout = null;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -1974,82 +1968,7 @@
         }
 
         // ================================================================
-        // 7.  كشف الرابط النهائي باستخدام iframe مخفي (شفاف تماماً)
-        // ================================================================
-        function detectFinalUrl(initialUrl, callback) {
-            // إزالة أي iframe سابق
-            if (detectIframe) {
-                document.body.removeChild(detectIframe);
-                detectIframe = null;
-            }
-            if (detectInterval) {
-                clearInterval(detectInterval);
-                detectInterval = null;
-            }
-            if (detectTimeout) {
-                clearTimeout(detectTimeout);
-                detectTimeout = null;
-            }
-
-            let lastUrl = initialUrl;
-            let attempts = 0;
-            const maxAttempts = 25; // 25 ثانية
-
-            // إنشاء iframe مخفي
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = initialUrl;
-            document.body.appendChild(iframe);
-            detectIframe = iframe;
-
-            detectInterval = setInterval(() => {
-                attempts++;
-                try {
-                    // محاولة قراءة عنوان iframe الحالي
-                    const currentUrl = iframe.contentWindow.location.href;
-                    if (currentUrl && currentUrl !== lastUrl && !currentUrl.includes('about:blank')) {
-                        lastUrl = currentUrl;
-                        // إذا كان الرابط النهائي (يحتوي على m3u8 أو mp4 أو ts أو manifest أو playlist)
-                        if (currentUrl.includes('.m3u8') || currentUrl.includes('.mp4') || currentUrl.includes('.ts') ||
-                            currentUrl.includes('manifest') || currentUrl.includes('playlist') || currentUrl.includes('master') ||
-                            currentUrl.includes('m3u8') || currentUrl.includes('mp4')) {
-                            // وجدنا الرابط النهائي
-                            clearInterval(detectInterval);
-                            clearTimeout(detectTimeout);
-                            document.body.removeChild(iframe);
-                            detectIframe = null;
-                            callback(currentUrl);
-                            return;
-                        }
-                    }
-                } catch(e) {
-                    // CORS أو تغيير نطاق، نستمر
-                }
-
-                if (attempts >= maxAttempts) {
-                    clearInterval(detectInterval);
-                    clearTimeout(detectTimeout);
-                    if (detectIframe) {
-                        document.body.removeChild(detectIframe);
-                        detectIframe = null;
-                    }
-                    // نستخدم آخر عنوان تم الحصول عليه
-                    callback(lastUrl);
-                }
-            }, 1000);
-
-            detectTimeout = setTimeout(() => {
-                clearInterval(detectInterval);
-                if (detectIframe) {
-                    document.body.removeChild(detectIframe);
-                    detectIframe = null;
-                }
-                callback(lastUrl);
-            }, 25000);
-        }
-
-        // ================================================================
-        // 8.  مشغل الفيديو (video فقط)
+        // 7.  مشغل الفيديو المباشر (بدون hls.js، باستخدام عنصر video فقط)
         // ================================================================
         function openPlayer(url) {
             const modal = document.getElementById('playerModal');
@@ -2112,7 +2031,7 @@
         window.closePlayer = closePlayer;
 
         // ================================================================
-        // 9.  دوال العرض (UI)
+        // 8.  دوال العرض (UI)
         // ================================================================
 
         function renderHeader() {
@@ -2244,7 +2163,7 @@
         }
 
         // ================================================================
-        // 10.  عرض القنوات مع Lazy Loading
+        // 9.  عرض القنوات مع Lazy Loading
         // ================================================================
 
         function renderGridWithLazy(filteredChannels) {
@@ -2322,7 +2241,7 @@
         }
 
         // ================================================================
-        // 11.  تشغيل القناة (شفاف تماماً)
+        // 10.  تشغيل القناة (مباشر باستخدام عنصر video)
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2343,15 +2262,8 @@
                 return;
             }
 
-            // كشف الرابط النهائي في الخلفية (بدون أي مؤشرات)
-            detectFinalUrl(url, (finalUrl) => {
-                if (finalUrl) {
-                    // تشغيل القناة مباشرة باستخدام عنصر video
-                    openPlayer(finalUrl);
-                } else {
-                    alert(getTranslation('playError'));
-                }
-            });
+            // تشغيل القناة مباشرة باستخدام عنصر video
+            openPlayer(url);
         }
 
         function playChannelById(id) {
@@ -2363,7 +2275,7 @@
         }
 
         // ================================================================
-        // 12.  دوال المصادقة (Login / Register / Logout)
+        // 11.  دوال المصادقة (Login / Register / Logout)
         // ================================================================
 
         function openLoginModal() {
@@ -2477,17 +2389,10 @@
             applyFilters();
             renderHistory();
             closePlayer();
-            // إزالة iframe الكشف إن وجد
-            if (detectIframe) {
-                document.body.removeChild(detectIframe);
-                detectIframe = null;
-            }
-            if (detectInterval) clearInterval(detectInterval);
-            if (detectTimeout) clearTimeout(detectTimeout);
         }
 
         // ================================================================
-        // 13.  دوال Xtream
+        // 12.  دوال Xtream
         // ================================================================
 
         function openXtreamModal() {
@@ -2544,7 +2449,7 @@
         }
 
         // ================================================================
-        // 14.  دوال القنوات (إضافة، حفظ، تفضيلات)
+        // 13.  دوال القنوات (إضافة، حفظ، تفضيلات)
         // ================================================================
 
         function openAddModal() {
@@ -2602,7 +2507,7 @@
         }
 
         // ================================================================
-        // 15.  دوال Admin مع الإحصائيات
+        // 14.  دوال Admin مع الإحصائيات
         // ================================================================
 
         async function openAdminModal() {
@@ -2712,7 +2617,7 @@
         }
 
         // ================================================================
-        // 16.  تطبيق التصنيفات المخصصة
+        // 15.  تطبيق التصنيفات المخصصة
         // ================================================================
         function applyCategoryMap(channels) {
             return channels.map(ch => {
@@ -2723,7 +2628,7 @@
         }
 
         // ================================================================
-        // 17. التهيئة (Initialization)
+        // 16. التهيئة (Initialization)
         // ================================================================
 
         async function initializeApp(forceRefresh = false) {
@@ -2794,7 +2699,7 @@
         }
 
         // ================================================================
-        // 18.  بدء التطبيق وأحداث الإغلاق
+        // 17.  بدء التطبيق وأحداث الإغلاق
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', () => initializeApp(false));
@@ -2810,17 +2715,10 @@
                 closeAdminModal();
                 closeEditUserModal();
                 closePlayer();
-                // تنظيف iframe الكشف
-                if (detectIframe) {
-                    document.body.removeChild(detectIframe);
-                    detectIframe = null;
-                }
-                if (detectInterval) clearInterval(detectInterval);
-                if (detectTimeout) clearTimeout(detectTimeout);
             }
         });
 
-        console.log('🚀 HACENE TV - تشغيل شفاف باستخدام iframe مخفي ومشغل video مباشر');
+        console.log('🚀 HACENE TV - تشغيل مباشر باستخدام عنصر video فقط (بدون iframe أو hls.js)');
     </script>
 </body>
 </html>
