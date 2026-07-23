@@ -609,6 +609,37 @@
         }
         .lang-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .lang-btn.active { border-color: var(--accent); color: var(--accent); }
+
+        /* ===== ABOUT / CONTENT MODAL ===== */
+        .modal-box .about-content, .modal-box .contact-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        .modal-box .about-content h3, .modal-box .contact-content h3 {
+            color: var(--text-primary);
+            margin: 12px 0 6px;
+        }
+        .modal-box .about-content p, .modal-box .contact-content p {
+            margin-bottom: 10px;
+        }
+        .modal-box .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 8px 12px;
+            background: var(--bg-input);
+            border-radius: 8px;
+        }
+        .modal-box .contact-item i {
+            width: 24px;
+            color: var(--accent);
+            font-size: 18px;
+        }
+        .modal-box .contact-item span {
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -716,7 +747,6 @@
                         </table>
                     </div>
                 </div>
-                <!-- ===== NEW: Admin Notification ===== -->
                 <div class="admin-panel">
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
@@ -761,6 +791,48 @@
             <p id="loadingModalText" style="font-size:16px; margin:20px 0;">يرجى الانتظار، سيتم تحميل القنوات...</p>
             <div style="width:100%; height:4px; background:var(--bg-input); border-radius:4px; overflow:hidden; margin-top:10px;">
                 <div id="loadingProgress" style="width:0%; height:100%; background:var(--accent); transition: width 0.5s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: About ===== -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAboutModal()">✕</button>
+            <h2 id="aboutModalTitle"><i class="fas fa-info-circle" style="color:var(--accent);"></i> من نحن</h2>
+            <div class="about-content" id="aboutContent">
+                <p>HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية.</p>
+                <p>نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر مثل Xtream Codes، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
+                <p>تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة.</p>
+                <p><strong>نسعى دائماً لتقديم الأفضل لمستخدمينا.</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: Contact ===== -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeContactModal()">✕</button>
+            <h2 id="contactModalTitle"><i class="fas fa-envelope" style="color:var(--accent);"></i> تواصل معنا</h2>
+            <div class="contact-content" id="contactContent">
+                <p>يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:</p>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>support@hacenetv.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+213 123 456 789</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-facebook"></i>
+                    <span>facebook.com/hacenetv</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-telegram"></i>
+                    <span>@hacenetv</span>
+                </div>
+                <p style="margin-top:15px;">نحن في انتظار استفساراتكم واقتراحاتكم.</p>
             </div>
         </div>
     </div>
@@ -1821,6 +1893,16 @@
                 "endOfList": "هذه نهاية القائمة",
                 "unread": "غير مقروء",
                 "markAsRead": "تحديد كمقروء",
+                "about": "من نحن",
+                "contact": "تواصل معنا",
+                "aboutTitle": "من نحن",
+                "contactTitle": "تواصل معنا",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر مثل Xtream Codes، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
+                "email": "البريد الإلكتروني",
+                "phone": "الهاتف",
+                "facebook": "فيسبوك",
+                "telegram": "تيليجرام",
             },
             fr: {
                 "live": "En direct",
@@ -1907,6 +1989,16 @@
                 "endOfList": "Fin de la liste",
                 "unread": "Non lu",
                 "markAsRead": "Marquer comme lu",
+                "about": "À propos",
+                "contact": "Nous contacter",
+                "aboutTitle": "À propos de nous",
+                "contactTitle": "Nous contacter",
+                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources telles que Xtream Codes, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
+                "email": "Email",
+                "phone": "Téléphone",
+                "facebook": "Facebook",
+                "telegram": "Telegram",
             }
         };
 
@@ -1922,8 +2014,8 @@
         let favorites = [];
         let appInitialized = false;
         let currentLang = 'ar';
-        let displayCount = 20;          // عدد القنوات المعروضة حالياً
-        const STEP = 20;                // عدد القنوات الإضافية عند التمرير
+        let displayCount = 20;
+        const STEP = 20;
         let isLoadingMore = false;
         let allChannelsFiltered = [];
         let notifications = [];
@@ -2018,6 +2110,18 @@
                 </button>
             `;
 
+            // أزرار من نحن و تواصل معنا (دائماً ظاهرة)
+            const aboutBtn = `
+                <button class="btn btn-outline btn-sm" onclick="openAboutModal()">
+                    <i class="fas fa-info-circle"></i> ${getTranslation('about')}
+                </button>
+            `;
+            const contactBtn = `
+                <button class="btn btn-outline btn-sm" onclick="openContactModal()">
+                    <i class="fas fa-envelope"></i> ${getTranslation('contact')}
+                </button>
+            `;
+
             let notifBtn = '';
             if (user) {
                 notifBtn = `
@@ -2034,6 +2138,8 @@
                 container.innerHTML = `
                     ${langButtons}
                     ${themeToggle}
+                    ${aboutBtn}
+                    ${contactBtn}
                     <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
                     <button class="btn btn-primary" onclick="openLoginModal()">
                         <i class="fas fa-sign-in-alt"></i> ${getTranslation('login')}
@@ -2058,6 +2164,8 @@
             container.innerHTML = `
                 ${langButtons}
                 ${themeToggle}
+                ${aboutBtn}
+                ${contactBtn}
                 ${notifBtn}
                 <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
                 <div class="user-info">
@@ -2154,19 +2262,16 @@
             return channel.name + '_' + (channel.category || 'عام');
         }
 
-        // ===== Normalize channels (ensure icon field) =====
         function normalizeChannels(channels) {
             return channels.map(ch => {
-                // تأكد من وجود حقل icon من stream_icon إذا كان موجوداً
                 if (ch.stream_icon && !ch.icon) ch.icon = ch.stream_icon;
-                if (ch.icon && !ch.stream_icon) ch.stream_icon = ch.icon; // للتوحيد
+                if (ch.icon && !ch.stream_icon) ch.stream_icon = ch.icon;
                 if (!ch.category) ch.category = 'عام';
                 if (!ch.url) ch.url = '';
                 return ch;
             });
         }
 
-        // ===== Infinite Scroll =====
         function applyFilters(resetDisplay = true) {
             const search = document.getElementById('searchInput');
             const searchVal = search ? search.value.trim().toLowerCase() : '';
@@ -2258,7 +2363,6 @@
             container.innerHTML = html;
         }
 
-        // ===== Infinite Scroll Observer =====
         function setupInfiniteScroll() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -2785,7 +2889,53 @@
         }
 
         // ================================================================
-        // 11.  Scroll to Top
+        // 11.  About & Contact Modals
+        // ================================================================
+        function openAboutModal() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('active');
+            document.getElementById('aboutModalTitle').innerHTML = `<i class="fas fa-info-circle" style="color:var(--accent);"></i> ${getTranslation('aboutTitle')}`;
+            document.getElementById('aboutContent').innerHTML = `
+                <p>${getTranslation('aboutDesc')}</p>
+            `;
+        }
+
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.remove('active');
+        }
+
+        function openContactModal() {
+            const modal = document.getElementById('contactModal');
+            modal.classList.add('active');
+            document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
+            document.getElementById('contactContent').innerHTML = `
+                <p>${getTranslation('contactDesc')}</p>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>support@hacenetv.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+213 123 456 789</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-facebook"></i>
+                    <span>facebook.com/hacenetv</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fab fa-telegram"></i>
+                    <span>@hacenetv</span>
+                </div>
+                <p style="margin-top:15px;">${getTranslation('contactDesc')}</p>
+            `;
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('active');
+        }
+
+        // ================================================================
+        // 12.  Scroll to Top
         // ================================================================
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2801,7 +2951,7 @@
         }
 
         // ================================================================
-        // 12.  التهيئة
+        // 13.  التهيئة
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -2882,7 +3032,7 @@
         }
 
         // ================================================================
-        // 13.  بدء التطبيق
+        // 14.  بدء التطبيق
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
@@ -2892,6 +3042,15 @@
                 const dropdown = document.getElementById('notifDropdown');
                 if (wrapper && !wrapper.contains(e.target) && dropdown) {
                     dropdown.classList.remove('active');
+                }
+                // إغلاق مودالات about/contact عند النقر خارجها
+                const aboutModal = document.getElementById('aboutModal');
+                const contactModal = document.getElementById('contactModal');
+                if (aboutModal.classList.contains('active') && e.target === aboutModal) {
+                    closeAboutModal();
+                }
+                if (contactModal.classList.contains('active') && e.target === contactModal) {
+                    closeContactModal();
                 }
             });
         });
@@ -2908,6 +3067,8 @@
                 closeAddModal();
                 closeAdminModal();
                 closeEditUserModal();
+                closeAboutModal();
+                closeContactModal();
                 document.getElementById('notifDropdown')?.classList.remove('active');
             }
         });
