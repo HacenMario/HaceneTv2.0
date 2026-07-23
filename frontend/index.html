@@ -569,9 +569,598 @@
     <!-- ============================================================== -->
     <script>
         // ================================================================
+        // 🔴🔴🔴  ضع محتوى extracted.txt هنا 🔴🔴🔴
+        // انسخ محتوى extracted.txt بالكامل (بدءاً من [ وانتهاءً بـ ])
+        // والصقه مكان العلامة ********** أدناه.
+        // ================================================================
+        let DEFAULT_CHANNELS = [
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HACENE TV - IPTV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ===== الأنماط العامة ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0a0e14;
+            color: #eaeaea;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== الهيدر ===== */
+        .header {
+            background: #141a24;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a3344;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-area h1 { font-size: 20px; color: #00d4ff; font-weight: 700; }
+        .controls-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 7px 16px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #0a0e14;
+        }
+        .btn-primary { background: #00d4ff; }
+        .btn-primary:hover { background: #00b8e6; transform: scale(1.02); }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-danger:hover { background: #c0392b; transform: scale(1.02); }
+        .btn-outline {
+            background: transparent;
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+        .btn-outline:hover { background: #00d4ff22; }
+        .btn-success { background: #2ecc71; color: #fff; }
+        .btn-success:hover { background: #27ae60; transform: scale(1.02); }
+        .btn-warning { background: #f39c12; color: #fff; }
+        .btn-warning:hover { background: #e67e22; transform: scale(1.02); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .search-box {
+            padding: 7px 14px;
+            border-radius: 30px;
+            border: none;
+            background: #1e2636;
+            color: #fff;
+            width: 160px;
+            outline: 2px solid transparent;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+        .search-box:focus { outline-color: #00d4ff; background: #141a24; }
+        .badge-count {
+            background: #00d4ff;
+            color: #0a0e14;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .channel-counter { color: #888; font-size: 13px; }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+            font-size: 13px;
+        }
+        .user-info .email { color: #00d4ff; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ===== الحاوية الرئيسية ===== */
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        /* ===== الشريط الجانبي ===== */
+        .sidebar {
+            width: 220px;
+            background: #11161f;
+            overflow-y: auto;
+            padding: 10px 0;
+            border-left: 1px solid #1e2636;
+            flex-shrink: 0;
+        }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #2a3344; border-radius: 10px; }
+        .sidebar .cat-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-right: 3px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            align-items: center;
+        }
+        .sidebar .cat-item:hover { background: #1e2636; }
+        .sidebar .cat-item.active {
+            background: #1e2636;
+            border-right-color: #00d4ff;
+            color: #00d4ff;
+        }
+        .sidebar .cat-item .count {
+            background: #1e2636;
+            padding: 0 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #888;
+        }
+        .sidebar .cat-item.active .count { background: #00d4ff22; color: #00d4ff; }
+        .sidebar .cat-item .cat-fav-btn {
+            background: transparent;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+            padding: 0 4px;
+        }
+        .sidebar .cat-item .cat-fav-btn:hover { color: #ffc107; }
+        .sidebar .cat-item .cat-fav-btn.active { color: #ffc107; }
+
+        /* ===== المحتوى الرئيسي ===== */
+        .main-content {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+            background: #0c1017;
+        }
+
+        /* ===== حالة فارغة ===== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 350px;
+            text-align: center;
+            color: #666;
+        }
+        .empty-state i { font-size: 60px; color: #00d4ff; margin-bottom: 15px; }
+        .empty-state h2 { font-size: 22px; margin-bottom: 8px; color: #ccc; }
+        .empty-state p { max-width: 400px; line-height: 1.8; font-size: 14px; }
+        .empty-state .btn-add-large {
+            margin-top: 20px;
+            background: #00d4ff;
+            color: #0a0e14;
+            padding: 10px 35px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .empty-state .btn-add-large:hover { background: #00b8e6; transform: scale(1.02); }
+
+        /* ===== شبكة القنوات ===== */
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .channel-card {
+            background: #141a24;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid #1e2636;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+        .channel-card:hover {
+            border-color: #00d4ff66;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 212, 255, 0.05);
+        }
+        .channel-card .ch-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-word;
+        }
+        .channel-card .ch-name i { color: #00d4ff; font-size: 14px; flex-shrink: 0; }
+        .channel-card .ch-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #1e2636;
+            flex-shrink: 0;
+        }
+        .channel-card .ch-cat {
+            font-size: 11px;
+            background: #1e2636;
+            padding: 2px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            width: fit-content;
+            color: #aaa;
+        }
+        .channel-card .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .channel-card .btn-play {
+            flex: 1;
+            background: #00d4ff;
+            color: #0a0e14;
+            border: none;
+            padding: 6px 0;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .channel-card .btn-play:hover { background: #00b8e6; }
+        .channel-card .btn-fav {
+            background: #2a3344;
+            color: #888;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .channel-card .btn-fav.active { background: #ffc10733; color: #ffc107; }
+        .channel-card .btn-fav:hover { background: #3a455a; }
+
+        /* ===== النوافذ المنبثقة (Modal) ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #141a24;
+            border-radius: 20px;
+            padding: 25px;
+            width: 94%;
+            max-width: 520px;
+            border: 1px solid #2a3344;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 26px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .modal-box .close-modal:hover { color: #fff; transform: rotate(90deg); }
+        .modal-box h2 { color: #fff; margin-bottom: 16px; font-size: 22px; }
+        .modal-box h2 i { margin-left: 8px; }
+        .modal-box label { display: block; margin: 10px 0 4px 0; color: #aaa; font-size: 13px; }
+        .modal-box input, .modal-box textarea, .modal-box select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #2a3344;
+            background: #1e2636;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .modal-box input:focus, .modal-box textarea:focus, .modal-box select:focus { border-color: #00d4ff; }
+        .modal-box select option { background: #141a24; }
+        .modal-box .btn-save {
+            width: 100%;
+            margin-top: 16px;
+            background: #00d4ff;
+            color: #0a0e14;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .modal-box .btn-save:hover { background: #00b8e6; }
+        .modal-box .btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .modal-box .btn-danger:hover { background: #c0392b; }
+        .modal-box .status-msg {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #1e2636;
+            color: #aaa;
+            font-size: 13px;
+            text-align: center;
+        }
+        .modal-box .status-msg.success { color: #2ecc71; border: 1px solid #2ecc71; }
+        .modal-box .status-msg.error { color: #e74c3c; border: 1px solid #e74c3c; }
+
+        /* ===== لوحة تحكم Admin ===== */
+        .admin-panel {
+            background: #11161f;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #1e2636;
+        }
+        .admin-panel h3 { color: #00d4ff; margin-bottom: 12px; }
+        .admin-panel table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .admin-panel th {
+            text-align: right;
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a3344;
+            color: #888;
+            font-weight: 400;
+        }
+        .admin-panel td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #1e2636;
+            vertical-align: middle;
+        }
+        .admin-panel .user-email { color: #00d4ff; }
+        .admin-panel .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .admin-panel .status-badge.active { background: #2ecc7133; color: #2ecc71; }
+        .admin-panel .status-badge.inactive { background: #e74c3c33; color: #e74c3c; }
+        .admin-panel .btn-icon {
+            background: transparent;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 4px 6px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .admin-panel .btn-icon:hover { color: #fff; }
+        .admin-panel .btn-icon.danger:hover { color: #e74c3c; }
+        .admin-panel .btn-icon.success:hover { color: #2ecc71; }
+        .admin-panel .btn-icon.warning:hover { color: #f39c12; }
+
+        /* ===== التوافق مع الهواتف ===== */
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; height: auto; }
+            .sidebar {
+                width: 100%;
+                max-height: 120px;
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 6px 10px;
+                border-left: none;
+                border-bottom: 1px solid #1e2636;
+            }
+            .sidebar .cat-item {
+                white-space: nowrap;
+                border-right: none;
+                border-bottom: 3px solid transparent;
+                padding: 5px 12px;
+                font-size: 13px;
+            }
+            .sidebar .cat-item.active { border-bottom-color: #00d4ff; }
+            .sidebar .cat-item .count { display: none; }
+            .sidebar .cat-item .cat-fav-btn { display: none; }
+            .header { flex-direction: column; align-items: stretch; }
+            .controls-area { justify-content: center; gap: 6px; }
+            .search-box { width: 100%; }
+            .channels-grid { grid-template-columns: 1fr; }
+            .modal-box { padding: 18px; }
+            .admin-panel table { font-size: 11px; }
+            .admin-panel th, .admin-panel td { padding: 4px 6px; }
+            .user-info .email { max-width: 80px; }
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0c1017; }
+        ::-webkit-scrollbar-thumb { background: #2a3344; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== الهيدر ===== -->
+    <header class="header">
+        <div class="logo-area">
+            <h1><i class="fas fa-satellite-dish" style="color:#00d4ff;"></i> HACENE TV</h1>
+        </div>
+        <div class="controls-area" id="headerControls">
+            <!-- سيتم ملؤها بواسطة JavaScript -->
+        </div>
+    </header>
+
+    <!-- ===== الحاوية الرئيسية ===== -->
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main-content" id="mainContent">
+            <div id="channelsContainer"></div>
+        </main>
+    </div>
+
+    <!-- ===== نافذة تسجيل الدخول ===== -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeLoginModal()">✕</button>
+            <h2><i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> تسجيل الدخول</h2>
+            <div id="loginForm">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="loginEmail" placeholder="example@email.com" />
+                <label>كلمة المرور</label>
+                <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" />
+                <button class="btn-save" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+                <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
+                    ليس لديك حساب؟ <span style="color:#00d4ff; cursor:pointer;" onclick="showRegister()">سجل الآن</span>
+                </div>
+                <div id="loginStatus" class="status-msg"></div>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="registerEmail" placeholder="example@email.com" />
+                <label>كلمة المرور</label>
+                <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" />
+                <button class="btn-save" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
+                <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
+                    لديك حساب؟ <span style="color:#00d4ff; cursor:pointer;" onclick="showLogin()">تسجيل الدخول</span>
+                </div>
+                <div id="registerStatus" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة إعدادات Xtream ===== -->
+    <div class="modal-overlay" id="xtreamModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeXtreamModal()">✕</button>
+            <h2><i class="fas fa-key" style="color:#9b59b6;"></i> إعدادات Xtream</h2>
+            <label>رابط الخادم (Server URL)</label>
+            <input type="url" id="xtreamServer" placeholder="http://example.com:8080" />
+            <label>اسم المستخدم (Username)</label>
+            <input type="text" id="xtreamUsername" placeholder="أدخل اسم المستخدم" />
+            <label>كلمة المرور (Password)</label>
+            <input type="password" id="xtreamPassword" placeholder="أدخل كلمة المرور" />
+            <button class="btn-save" onclick="saveXtreamSettings()"><i class="fas fa-save"></i> حفظ وجلب القنوات</button>
+            <div id="xtreamStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة إضافة قناة يدوي ===== -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAddModal()">✕</button>
+            <h2><i class="fas fa-plus-circle" style="color:#00d4ff;"></i> إضافة قناة</h2>
+            <label>اسم القناة *</label>
+            <input type="text" id="inputName" placeholder="مثال: beIN Sports 1" />
+            <label>التصنيف</label>
+            <input type="text" id="inputCategory" placeholder="مثال: رياضة" />
+            <label>رابط المشاهدة (.m3u8) *</label>
+            <input type="url" id="inputUrl" placeholder="http://example.com/stream.m3u8" />
+            <button class="btn-save" onclick="saveChannel()"><i class="fas fa-save"></i> حفظ</button>
+        </div>
+    </div>
+
+    <!-- ===== نافذة إدارة المستخدمين (للـ Admin فقط) ===== -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-box" style="max-width: 800px;">
+            <button class="close-modal" onclick="closeAdminModal()">✕</button>
+            <h2><i class="fas fa-users-cog" style="color:#f39c12;"></i> لوحة تحكم المدير</h2>
+            <div id="adminContent">
+                <div class="admin-panel">
+                    <h3>إدارة المستخدمين</h3>
+                    <div id="adminUsersTable" style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>البريد</th>
+                                    <th>الحالة</th>
+                                    <th>Xtream</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="adminStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة تعديل مستخدم (للـ Admin) ===== -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeEditUserModal()">✕</button>
+            <h2><i class="fas fa-user-edit" style="color:#f39c12;"></i> تعديل المستخدم</h2>
+            <div id="editUserForm">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="editUserEmail" disabled style="opacity:0.6;" />
+                <label>الحالة</label>
+                <select id="editUserStatus">
+                    <option value="true">نشط</option>
+                    <option value="false">معطل</option>
+                </select>
+                <label>رابط الخادم (Xtream)</label>
+                <input type="url" id="editUserServer" placeholder="http://example.com:8080" />
+                <label>اسم المستخدم (Xtream)</label>
+                <input type="text" id="editUserUsername" placeholder="أدخل اسم المستخدم" />
+                <label>كلمة المرور (Xtream)</label>
+                <input type="password" id="editUserPassword" placeholder="أدخل كلمة المرور" />
+                <button class="btn-save" onclick="saveEditUser()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <div id="editUserStatusMsg" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- =====  JAVASCRIPT ===== -->
+    <!-- ============================================================== -->
+    <script>
+        // ================================================================
+        // 🔴🔴🔴  ضع محتوى extracted.txt هنا 🔴🔴🔴
+        // انسخ محتوى extracted.txt بالكامل (بدءاً من [ وانتهاءً بـ ])
+        // والصقه مكان العلامة ********** أدناه.
+        // ================================================================
+        let DEFAULT_CHANNELS = [
+            // ********** ضع محتوى extracted.txt هنا **********
+            // مثال:
+            // {"num":1,"name":"BTN - The B1G Moment - 54-51","stream_type":"live","stream_id":273923,"stream_icon":"","epg_channel_id":"event10464","added":"","category_id":"701","tv_archive":0,"tv_archive_duration":0,"direct_source":"","custom_sid":""},
+            // ...
+        ];
+        // ================================================================
+
+        // ================================================================
         // 1.  الإعدادات العامة
         // ================================================================
-        const API_URL = 'https://hacenetv2-0.onrender.com/api'; // خادم Render
+        const API_URL = 'https://hacenetv2-0.onrender.com/api';
 
         let currentUser = null;
         let token = null;
@@ -867,7 +1456,6 @@
             setFavorites(favorites);
             buildSidebar();
             applyFilters();
-            // حفظ القنوات مع المفضلة في الخادم (اختياري)
             saveChannelsToServer();
         }
 
@@ -1016,30 +1604,21 @@
             statusEl.className = 'status-msg';
 
             try {
-                // حفظ بيانات Xtream
                 await apiCall('POST', '/user/xtream', { server, username, password });
-
-                // جلب القنوات
                 const result = await apiCall('GET', '/user/fetch-channels');
                 allChannels = result.channels || [];
-                // حفظ القنوات في التخزين المحلي
                 localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-                // تحديث المستخدم المحلي
                 const user = getUser();
                 if (user) {
                     user.xtream = { server, username, password };
                     setUser(user);
                 }
-
-                // إعادة تعيين المفضلة (لأن القنوات تغيرت)
                 setFavorites([]);
-
                 closeXtreamModal();
                 buildSidebar();
                 applyFilters();
                 statusEl.textContent = `✅ تم جلب ${allChannels.length} قناة بنجاح`;
                 statusEl.className = 'status-msg success';
-                // إعادة عرض رسالة النجاح في مودال مفتوح (سنغلقه بعد قليل)
                 setTimeout(() => {
                     statusEl.textContent = '';
                     statusEl.className = 'status-msg';
@@ -1106,7 +1685,6 @@
             let url = channel.url;
             const user = getUser();
 
-            // إذا كانت القناة من Xtream (لدينا stream_id) ولدينا بيانات Xtream
             if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
                 const { server, username, password } = user.xtream;
                 url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
@@ -1117,7 +1695,6 @@
                 return;
             }
 
-            // فتح الرابط في نفس النافذة
             window.location.href = url;
         }
 
@@ -1275,6 +1852,17 @@
                         const stored = localStorage.getItem('hacene_channels');
                         if (stored) {
                             try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
+                        } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
+                            // إذا كانت القنوات الافتراضية موجودة، استخدمها
+                            allChannels = DEFAULT_CHANNELS.map(ch => ({
+                                name: ch.name || 'بدون اسم',
+                                category: ch.category_name || ch.category || 'عام',
+                                stream_id: ch.stream_id,
+                                icon: ch.stream_icon || '',
+                                url: ''
+                            }));
+                            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                            await saveChannelsToServer();
                         }
                     }
                 } catch (err) {
@@ -1288,6 +1876,16 @@
                 const stored = localStorage.getItem('hacene_channels');
                 if (stored) {
                     try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
+                } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
+                    // إذا كانت القنوات الافتراضية موجودة، استخدمها
+                    allChannels = DEFAULT_CHANNELS.map(ch => ({
+                        name: ch.name || 'بدون اسم',
+                        category: ch.category_name || ch.category || 'عام',
+                        stream_id: ch.stream_id,
+                        icon: ch.stream_icon || '',
+                        url: ''
+                    }));
+                    localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                 }
             }
 
@@ -1297,11 +1895,771 @@
             renderHeader();
             buildSidebar();
             applyFilters();
+        }
 
-            // إذا كان المستخدم مسجلاً وليس لديه قنوات، نعرض رسالة
-            if (getUser() && allChannels.length === 0) {
-                // لا شيء، فقط نعرض الحالة الفارغة
+        // ================================================================
+        // 10.  بدء التطبيق
+        // ================================================================
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            initializeApp();
+        }
+
+        // دعم مفتاح Escape لإغلاق النوافذ
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLoginModal();
+                closeXtreamModal();
+                closeAddModal();
+                closeAdminModal();
+                closeEditUserModal();
             }
+        });
+    </script>
+</body>
+</html>
+        ];
+        // ================================================================
+
+        // ================================================================
+        // 1.  الإعدادات العامة
+        // ================================================================
+        const API_URL = 'https://hacenetv2-0.onrender.com/api';
+
+        let currentUser = null;
+        let token = null;
+        let allChannels = [];
+        let currentCategory = 'الكل';
+        let favorites = [];
+        let appInitialized = false;
+
+        // ================================================================
+        // 2.  إدارة التوكن والتخزين المحلي
+        // ================================================================
+        function getToken() {
+            return localStorage.getItem('hacene_token');
+        }
+
+        function setToken(t) {
+            token = t;
+            if (t) {
+                localStorage.setItem('hacene_token', t);
+            } else {
+                localStorage.removeItem('hacene_token');
+            }
+        }
+
+        function getUser() {
+            const stored = localStorage.getItem('hacene_user');
+            if (stored) {
+                try { return JSON.parse(stored); } catch (e) { return null; }
+            }
+            return null;
+        }
+
+        function setUser(u) {
+            currentUser = u;
+            if (u) {
+                localStorage.setItem('hacene_user', JSON.stringify(u));
+            } else {
+                localStorage.removeItem('hacene_user');
+            }
+        }
+
+        function getFavorites() {
+            const stored = localStorage.getItem('hacene_favorites');
+            if (stored) {
+                try { return JSON.parse(stored); } catch (e) { return []; }
+            }
+            return [];
+        }
+
+        function setFavorites(f) {
+            favorites = f;
+            localStorage.setItem('hacene_favorites', JSON.stringify(f));
+        }
+
+        // ================================================================
+        // 3.  دوال المصادقة (Authentication)
+        // ================================================================
+
+        function getAuthHeaders() {
+            const t = getToken();
+            return t ? { 'Authorization': 'Bearer ' + t } : {};
+        }
+
+        async function apiCall(method, endpoint, body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(API_URL + endpoint, options);
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+                return data;
+            } catch (err) {
+                console.error('API Call Error:', err);
+                throw err;
+            }
+        }
+
+        // ================================================================
+        // 4.  دوال العرض (UI)
+        // ================================================================
+
+        function renderHeader() {
+            const container = document.getElementById('headerControls');
+            const user = getUser();
+
+            if (!user) {
+                container.innerHTML = `
+                    <span class="badge-count"><i class="fas fa-play"></i> مباشر</span>
+                    <button class="btn btn-primary" onclick="openLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> دخول
+                    </button>
+                    <button class="btn btn-outline" onclick="openRegisterModal()">
+                        <i class="fas fa-user-plus"></i> تسجيل
+                    </button>
+                `;
+                return;
+            }
+
+            let adminBtn = '';
+            if (user.role === 'admin') {
+                adminBtn = `<button class="btn btn-warning btn-sm" onclick="openAdminModal()">
+                    <i class="fas fa-users-cog"></i> لوحة التحكم
+                </button>`;
+            }
+
+            container.innerHTML = `
+                <span class="badge-count"><i class="fas fa-play"></i> مباشر</span>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="email" title="${user.email}">${user.email}</span>
+                    ${user.role === 'admin' ? '<span style="color:#f39c12;font-size:11px;">(مدير)</span>' : ''}
+                </div>
+                ${adminBtn}
+                <button class="btn btn-outline btn-sm" onclick="openXtreamModal()">
+                    <i class="fas fa-key"></i> Xtream
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> إضافة
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </button>
+                <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث..." oninput="applyFilters()" />
+                <span class="channel-counter" id="channelCount">0</span>
+            `;
+        }
+
+        function buildSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (!allChannels || allChannels.length === 0) {
+                sidebar.innerHTML = `<div class="cat-item" style="color:#666; text-align:center;">لا توجد قنوات</div>`;
+                return;
+            }
+            const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
+            const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
+
+            sidebar.innerHTML = sorted.map(cat => {
+                let count = 0;
+                if (cat === 'الكل') {
+                    count = allChannels.length;
+                } else if (cat === 'المفضلة') {
+                    count = favorites.length;
+                } else {
+                    count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
+                }
+                const active = cat === currentCategory ? 'active' : '';
+                const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
+                return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
+                            <span>${cat}</span>
+                            <span class="count">${count}</span>
+                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? 'إزالة التصنيف من المفضلة' : 'إضافة التصنيف إلى المفضلة'}"><i class="fas fa-star"></i></button>` : ''}
+                        </div>`;
+            }).join('');
+        }
+
+        function isCategoryFavorite(category) {
+            const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
+            if (catChannels.length === 0) return false;
+            return catChannels.every(ch => favorites.includes(getChannelId(ch)));
+        }
+
+        function toggleCategoryFavorite(category) {
+            const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
+            if (catChannels.length === 0) return;
+            const isFav = isCategoryFavorite(category);
+            if (isFav) {
+                catChannels.forEach(ch => {
+                    const id = getChannelId(ch);
+                    const idx = favorites.indexOf(id);
+                    if (idx > -1) favorites.splice(idx, 1);
+                });
+            } else {
+                catChannels.forEach(ch => {
+                    const id = getChannelId(ch);
+                    if (!favorites.includes(id)) favorites.push(id);
+                });
+            }
+            setFavorites(favorites);
+            buildSidebar();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput');
+            const searchVal = search ? search.value.trim().toLowerCase() : '';
+            let filtered = allChannels;
+
+            if (currentCategory === 'المفضلة') {
+                filtered = allChannels.filter(ch => favorites.includes(getChannelId(ch)));
+            } else if (currentCategory !== 'الكل') {
+                filtered = filtered.filter(ch => (ch.category || 'عام') === currentCategory);
+            }
+
+            if (searchVal) {
+                filtered = filtered.filter(ch => ch.name.toLowerCase().includes(searchVal));
+            }
+            renderGrid(filtered);
+            const countEl = document.getElementById('channelCount');
+            if (countEl) countEl.textContent = filtered.length;
+        }
+
+        function getChannelId(channel) {
+            if (channel.stream_id) return channel.stream_id.toString();
+            return channel.name + '_' + (channel.category || 'عام');
+        }
+
+        function renderGrid(channels) {
+            const container = document.getElementById('channelsContainer');
+            const user = getUser();
+
+            if (!user) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <h2>يرجى تسجيل الدخول</h2>
+                        <p>سجل الدخول لمشاهدة القنوات وإدارة اشتراكك.</p>
+                        <button class="btn-add-large" onclick="openLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!channels || channels.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tv"></i>
+                        <h2>لا توجد قنوات</h2>
+                        <p>قم بإعداد حساب Xtream بالضغط على زر <strong>"Xtream"</strong>، أو أضف قناة يدوياً.</p>
+                        <button class="btn-add-large" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> إضافة قناة جديدة
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                        <div class="channels-grid">
+                            ${channels.map((ch, index) => {
+                                const realIndex = allChannels.indexOf(ch);
+                                const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" />` : '';
+                                const isFav = favorites.includes(getChannelId(ch));
+                                return `
+                                <div class="channel-card">
+                                    <div class="ch-name">
+                                        ${iconHtml}
+                                        <i class="fas fa-broadcast-tower"></i> ${ch.name || 'بدون اسم'}
+                                    </div>
+                                    <span class="ch-cat">${ch.category || 'عام'}</span>
+                                    <div class="card-actions">
+                                        <button class="btn-play" onclick="playChannel(${realIndex})">
+                                            <i class="fas fa-play"></i> تشغيل
+                                        </button>
+                                        <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite(${realIndex})" title="${isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `}).join('')}
+                        </div>
+                    `;
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.cat === cat);
+            });
+            applyFilters();
+        }
+
+        function toggleFavorite(index) {
+            const channel = allChannels[index];
+            if (!channel) return;
+            const id = getChannelId(channel);
+            const idx = favorites.indexOf(id);
+            if (idx > -1) {
+                favorites.splice(idx, 1);
+            } else {
+                favorites.push(id);
+            }
+            setFavorites(favorites);
+            buildSidebar();
+            applyFilters();
+            saveChannelsToServer();
+        }
+
+        // ================================================================
+        // 5.  دوال المصادقة (Login / Register / Logout)
+        // ================================================================
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginStatus').textContent = '';
+            document.getElementById('loginStatus').className = 'status-msg';
+            document.getElementById('loginEmail').focus();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('registerStatus').textContent = '';
+            document.getElementById('registerStatus').className = 'status-msg';
+            document.getElementById('registerEmail').focus();
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('loginStatus').textContent = '';
+            document.getElementById('loginStatus').className = 'status-msg';
+            document.getElementById('loginEmail').focus();
+        }
+
+        function openRegisterModal() {
+            document.getElementById('loginModal').classList.add('active');
+            showRegister();
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const statusEl = document.getElementById('loginStatus');
+
+            if (!email || !password) {
+                statusEl.textContent = '⚠️ يرجى إدخال البريد وكلمة المرور';
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = '⏳ جاري تسجيل الدخول...';
+            statusEl.className = 'status-msg';
+
+            try {
+                const data = await apiCall('POST', '/auth/login', { email, password });
+                setToken(data.token);
+                setUser(data.user);
+                closeLoginModal();
+                initializeApp();
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const statusEl = document.getElementById('registerStatus');
+
+            if (!email || !password) {
+                statusEl.textContent = '⚠️ يرجى إدخال البريد وكلمة المرور';
+                statusEl.className = 'status-msg error';
+                return;
+            }
+            if (password.length < 6) {
+                statusEl.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = '⏳ جاري إنشاء الحساب...';
+            statusEl.className = 'status-msg';
+
+            try {
+                const data = await apiCall('POST', '/auth/register', { email, password });
+                setToken(data.token);
+                setUser(data.user);
+                closeLoginModal();
+                initializeApp();
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        function logout() {
+            if (!confirm('هل أنت متأكد من تسجيل الخروج؟')) return;
+            setToken(null);
+            setUser(null);
+            setFavorites([]);
+            allChannels = [];
+            currentCategory = 'الكل';
+            renderHeader();
+            buildSidebar();
+            applyFilters();
+        }
+
+        // ================================================================
+        // 6.  دوال Xtream
+        // ================================================================
+
+        function openXtreamModal() {
+            const user = getUser();
+            if (!user) {
+                alert('⚠️ يرجى تسجيل الدخول أولاً');
+                return;
+            }
+            document.getElementById('xtreamModal').classList.add('active');
+            document.getElementById('xtreamServer').value = user.xtream?.server || '';
+            document.getElementById('xtreamUsername').value = user.xtream?.username || '';
+            document.getElementById('xtreamPassword').value = user.xtream?.password || '';
+            document.getElementById('xtreamStatus').textContent = '';
+            document.getElementById('xtreamStatus').className = 'status-msg';
+        }
+
+        function closeXtreamModal() {
+            document.getElementById('xtreamModal').classList.remove('active');
+        }
+
+        async function saveXtreamSettings() {
+            const server = document.getElementById('xtreamServer').value.trim();
+            const username = document.getElementById('xtreamUsername').value.trim();
+            const password = document.getElementById('xtreamPassword').value.trim();
+            const statusEl = document.getElementById('xtreamStatus');
+
+            if (!server || !username || !password) {
+                statusEl.textContent = '⚠️ يرجى ملء جميع الحقول';
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = '⏳ جاري الحفظ وجلب القنوات...';
+            statusEl.className = 'status-msg';
+
+            try {
+                await apiCall('POST', '/user/xtream', { server, username, password });
+                const result = await apiCall('GET', '/user/fetch-channels');
+                allChannels = result.channels || [];
+                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                const user = getUser();
+                if (user) {
+                    user.xtream = { server, username, password };
+                    setUser(user);
+                }
+                setFavorites([]);
+                closeXtreamModal();
+                buildSidebar();
+                applyFilters();
+                statusEl.textContent = `✅ تم جلب ${allChannels.length} قناة بنجاح`;
+                statusEl.className = 'status-msg success';
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                    statusEl.className = 'status-msg';
+                }, 3000);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        // ================================================================
+        // 7.  دوال القنوات
+        // ================================================================
+
+        function openAddModal() {
+            const user = getUser();
+            if (!user) {
+                alert('⚠️ يرجى تسجيل الدخول أولاً');
+                return;
+            }
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputCategory').value = '';
+            document.getElementById('inputUrl').value = '';
+            document.getElementById('inputName').focus();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        async function saveChannel() {
+            const name = document.getElementById('inputName').value.trim();
+            const category = document.getElementById('inputCategory').value.trim() || 'عام';
+            const url = document.getElementById('inputUrl').value.trim();
+
+            if (!name) { alert('⚠️ يرجى إدخال اسم القناة.'); return; }
+            if (!url) { alert('⚠️ يرجى لصق رابط القناة.'); return; }
+
+            const newChannel = { name, category, url, stream_id: null, icon: '' };
+            allChannels.push(newChannel);
+            await saveChannelsToServer();
+            closeAddModal();
+            buildSidebar();
+            applyFilters();
+        }
+
+        async function saveChannelsToServer() {
+            try {
+                await apiCall('POST', '/user/channels', { channels: allChannels });
+                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+            } catch (err) {
+                console.error('Failed to save channels:', err);
+            }
+        }
+
+        function playChannel(index) {
+            const channel = allChannels[index];
+            if (!channel) {
+                alert('⚠️ القناة غير موجودة.');
+                return;
+            }
+
+            let url = channel.url;
+            const user = getUser();
+
+            if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+                const { server, username, password } = user.xtream;
+                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
+            }
+
+            if (!url || url === '#') {
+                alert('⚠️ هذا الرابط غير صحيح.');
+                return;
+            }
+
+            window.location.href = url;
+        }
+
+        // ================================================================
+        // 8.  دوال Admin
+        // ================================================================
+
+        async function openAdminModal() {
+            const user = getUser();
+            if (!user || user.role !== 'admin') {
+                alert('⚠️ هذه الصفحة مخصصة للمدير فقط');
+                return;
+            }
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('adminStatus').textContent = '';
+            document.getElementById('adminStatus').className = 'status-msg';
+            await loadAdminUsers();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        async function loadAdminUsers() {
+            try {
+                const data = await apiCall('GET', '/admin/users');
+                const tbody = document.getElementById('adminUsersBody');
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">لا يوجد مستخدمون</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td class="user-email">${u.email}</td>
+                        <td>
+                            <span class="status-badge ${u.isActive ? 'active' : 'inactive'}">
+                                ${u.isActive ? 'نشط' : 'معطل'}
+                            </span>
+                        </td>
+                        <td style="font-size:11px;color:#888;">
+                            ${u.xtream?.server ? '✅' : '❌'}
+                        </td>
+                        <td>
+                            <button class="btn-icon warning" onclick="openEditUser('${u._id}')" title="تعديل">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" onclick="deleteUser('${u._id}')" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                const status = document.getElementById('adminStatus');
+                status.textContent = '❌ ' + err.message;
+                status.className = 'status-msg error';
+            }
+        }
+
+        let editingUserId = null;
+
+        async function openEditUser(userId) {
+            try {
+                const data = await apiCall('GET', '/admin/users');
+                const user = data.users.find(u => u._id === userId);
+                if (!user) {
+                    alert('المستخدم غير موجود');
+                    return;
+                }
+                editingUserId = userId;
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserStatus').value = user.isActive ? 'true' : 'false';
+                document.getElementById('editUserServer').value = user.xtream?.server || '';
+                document.getElementById('editUserUsername').value = user.xtream?.username || '';
+                document.getElementById('editUserPassword').value = user.xtream?.password || '';
+                document.getElementById('editUserStatusMsg').textContent = '';
+                document.getElementById('editUserStatusMsg').className = 'status-msg';
+                document.getElementById('editUserModal').classList.add('active');
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.remove('active');
+            editingUserId = null;
+        }
+
+        async function saveEditUser() {
+            const statusEl = document.getElementById('editUserStatusMsg');
+            if (!editingUserId) {
+                statusEl.textContent = '⚠️ لم يتم تحديد المستخدم';
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            const isActive = document.getElementById('editUserStatus').value === 'true';
+            const server = document.getElementById('editUserServer').value.trim();
+            const username = document.getElementById('editUserUsername').value.trim();
+            const password = document.getElementById('editUserPassword').value.trim();
+
+            statusEl.textContent = '⏳ جاري الحفظ...';
+            statusEl.className = 'status-msg';
+
+            try {
+                await apiCall('PUT', `/admin/users/${editingUserId}`, {
+                    isActive,
+                    xtream: { server, username, password }
+                });
+                statusEl.textContent = '✅ تم التحديث بنجاح';
+                statusEl.className = 'status-msg success';
+                setTimeout(() => {
+                    closeEditUserModal();
+                    loadAdminUsers();
+                }, 1000);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')) return;
+            try {
+                await apiCall('DELETE', `/admin/users/${userId}`);
+                await loadAdminUsers();
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        // ================================================================
+        // 9.  التهيئة (Initialization)
+        // ================================================================
+
+        async function initializeApp() {
+            if (appInitialized) return;
+            appInitialized = true;
+
+            const token = getToken();
+            const user = getUser();
+
+            // التحقق من صحة التوكن
+            if (token && user) {
+                try {
+                    const data = await apiCall('GET', '/auth/me');
+                    setUser(data.user);
+                    // تحميل القنوات من الخادم
+                    const channelsData = await apiCall('GET', '/user/channels');
+                    if (channelsData.channels && channelsData.channels.length > 0) {
+                        allChannels = channelsData.channels;
+                        localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                    } else {
+                        // محاولة تحميل من التخزين المحلي
+                        const stored = localStorage.getItem('hacene_channels');
+                        if (stored) {
+                            try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
+                        } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
+                            // إذا كانت القنوات الافتراضية موجودة، استخدمها
+                            allChannels = DEFAULT_CHANNELS.map(ch => ({
+                                name: ch.name || 'بدون اسم',
+                                category: ch.category_name || ch.category || 'عام',
+                                stream_id: ch.stream_id,
+                                icon: ch.stream_icon || '',
+                                url: ''
+                            }));
+                            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                            await saveChannelsToServer();
+                        }
+                    }
+                } catch (err) {
+                    // التوكن غير صالح
+                    setToken(null);
+                    setUser(null);
+                    allChannels = [];
+                }
+            } else {
+                // محاولة تحميل من التخزين المحلي
+                const stored = localStorage.getItem('hacene_channels');
+                if (stored) {
+                    try { allChannels = JSON.parse(stored); } catch (e) { allChannels = []; }
+                } else if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
+                    // إذا كانت القنوات الافتراضية موجودة، استخدمها
+                    allChannels = DEFAULT_CHANNELS.map(ch => ({
+                        name: ch.name || 'بدون اسم',
+                        category: ch.category_name || ch.category || 'عام',
+                        stream_id: ch.stream_id,
+                        icon: ch.stream_icon || '',
+                        url: ''
+                    }));
+                    localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                }
+            }
+
+            // تحميل المفضلة
+            favorites = getFavorites();
+
+            renderHeader();
+            buildSidebar();
+            applyFilters();
         }
 
         // ================================================================
