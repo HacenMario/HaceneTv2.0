@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* جميع الأنماط السابقة مع تحسينات المشغل */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -50,18 +49,13 @@
         .btn-primary:hover { background: #00b8e6; transform: scale(1.02); }
         .btn-danger { background: #e74c3c; color: #fff; }
         .btn-danger:hover { background: #c0392b; transform: scale(1.02); }
-        .btn-outline {
-            background: transparent;
-            color: #00d4ff;
-            border: 1px solid #00d4ff;
-        }
+        .btn-outline { background: transparent; color: #00d4ff; border: 1px solid #00d4ff; }
         .btn-outline:hover { background: #00d4ff22; }
         .btn-success { background: #2ecc71; color: #fff; }
         .btn-success:hover { background: #27ae60; transform: scale(1.02); }
         .btn-warning { background: #f39c12; color: #fff; }
         .btn-warning:hover { background: #e67e22; transform: scale(1.02); }
         .btn-sm { padding: 4px 10px; font-size: 12px; }
-        .btn-xs { padding: 3px 8px; font-size: 11px; }
         .search-box {
             padding: 7px 14px;
             border-radius: 30px;
@@ -74,30 +68,12 @@
             font-size: 13px;
         }
         .search-box:focus { outline-color: #00d4ff; background: #141a24; }
-        .badge-count {
-            background: #00d4ff;
-            color: #0a0e14;
-            padding: 3px 12px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 13px;
-        }
+        .badge-count { background: #00d4ff; color: #0a0e14; padding: 3px 12px; border-radius: 30px; font-weight: 700; font-size: 13px; }
         .channel-counter { color: #888; font-size: 13px; }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #aaa;
-            font-size: 13px;
-        }
+        .user-info { display: flex; align-items: center; gap: 8px; color: #aaa; font-size: 13px; }
         .user-info .email { color: #00d4ff; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .app-container {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - 70px);
-            overflow: hidden;
-        }
+        .app-container { display: flex; flex: 1; height: calc(100vh - 70px); overflow: hidden; }
         .sidebar {
             width: 220px;
             background: #11161f;
@@ -119,37 +95,14 @@
             align-items: center;
         }
         .sidebar .cat-item:hover { background: #1e2636; }
-        .sidebar .cat-item.active {
-            background: #1e2636;
-            border-right-color: #00d4ff;
-            color: #00d4ff;
-        }
-        .sidebar .cat-item .count {
-            background: #1e2636;
-            padding: 0 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: #888;
-        }
+        .sidebar .cat-item.active { background: #1e2636; border-right-color: #00d4ff; color: #00d4ff; }
+        .sidebar .cat-item .count { background: #1e2636; padding: 0 10px; border-radius: 20px; font-size: 11px; color: #888; }
         .sidebar .cat-item.active .count { background: #00d4ff22; color: #00d4ff; }
-        .sidebar .cat-item .cat-fav-btn {
-            background: transparent;
-            border: none;
-            color: #555;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-            padding: 0 4px;
-        }
+        .sidebar .cat-item .cat-fav-btn { background: transparent; border: none; color: #555; cursor: pointer; font-size: 14px; transition: 0.2s; padding: 0 4px; }
         .sidebar .cat-item .cat-fav-btn:hover { color: #ffc107; }
         .sidebar .cat-item .cat-fav-btn.active { color: #ffc107; }
 
-        .main-content {
-            flex: 1;
-            padding: 16px 20px;
-            overflow-y: auto;
-            background: #0c1017;
-        }
+        .main-content { flex: 1; padding: 16px 20px; overflow-y: auto; background: #0c1017; }
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -176,7 +129,6 @@
         }
         .empty-state .btn-add-large:hover { background: #00b8e6; transform: scale(1.02); }
 
-        /* ===== سجل المشاهدة ===== */
         .history-bar {
             background: #11161f;
             border-radius: 10px;
@@ -188,12 +140,7 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .history-bar .label {
-            color: #888;
-            font-size: 13px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
+        .history-bar .label { color: #888; font-size: 13px; font-weight: 700; margin-left: 8px; }
         .history-item {
             background: #1e2636;
             padding: 4px 12px;
@@ -210,7 +157,6 @@
         .history-item .flag { font-size: 16px; }
         .history-item .h-name { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* ===== شبكة القنوات ===== */
         .channels-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -228,11 +174,7 @@
             gap: 6px;
             position: relative;
         }
-        .channel-card:hover {
-            border-color: #00d4ff66;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 212, 255, 0.05);
-        }
+        .channel-card:hover { border-color: #00d4ff66; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 212, 255, 0.05); }
         .channel-card .ch-name {
             font-size: 15px;
             font-weight: 700;
@@ -251,11 +193,7 @@
             background: #1e2636;
             flex-shrink: 0;
         }
-        .channel-card .ch-flag {
-            font-size: 20px;
-            line-height: 1;
-            flex-shrink: 0;
-        }
+        .channel-card .ch-flag { font-size: 20px; line-height: 1; flex-shrink: 0; }
         .channel-card .ch-cat {
             font-size: 11px;
             background: #1e2636;
@@ -265,11 +203,7 @@
             width: fit-content;
             color: #aaa;
         }
-        .channel-card .card-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 4px;
-        }
+        .channel-card .card-actions { display: flex; gap: 6px; margin-top: 4px; }
         .channel-card .btn-play {
             flex: 1;
             background: #00d4ff;
@@ -296,11 +230,7 @@
         .channel-card .btn-fav.active { background: #ffc10733; color: #ffc107; }
         .channel-card .btn-fav:hover { background: #3a455a; }
 
-        /* ===== تحميل المزيد ===== */
-        .load-more-container {
-            text-align: center;
-            margin: 20px 0 10px;
-        }
+        .load-more-container { text-align: center; margin: 20px 0 10px; }
         .load-more-btn {
             background: transparent;
             border: 1px solid #2a3344;
@@ -378,10 +308,7 @@
             transition: 0.3s;
         }
         .modal-box .btn-save:hover { background: #00b8e6; }
-        .modal-box .btn-danger {
-            background: #e74c3c;
-            color: #fff;
-        }
+        .modal-box .btn-danger { background: #e74c3c; color: #fff; }
         .modal-box .btn-danger:hover { background: #c0392b; }
         .modal-box .status-msg {
             margin-top: 12px;
@@ -404,13 +331,7 @@
             overflow: hidden;
             position: relative;
         }
-        #playerModal .close-modal {
-            color: #fff;
-            font-size: 30px;
-            top: 8px;
-            right: 15px;
-            z-index: 10;
-        }
+        #playerModal .close-modal { color: #fff; font-size: 30px; top: 8px; right: 15px; z-index: 10; }
         #playerModal .close-modal:hover { color: #00d4ff; }
         #playerVideo {
             width: 100%;
@@ -418,33 +339,6 @@
             background: #000;
             display: block;
         }
-        #playerIframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
-            background: #000;
-            display: none;
-        }
-        .player-controls {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            z-index: 5;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 5px;
-            background: rgba(0,0,0,0.5);
-        }
-        .player-controls .btn {
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            border: 1px solid #555;
-            font-size: 12px;
-        }
-        .player-controls .btn:hover { background: #00d4ff; color: #000; }
         #playerError {
             display: none;
             position: absolute;
@@ -460,12 +354,6 @@
         }
         #playerError .btn { margin-top: 8px; }
 
-        /* ===== نافذة التحميل ===== */
-        #detectingModal .modal-box { max-width: 400px; text-align: center; }
-        #detectingModal .modal-box p { margin: 15px 0; color: #aaa; }
-        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #1e2636; border-top: 4px solid #00d4ff; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         /* ===== لوحة المدير ===== */
         .admin-panel {
             background: #11161f;
@@ -475,23 +363,9 @@
             border: 1px solid #1e2636;
         }
         .admin-panel h3 { color: #00d4ff; margin-bottom: 12px; }
-        .admin-panel table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .admin-panel th {
-            text-align: right;
-            padding: 8px 10px;
-            border-bottom: 1px solid #2a3344;
-            color: #888;
-            font-weight: 400;
-        }
-        .admin-panel td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #1e2636;
-            vertical-align: middle;
-        }
+        .admin-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .admin-panel th { text-align: right; padding: 8px 10px; border-bottom: 1px solid #2a3344; color: #888; font-weight: 400; }
+        .admin-panel td { padding: 8px 10px; border-bottom: 1px solid #1e2636; vertical-align: middle; }
         .admin-panel .user-email { color: #00d4ff; }
         .admin-panel .status-badge {
             padding: 2px 10px;
@@ -515,7 +389,6 @@
         .admin-panel .btn-icon.success:hover { color: #2ecc71; }
         .admin-panel .btn-icon.warning:hover { color: #f39c12; }
 
-        /* ===== إحصائيات ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -529,16 +402,8 @@
             text-align: center;
             border: 1px solid #2a3344;
         }
-        .stat-card .num {
-            font-size: 28px;
-            font-weight: 700;
-            color: #00d4ff;
-        }
-        .stat-card .label {
-            font-size: 13px;
-            color: #888;
-            margin-top: 4px;
-        }
+        .stat-card .num { font-size: 28px; font-weight: 700; color: #00d4ff; }
+        .stat-card .label { font-size: 13px; color: #888; margin-top: 4px; }
 
         /* ===== تحسينات الشاشات الصغيرة ===== */
         @media (max-width: 768px) {
@@ -563,42 +428,26 @@
             .sidebar .cat-item.active { border-bottom-color: #00d4ff; }
             .sidebar .cat-item .count { display: none; }
             .sidebar .cat-item .cat-fav-btn { display: none; }
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 10px 12px;
-            }
+            .header { flex-direction: column; align-items: stretch; padding: 10px 12px; }
             .logo-area { justify-content: center; }
-            .controls-area {
-                justify-content: center;
-                gap: 5px;
-                flex-wrap: wrap;
-            }
+            .controls-area { justify-content: center; gap: 5px; flex-wrap: wrap; }
             .controls-area .btn { padding: 5px 10px; font-size: 11px; }
             .controls-area .search-box { width: 100%; max-width: 200px; font-size: 12px; }
             .controls-area .user-info .email { max-width: 80px; font-size: 11px; }
-            .channels-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
+            .channels-grid { grid-template-columns: 1fr; gap: 10px; }
             .channel-card { padding: 10px; }
             .channel-card .ch-name { font-size: 14px; }
             .modal-box { padding: 16px; }
             .admin-panel table { font-size: 11px; }
             .admin-panel th, .admin-panel td { padding: 4px 6px; }
-            .history-bar {
-                flex-wrap: wrap;
-                padding: 8px 12px;
-                gap: 6px;
-            }
+            .history-bar { flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
             .history-bar .label { font-size: 12px; }
             .history-item { font-size: 12px; padding: 3px 10px; }
             .history-item .h-name { max-width: 60px; }
             .badge-count { font-size: 11px; padding: 2px 8px; }
             #playerModal .modal-box { max-width: 100%; border-radius: 0; }
-            #playerVideo, #playerIframe { max-height: 60vh; }
+            #playerVideo { max-height: 60vh; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
-            #detectingModal .modal-box { max-width: 90%; }
         }
         @media (max-width: 480px) {
             .header { padding: 8px 10px; }
@@ -723,32 +572,16 @@
                 <div class="admin-panel" id="statsPanel">
                     <h3>📊 الإحصائيات</h3>
                     <div class="stats-grid" id="statsGrid">
-                        <div class="stat-card">
-                            <div class="num" id="statChannels">0</div>
-                            <div class="label">عدد القنوات</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="num" id="statUsers">0</div>
-                            <div class="label">عدد المستخدمين</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="num" id="statFavorites">0</div>
-                            <div class="label">المفضلة (لك)</div>
-                        </div>
+                        <div class="stat-card"><div class="num" id="statChannels">0</div><div class="label">عدد القنوات</div></div>
+                        <div class="stat-card"><div class="num" id="statUsers">0</div><div class="label">عدد المستخدمين</div></div>
+                        <div class="stat-card"><div class="num" id="statFavorites">0</div><div class="label">المفضلة (لك)</div></div>
                     </div>
                 </div>
                 <div class="admin-panel">
                     <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
                         <table>
-                            <thead>
-                                <tr>
-                                    <th id="adminEmailTh">البريد</th>
-                                    <th id="adminStatusTh">الحالة</th>
-                                    <th id="adminXtreamTh">Xtream</th>
-                                    <th id="adminActionsTh">الإجراءات</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th id="adminEmailTh">البريد</th><th id="adminStatusTh">الحالة</th><th id="adminXtreamTh">Xtream</th><th id="adminActionsTh">الإجراءات</th></tr></thead>
                             <tbody id="adminUsersBody"></tbody>
                         </table>
                     </div>
@@ -794,17 +627,6 @@
         </div>
     </div>
 
-    <!-- MODAL: Detecting Redirect -->
-    <div class="modal-overlay" id="detectingModal">
-        <div class="modal-box" style="text-align:center;">
-            <h2><i class="fas fa-sync-alt fa-spin" style="color:#00d4ff;"></i> جاري تحليل الرابط</h2>
-            <div class="spinner" style="margin:20px auto;"></div>
-            <p style="color:#aaa;">جاري متابعة إعادة التوجيه...</p>
-            <p style="color:#888; font-size:13px;" id="detectingStatus">الرجاء الانتظار</p>
-            <button class="btn btn-danger" onclick="cancelDetecting()" style="margin-top:15px;"><i class="fas fa-times"></i> إلغاء</button>
-        </div>
-    </div>
-
     <!-- MODAL: Player -->
     <div class="modal-overlay" id="playerModal">
         <div class="modal-box" style="position:relative; background:#000; padding:0;">
@@ -812,9 +634,7 @@
             <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:block;"></video>
             <div id="playerError" style="display:none; position:absolute; bottom:70px; left:0; right:0; text-align:center; color:#fff; background:rgba(0,0,0,0.7); padding:15px; font-size:14px; z-index:5;">
                 <p id="playerErrorMsg">تعذر تشغيل القناة.</p>
-                <button onclick="retryPlay()" class="btn btn-primary" style="margin-top:8px;">
-                    <i class="fas fa-redo"></i> إعادة المحاولة
-                </button>
+                <button onclick="retryPlay()" class="btn btn-primary" style="margin-top:8px;"><i class="fas fa-redo"></i> إعادة المحاولة</button>
             </div>
         </div>
     </div>
@@ -1866,10 +1686,7 @@
                 "usersCount": "عدد المستخدمين",
                 "yourFavorites": "المفضلة (لك)",
                 "retry": "إعادة المحاولة",
-                "playError": "تعذر تشغيل القناة.",
-                "detecting": "جاري تحليل الرابط",
-                "detectingStatus": "الرجاء الانتظار",
-                "cancel": "إلغاء"
+                "playError": "تعذر تشغيل القناة."
             },
             fr: {
                 "live": "En direct",
@@ -1951,10 +1768,7 @@
                 "usersCount": "Nombre d'utilisateurs",
                 "yourFavorites": "Favoris (vous)",
                 "retry": "Réessayer",
-                "playError": "Impossible de lire la chaîne.",
-                "detecting": "Analyse du lien",
-                "detectingStatus": "Veuillez patienter",
-                "cancel": "Annuler"
+                "playError": "Impossible de lire la chaîne."
             }
         };
 
@@ -1983,15 +1797,10 @@
         let displayedChunks = 1;
         let currentFilteredChannels = [];
 
-        // متغيرات المشغل
         let hls = null;
         let currentPlayerUrl = '';
         let retryCount = 0;
         const MAX_RETRIES = 3;
-        let detectingWindow = null;
-        let detectInterval = null;
-        let detectTimeout = null;
-        let isDetecting = false;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -1999,9 +1808,7 @@
         function getTranslation(key, params = {}) {
             const langData = translations[currentLang] || translations.ar;
             let text = langData[key] || key;
-            for (let [k, v] of Object.entries(params)) {
-                text = text.replace(`{${k}}`, v);
-            }
+            for (let [k, v] of Object.entries(params)) text = text.replace(`{${k}}`, v);
             return text;
         }
 
@@ -2165,125 +1972,50 @@
         }
 
         // ================================================================
-        // 7.  كشف إعادة التوجيه والحصول على الرابط النهائي
+        // 7.  كشف الرابط النهائي (شفاف تماماً)
         // ================================================================
         function detectFinalUrl(initialUrl, callback) {
-            if (isDetecting) {
-                console.warn('جاري الكشف بالفعل');
-                return;
-            }
-            isDetecting = true;
-
-            // إظهار نافذة التحميل
-            const modal = document.getElementById('detectingModal');
-            modal.classList.add('active');
-            document.getElementById('detectingStatus').textContent = getTranslation('detectingStatus');
-
-            // فتح نافذة صغيرة مخفية
-            const win = window.open(initialUrl, '_blank', 'width=1,height=1,menubar=no,toolbar=no,location=yes,status=no,scrollbars=no');
+            let win = window.open(initialUrl, '_blank', 'width=1,height=1,menubar=no,toolbar=no,location=yes,status=no,scrollbars=no');
             if (!win) {
-                // إذا تم منع النوافذ المنبثقة، نستخدم iframe كحل بديل
-                document.getElementById('detectingStatus').textContent = '⚠️ تم منع النوافذ المنبثقة، جاري استخدام iframe...';
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = initialUrl;
-                document.body.appendChild(iframe);
-                detectInterval = setInterval(() => {
-                    try {
-                        if (iframe.contentWindow && iframe.contentWindow.location.href) {
-                            const currentUrl = iframe.contentWindow.location.href;
-                            if (currentUrl !== initialUrl && !currentUrl.includes('about:blank')) {
-                                clearInterval(detectInterval);
-                                iframe.remove();
-                                modal.classList.remove('active');
-                                isDetecting = false;
-                                callback(currentUrl);
-                            }
-                        }
-                    } catch (e) {
-                        // CORS قد يمنع الوصول إلى عنوان iframe
-                    }
-                }, 1000);
-                detectTimeout = setTimeout(() => {
-                    clearInterval(detectInterval);
-                    iframe.remove();
-                    modal.classList.remove('active');
-                    isDetecting = false;
-                    // فشل الكشف، نستخدم الرابط الأصلي
-                    callback(initialUrl);
-                }, 15000);
-                detectingWindow = iframe;
+                // فشل فتح النافذة، نستخدم الرابط الأصلي
+                callback(initialUrl);
                 return;
             }
-
-            detectingWindow = win;
             let lastUrl = initialUrl;
             let attempts = 0;
-            const maxAttempts = 30; // 30 ثانية
-
-            detectInterval = setInterval(() => {
+            const maxAttempts = 20; // 20 ثانية
+            const interval = setInterval(() => {
                 attempts++;
                 try {
-                    const currentUrl = win.location.href;
+                    let currentUrl = win.location.href;
                     if (currentUrl && currentUrl !== lastUrl && !currentUrl.includes('about:blank')) {
                         lastUrl = currentUrl;
-                        document.getElementById('detectingStatus').textContent = `⏳ تم التوجيه إلى: ${currentUrl.substring(0, 60)}...`;
-                        // إذا كان الرابط ينتهي بـ .m3u8 أو .mp4 أو .ts أو يحتوي على m3u8 أو mp4
+                        // إذا كان الرابط النهائي (يحتوي على m3u8 أو mp4 أو ts أو manifest)
                         if (currentUrl.includes('.m3u8') || currentUrl.includes('.mp4') || currentUrl.includes('.ts') ||
-                            currentUrl.includes('m3u8') || currentUrl.includes('mp4') || currentUrl.includes('manifest')) {
-                            // وجدنا الرابط النهائي
-                            clearInterval(detectInterval);
-                            clearTimeout(detectTimeout);
+                            currentUrl.includes('manifest') || currentUrl.includes('playlist') || currentUrl.includes('master')) {
+                            clearInterval(interval);
+                            clearTimeout(timeout);
                             win.close();
-                            modal.classList.remove('active');
-                            isDetecting = false;
                             callback(currentUrl);
                             return;
                         }
                     }
-                } catch (e) {
-                    // قد يكون بسبب CORS أو تغيير النطاق
+                } catch(e) {
+                    // CORS أو تغيير نطاق
                 }
-
                 if (attempts >= maxAttempts) {
-                    clearInterval(detectInterval);
-                    clearTimeout(detectTimeout);
-                    try { win.close(); } catch(e) {}
-                    modal.classList.remove('active');
-                    isDetecting = false;
-                    // نستخدم آخر عنوان تم الحصول عليه
-                    if (lastUrl !== initialUrl) {
-                        callback(lastUrl);
-                    } else {
-                        callback(initialUrl);
-                    }
+                    clearInterval(interval);
+                    clearTimeout(timeout);
+                    win.close();
+                    callback(lastUrl);
                 }
             }, 1000);
 
-            detectTimeout = setTimeout(() => {
-                clearInterval(detectInterval);
+            const timeout = setTimeout(() => {
+                clearInterval(interval);
                 try { win.close(); } catch(e) {}
-                modal.classList.remove('active');
-                isDetecting = false;
                 callback(initialUrl);
-            }, 30000);
-        }
-
-        function cancelDetecting() {
-            if (detectInterval) {
-                clearInterval(detectInterval);
-                detectInterval = null;
-            }
-            if (detectTimeout) {
-                clearTimeout(detectTimeout);
-                detectTimeout = null;
-            }
-            if (detectingWindow) {
-                try { detectingWindow.close(); } catch(e) {}
-                detectingWindow = null;
-            }
-            document.getElementById('detectingModal').classList.remove('active');
-            isDetecting = false;
+            }, 25000);
         }
 
         // ================================================================
@@ -2307,9 +2039,7 @@
             currentPlayerUrl = url;
             retryCount = 0;
 
-            // التحقق من دعم HLS
             if (!Hls.isSupported()) {
-                // المتصفح لا يدعم HLS عبر hls.js، نستخدم src مباشرة
                 video.src = url;
                 video.play().catch(err => {
                     showPlayerError(getTranslation('playError'));
@@ -2318,10 +2048,7 @@
                 return;
             }
 
-            hls = new Hls({
-                enableWorker: true,
-                lowLatencyMode: true,
-            });
+            hls = new Hls({ enableWorker: true, lowLatencyMode: true });
             hls.loadSource(url);
             hls.attachMedia(video);
 
@@ -2363,8 +2090,7 @@
 
         function showPlayerError(msg) {
             const errorDiv = document.getElementById('playerError');
-            const errorMsg = document.getElementById('playerErrorMsg');
-            errorMsg.textContent = msg;
+            document.getElementById('playerErrorMsg').textContent = msg;
             errorDiv.style.display = 'block';
         }
 
@@ -2398,6 +2124,9 @@
             modal.onclick = null;
             document.getElementById('playerError').style.display = 'none';
         }
+
+        window.retryPlay = retryPlay;
+        window.closePlayer = closePlayer;
 
         // ================================================================
         // 9.  دوال العرض (UI)
@@ -2610,7 +2339,7 @@
         }
 
         // ================================================================
-        // 11.  تشغيل القناة مع كشف إعادة التوجيه
+        // 11.  تشغيل القناة (شفاف)
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2631,7 +2360,7 @@
                 return;
             }
 
-            // استخدام كشف إعادة التوجيه
+            // كشف الرابط النهائي في الخلفية (بدون أي مؤشرات)
             detectFinalUrl(url, (finalUrl) => {
                 if (finalUrl) {
                     openPlayer(finalUrl);
@@ -2660,7 +2389,6 @@
             document.getElementById('loginStatus').textContent = '';
             document.getElementById('loginStatus').className = 'status-msg';
             document.getElementById('loginEmail').focus();
-            // تحديث النصوص
             document.getElementById('loginModalTitle').innerHTML = `<i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> ${getTranslation('login')}`;
             document.getElementById('loginEmailLabel').textContent = getTranslation('email');
             document.getElementById('loginPasswordLabel').textContent = getTranslation('password');
@@ -2674,10 +2402,7 @@
             document.getElementById('loginLink').textContent = getTranslation('loginNow');
         }
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.remove('active');
-        }
-
+        function closeLoginModal() { document.getElementById('loginModal').classList.remove('active'); }
         function showRegister() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registerForm').style.display = 'block';
@@ -2685,7 +2410,6 @@
             document.getElementById('registerStatus').className = 'status-msg';
             document.getElementById('registerEmail').focus();
         }
-
         function showLogin() {
             document.getElementById('registerForm').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
@@ -2693,7 +2417,6 @@
             document.getElementById('loginStatus').className = 'status-msg';
             document.getElementById('loginEmail').focus();
         }
-
         function openRegisterModal() {
             document.getElementById('loginModal').classList.add('active');
             showRegister();
@@ -2703,22 +2426,18 @@
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const statusEl = document.getElementById('loginStatus');
-
             if (!email || !password) {
                 statusEl.textContent = getTranslation('fillEmailPassword');
                 statusEl.className = 'status-msg error';
                 return;
             }
-
             statusEl.textContent = getTranslation('loginInProgress');
             statusEl.className = 'status-msg';
-
             try {
                 const data = await apiCall('POST', '/auth/login', { email, password });
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-
                 document.getElementById('loadingModal').classList.add('active');
                 setTimeout(() => {
                     document.getElementById('loadingModal').classList.remove('active');
@@ -2734,7 +2453,6 @@
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
             const statusEl = document.getElementById('registerStatus');
-
             if (!email || !password) {
                 statusEl.textContent = getTranslation('fillEmailPassword');
                 statusEl.className = 'status-msg error';
@@ -2745,16 +2463,13 @@
                 statusEl.className = 'status-msg error';
                 return;
             }
-
             statusEl.textContent = getTranslation('registerInProgress');
             statusEl.className = 'status-msg';
-
             try {
                 const data = await apiCall('POST', '/auth/register', { email, password });
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-
                 document.getElementById('loadingModal').classList.add('active');
                 setTimeout(() => {
                     document.getElementById('loadingModal').classList.remove('active');
@@ -2778,7 +2493,6 @@
             applyFilters();
             renderHistory();
             closePlayer();
-            cancelDetecting();
         }
 
         // ================================================================
@@ -2787,54 +2501,36 @@
 
         function openXtreamModal() {
             const user = getUser();
-            if (!user) {
-                alert(getTranslation('loginFirst'));
-                return;
-            }
-            if (user.role !== 'admin') {
-                alert(getTranslation('adminOnlySettings'));
-                return;
-            }
-
+            if (!user) { alert(getTranslation('loginFirst')); return; }
+            if (user.role !== 'admin') { alert(getTranslation('adminOnlySettings')); return; }
             document.getElementById('xtreamModal').classList.add('active');
             document.getElementById('xtreamModalTitle').innerHTML = `<i class="fas fa-key" style="color:#9b59b6;"></i> ${getTranslation('xtreamSettings')}`;
             document.getElementById('xtreamServerLabel').textContent = getTranslation('serverUrl');
             document.getElementById('xtreamUsernameLabel').textContent = getTranslation('username');
             document.getElementById('xtreamPasswordLabel').textContent = getTranslation('password');
             document.getElementById('xtreamSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveAndFetch')}`;
-
             document.getElementById('xtreamServer').value = user.xtream?.server || '';
             document.getElementById('xtreamUsername').value = user.xtream?.username || '';
             document.getElementById('xtreamPassword').value = user.xtream?.password || '';
             document.getElementById('xtreamStatus').textContent = '';
             document.getElementById('xtreamStatus').className = 'status-msg';
         }
-
-        function closeXtreamModal() {
-            document.getElementById('xtreamModal').classList.remove('active');
-        }
+        function closeXtreamModal() { document.getElementById('xtreamModal').classList.remove('active'); }
 
         async function saveXtreamSettings() {
             const user = getUser();
-            if (!user || user.role !== 'admin') {
-                alert(getTranslation('notAuthorized'));
-                return;
-            }
-
+            if (!user || user.role !== 'admin') { alert(getTranslation('notAuthorized')); return; }
             const server = document.getElementById('xtreamServer').value.trim();
             const username = document.getElementById('xtreamUsername').value.trim();
             const password = document.getElementById('xtreamPassword').value.trim();
             const statusEl = document.getElementById('xtreamStatus');
-
             if (!server || !username || !password) {
                 statusEl.textContent = getTranslation('fillAllFields');
                 statusEl.className = 'status-msg error';
                 return;
             }
-
             statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
             statusEl.className = 'status-msg';
-
             try {
                 await apiCall('POST', '/user/xtream', { server, username, password });
                 const result = await apiCall('GET', '/user/fetch-channels');
@@ -2862,10 +2558,7 @@
 
         function openAddModal() {
             const user = getUser();
-            if (!user) {
-                alert(getTranslation('loginFirst'));
-                return;
-            }
+            if (!user) { alert(getTranslation('loginFirst')); return; }
             document.getElementById('addModal').classList.add('active');
             document.getElementById('addModalTitle').innerHTML = `<i class="fas fa-plus-circle" style="color:#00d4ff;"></i> ${getTranslation('addChannel')}`;
             document.getElementById('addNameLabel').textContent = getTranslation('channelName');
@@ -2877,24 +2570,16 @@
             document.getElementById('inputUrl').value = '';
             document.getElementById('inputName').focus();
         }
-
-        function closeAddModal() {
-            document.getElementById('addModal').classList.remove('active');
-        }
+        function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
 
         async function saveChannel() {
             const name = document.getElementById('inputName').value.trim();
             const category = document.getElementById('inputCategory').value.trim() || GENERAL_CATEGORY;
             const url = document.getElementById('inputUrl').value.trim();
-
             if (!name) { alert(getTranslation('enterChannelName')); return; }
             if (!url) { alert(getTranslation('pasteChannelUrl')); return; }
-
             let finalCategory = category;
-            if (CHANNEL_CATEGORY_MAP[name]) {
-                finalCategory = CHANNEL_CATEGORY_MAP[name];
-            }
-
+            if (CHANNEL_CATEGORY_MAP[name]) finalCategory = CHANNEL_CATEGORY_MAP[name];
             const newChannel = { name, category: finalCategory, url, stream_id: null, stream_icon: '' };
             allChannels.push(newChannel);
             await apiCall('POST', '/user/channels', { channels: allChannels });
@@ -2931,10 +2616,7 @@
 
         async function openAdminModal() {
             const user = getUser();
-            if (!user || user.role !== 'admin') {
-                alert(getTranslation('adminOnlyPage'));
-                return;
-            }
+            if (!user || user.role !== 'admin') { alert(getTranslation('adminOnlyPage')); return; }
             document.getElementById('adminModal').classList.add('active');
             document.getElementById('adminStatus').textContent = '';
             document.getElementById('adminStatus').className = 'status-msg';
@@ -2944,18 +2626,14 @@
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
             document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
-
             updateStats();
             await loadAdminUsers();
         }
+        function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
 
         function updateStats() {
             document.getElementById('statChannels').textContent = allChannels.length;
             document.getElementById('statFavorites').textContent = favorites.length;
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('active');
         }
 
         async function loadAdminUsers() {
@@ -2963,7 +2641,6 @@
                 const data = await apiCall('GET', '/admin/users');
                 const tbody = document.getElementById('adminUsersBody');
                 document.getElementById('statUsers').textContent = data.users ? data.users.length : 0;
-
                 if (!data.users || data.users.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">${getTranslation('noUsers')}</td></tr>`;
                     return;
@@ -2986,15 +2663,11 @@
         }
 
         let editingUserId = null;
-
         async function openEditUser(userId) {
             try {
                 const data = await apiCall('GET', '/admin/users');
                 const user = data.users.find(u => u._id === userId);
-                if (!user) {
-                    alert(getTranslation('userNotFound'));
-                    return;
-                }
+                if (!user) { alert(getTranslation('userNotFound')); return; }
                 editingUserId = userId;
                 document.getElementById('editUserModalTitle').innerHTML = `<i class="fas fa-user-edit" style="color:#f39c12;"></i> ${getTranslation('editUser')}`;
                 document.getElementById('editUserEmailLabel').textContent = getTranslation('email');
@@ -3013,40 +2686,24 @@
                 document.getElementById('editUserStatusMsg').textContent = '';
                 document.getElementById('editUserStatusMsg').className = 'status-msg';
                 document.getElementById('editUserModal').classList.add('active');
-            } catch (err) {
-                alert('❌ ' + err.message);
-            }
+            } catch (err) { alert('❌ ' + err.message); }
         }
-
-        function closeEditUserModal() {
-            document.getElementById('editUserModal').classList.remove('active');
-            editingUserId = null;
-        }
+        function closeEditUserModal() { document.getElementById('editUserModal').classList.remove('active'); editingUserId = null; }
 
         async function saveEditUser() {
             const statusEl = document.getElementById('editUserStatusMsg');
-            if (!editingUserId) {
-                statusEl.textContent = getTranslation('userNotSpecified');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-
+            if (!editingUserId) { statusEl.textContent = getTranslation('userNotSpecified'); statusEl.className = 'status-msg error'; return; }
             const isActive = document.getElementById('editUserStatus').value === 'true';
             const server = document.getElementById('editUserServer').value.trim();
             const username = document.getElementById('editUserUsername').value.trim();
             const password = document.getElementById('editUserPassword').value.trim();
-
             statusEl.textContent = '⏳ ' + getTranslation('saveChanges') + '...';
             statusEl.className = 'status-msg';
-
             try {
                 await apiCall('PUT', `/admin/users/${editingUserId}`, { isActive, xtream: { server, username, password } });
                 statusEl.textContent = getTranslation('updateSuccess');
                 statusEl.className = 'status-msg success';
-                setTimeout(() => {
-                    closeEditUserModal();
-                    loadAdminUsers();
-                }, 1000);
+                setTimeout(() => { closeEditUserModal(); loadAdminUsers(); }, 1000);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -3060,9 +2717,7 @@
                 await loadAdminUsers();
                 const data = await apiCall('GET', '/admin/users');
                 document.getElementById('statUsers').textContent = data.users ? data.users.length : 0;
-            } catch (err) {
-                alert('❌ ' + err.message);
-            }
+            } catch (err) { alert('❌ ' + err.message); }
         }
 
         // ================================================================
@@ -3164,16 +2819,10 @@
                 closeAdminModal();
                 closeEditUserModal();
                 closePlayer();
-                cancelDetecting();
             }
         });
 
-        // ربط دوال الإلغاء
-        window.cancelDetecting = cancelDetecting;
-        window.retryPlay = retryPlay;
-        window.closePlayer = closePlayer;
-
-        console.log('🚀 HACENE TV تم التحميل مع كشف إعادة التوجيه والمشغل المدمج!');
+        console.log('🚀 HACENE TV تم التحميل مع كشف إعادة التوجيه الشفاف والمشغل المدمج!');
     </script>
 </body>
 </html>
