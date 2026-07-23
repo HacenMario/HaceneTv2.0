@@ -679,9 +679,13 @@
             }
 
             let adminBtn = '';
+            let xtreamBtn = '';
             if (user.role === 'admin') {
                 adminBtn = `<button class="btn btn-warning btn-sm" onclick="openAdminModal()">
                     <i class="fas fa-users-cog"></i> لوحة التحكم
+                </button>`;
+                xtreamBtn = `<button class="btn btn-outline btn-sm" onclick="openXtreamModal()">
+                    <i class="fas fa-key"></i> Xtream
                 </button>`;
             }
 
@@ -693,9 +697,7 @@
                     ${user.role === 'admin' ? '<span style="color:#f39c12;font-size:11px;">(مدير)</span>' : ''}
                 </div>
                 ${adminBtn}
-                <button class="btn btn-outline btn-sm" onclick="openXtreamModal()">
-                    <i class="fas fa-key"></i> Xtream
-                </button>
+                ${xtreamBtn}
                 <button class="btn btn-primary btn-sm" onclick="openAddModal()">
                     <i class="fas fa-plus"></i> إضافة
                 </button>
@@ -809,7 +811,7 @@
                     <div class="empty-state">
                         <i class="fas fa-tv"></i>
                         <h2>لا توجد قنوات</h2>
-                        <p>قم بإعداد حساب Xtream بالضغط على زر <strong>"Xtream"</strong>، أو أضف قناة يدوياً.</p>
+                        <p>قم بإعداد حساب Xtream بالضغط على زر <strong>"Xtream"</strong> (للمدير فقط)، أو أضف قناة يدوياً.</p>
                         <button class="btn-add-large" onclick="openAddModal()">
                             <i class="fas fa-plus"></i> إضافة قناة جديدة
                         </button>
@@ -1036,7 +1038,7 @@
         }
 
         // ================================================================
-        // 6.  دوال Xtream
+        // 6.  دوال Xtream (معدلة لمنع المستخدم العادي من رؤية المعلومات)
         // ================================================================
 
         function openXtreamModal() {
@@ -1045,6 +1047,13 @@
                 alert('⚠️ يرجى تسجيل الدخول أولاً');
                 return;
             }
+
+            // التأكد من أن المستخدم هو admin
+            if (user.role !== 'admin') {
+                alert('⚠️ هذه الإعدادات متاحة للمدير فقط');
+                return;
+            }
+
             document.getElementById('xtreamModal').classList.add('active');
             document.getElementById('xtreamServer').value = user.xtream?.server || '';
             document.getElementById('xtreamUsername').value = user.xtream?.username || '';
@@ -1058,6 +1067,12 @@
         }
 
         async function saveXtreamSettings() {
+            const user = getUser();
+            if (!user || user.role !== 'admin') {
+                alert('⚠️ غير مصرح لك بتعديل هذه الإعدادات');
+                return;
+            }
+
             const server = document.getElementById('xtreamServer').value.trim();
             const username = document.getElementById('xtreamUsername').value.trim();
             const password = document.getElementById('xtreamPassword').value.trim();
