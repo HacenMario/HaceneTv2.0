@@ -6,6 +6,7 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* جميع الأنماط الحالية + تحسينات المشغل */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -401,6 +402,7 @@
             padding: 0;
             border-radius: 12px;
             overflow: hidden;
+            position: relative;
         }
         #playerModal .close-modal {
             color: #fff;
@@ -427,6 +429,7 @@
             background: rgba(0,0,0,0.7);
             padding: 15px;
             font-size: 14px;
+            z-index: 5;
         }
         #playerError .btn { margin-top: 8px; }
 
@@ -760,14 +763,13 @@
 
     <!-- MODAL: Player -->
     <div class="modal-overlay" id="playerModal">
-        <div class="modal-box" style="position:relative;">
+        <div class="modal-box" style="position:relative; background:#000; padding:0;">
             <button class="close-modal" onclick="closePlayer()" style="color:#fff; font-size:30px; top:8px; right:15px; z-index:10;">✕</button>
             <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:block;"></video>
-            <div id="playerError" style="display:none; position:absolute; bottom:70px; left:0; right:0; text-align:center; color:#fff; background:rgba(0,0,0,0.7); padding:15px; font-size:14px;">
-                تعذر تشغيل القناة مباشرة.
-                <br>
-                <button onclick="window.open(document.getElementById('playerVideo').src, '_blank')" class="btn btn-primary" style="margin-top:8px;">
-                    <i class="fas fa-external-link-alt"></i> فتح في نافذة جديدة
+            <div id="playerError" style="display:none; position:absolute; bottom:70px; left:0; right:0; text-align:center; color:#fff; background:rgba(0,0,0,0.7); padding:15px; font-size:14px; z-index:5;">
+                <p id="playerErrorMsg">تعذر تشغيل القناة.</p>
+                <button onclick="retryPlay()" class="btn btn-primary" style="margin-top:8px;">
+                    <i class="fas fa-redo"></i> إعادة المحاولة
                 </button>
             </div>
         </div>
@@ -1819,6 +1821,8 @@
                 "channelsCount": "عدد القنوات",
                 "usersCount": "عدد المستخدمين",
                 "yourFavorites": "المفضلة (لك)",
+                "retry": "إعادة المحاولة",
+                "playError": "تعذر تشغيل القناة."
             },
             fr: {
                 "live": "En direct",
@@ -1899,6 +1903,8 @@
                 "channelsCount": "Nombre de chaînes",
                 "usersCount": "Nombre d'utilisateurs",
                 "yourFavorites": "Favoris (vous)",
+                "retry": "Réessayer",
+                "playError": "Impossible de lire la chaîne."
             }
         };
 
@@ -1926,6 +1932,12 @@
         let currentLang = 'ar';
         let displayedChunks = 1;
         let currentFilteredChannels = [];
+
+        // متغيرات المشغل
+        let hls = null;
+        let currentPlayerUrl = '';
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2099,34 +2111,78 @@
         }
 
         // ================================================================
-        // 7.  مشغل الفيديو المدمج (باستخدام عنصر video الأصلي)
+        // 7.  مشغل الفيديو القوي باستخدام hls.js
         // ================================================================
         function openPlayer(url) {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
             const errorDiv = document.getElementById('playerError');
+            const errorMsg = document.getElementById('playerErrorMsg');
             
-            // إخفاء رسالة الخطأ السابقة
+            // إخفاء رسالة الخطأ
             errorDiv.style.display = 'none';
-            
-            // إيقاف التشغيل السابق
+            // إيقاف أي تشغيل سابق
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
             video.pause();
             video.src = '';
             video.load();
 
-            // تعيين المصدر الجديد
-            video.src = url;
-            
-            // محاولة التشغيل
-            video.play().catch(err => {
-                console.error('تشغيل فشل:', err);
-                // عرض رسالة الخطأ مع زر لفتح الرابط في نافذة جديدة
-                errorDiv.style.display = 'block';
-                // تعيين الرابط في الزر
-                const btn = errorDiv.querySelector('button');
-                btn.onclick = function() {
-                    window.open(url, '_blank');
-                };
+            // تخزين الرابط للمحاولة لاحقاً
+            currentPlayerUrl = url;
+            retryCount = 0;
+
+            // التحقق من وجود HLS
+            if (!Hls.isSupported()) {
+                // المتصفح لا يدعم HLS عبر hls.js، نجرب التشغيل المباشر
+                video.src = url;
+                video.play().catch(err => {
+                    showPlayerError(getTranslation('playError'));
+                });
+                modal.classList.add('active');
+                return;
+            }
+
+            // استخدام hls.js
+            hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+            });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play().catch(err => {
+                    console.warn('تشغيل تلقائي فشل:', err);
+                    // نعرض رسالة خطأ مع إعادة المحاولة
+                    showPlayerError(getTranslation('playError'));
+                });
+            });
+
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            // محاولة إعادة التحميل
+                            console.log('خطأ شبكة، محاولة إعادة التحميل...');
+                            if (retryCount < MAX_RETRIES) {
+                                retryCount++;
+                                hls.startLoad();
+                            } else {
+                                showPlayerError(getTranslation('playError'));
+                            }
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.log('خطأ وسائط، محاولة الاسترداد...');
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            showPlayerError(getTranslation('playError'));
+                            break;
+                    }
+                }
             });
 
             // إظهار النافذة
@@ -2138,14 +2194,44 @@
             };
         }
 
+        function showPlayerError(msg) {
+            const errorDiv = document.getElementById('playerError');
+            const errorMsg = document.getElementById('playerErrorMsg');
+            errorMsg.textContent = msg;
+            errorDiv.style.display = 'block';
+        }
+
+        function retryPlay() {
+            if (currentPlayerUrl) {
+                // إعادة تشغيل المشغل بنفس الرابط
+                const video = document.getElementById('playerVideo');
+                const errorDiv = document.getElementById('playerError');
+                errorDiv.style.display = 'none';
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
+                video.pause();
+                video.src = '';
+                video.load();
+                openPlayer(currentPlayerUrl);
+            }
+        }
+
         function closePlayer() {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
             video.pause();
             video.src = '';
             video.load();
             modal.classList.remove('active');
             modal.onclick = null;
+            // إخفاء رسالة الخطأ
+            document.getElementById('playerError').style.display = 'none';
         }
 
         // ================================================================
@@ -2359,7 +2445,7 @@
         }
 
         // ================================================================
-        // 10.  تشغيل القناة مع مشغل مدمج
+        // 10.  تشغيل القناة مع مشغل مدمج (hls.js + video)
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2919,7 +3005,11 @@
             }
         });
 
-        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل مدمج (عنصر video) وإحصائيات!');
+        // ربط دالة retryPlay بالكائن window لاستخدامها في onclick
+        window.retryPlay = retryPlay;
+        window.closePlayer = closePlayer;
+
+        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل قوي (hls.js) وإحصائيات!');
     </script>
 </body>
 </html>
