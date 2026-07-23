@@ -418,6 +418,32 @@
             background: #000;
             display: block;
         }
+        #playerIframe {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            background: #000;
+            display: none;
+        }
+        .player-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 5px;
+        }
+        .player-controls .btn {
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: 1px solid #555;
+            font-size: 12px;
+        }
+        .player-controls .btn:hover { background: #00d4ff; color: #000; }
         #playerError {
             display: none;
             position: absolute;
@@ -563,7 +589,7 @@
             .history-item .h-name { max-width: 60px; }
             .badge-count { font-size: 11px; padding: 2px 8px; }
             #playerModal .modal-box { max-width: 100%; border-radius: 0; }
-            #playerVideo { max-height: 60vh; }
+            #playerVideo, #playerIframe { max-height: 60vh; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 480px) {
@@ -765,12 +791,25 @@
     <div class="modal-overlay" id="playerModal">
         <div class="modal-box" style="position:relative; background:#000; padding:0;">
             <button class="close-modal" onclick="closePlayer()" style="color:#fff; font-size:30px; top:8px; right:15px; z-index:10;">✕</button>
-            <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:block;"></video>
+            <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:none;"></video>
+            <iframe id="playerIframe" style="width:100%; height:80vh; border:none; background:#000; display:none;"></iframe>
             <div id="playerError" style="display:none; position:absolute; bottom:70px; left:0; right:0; text-align:center; color:#fff; background:rgba(0,0,0,0.7); padding:15px; font-size:14px; z-index:5;">
                 <p id="playerErrorMsg">تعذر تشغيل القناة.</p>
-                <button onclick="retryPlay()" class="btn btn-primary" style="margin-top:8px;">
-                    <i class="fas fa-redo"></i> إعادة المحاولة
-                </button>
+                <div style="margin-top:8px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                    <button onclick="switchToIframe()" class="btn btn-primary" id="switchIframeBtn">
+                        <i class="fas fa-window-maximize"></i> عرض في الإطار
+                    </button>
+                    <button onclick="switchToVideo()" class="btn btn-outline" id="switchVideoBtn" style="display:none;">
+                        <i class="fas fa-video"></i> محاولة المشغل
+                    </button>
+                    <button onclick="retryPlay()" class="btn btn-success">
+                        <i class="fas fa-redo"></i> إعادة المحاولة
+                    </button>
+                </div>
+            </div>
+            <div class="player-controls" id="playerControls">
+                <button class="btn btn-xs" onclick="switchToIframe()" id="ctrlIframeBtn" title="عرض في إطار"><i class="fas fa-window-maximize"></i></button>
+                <button class="btn btn-xs" onclick="switchToVideo()" id="ctrlVideoBtn" title="مشغل الفيديو" style="display:none;"><i class="fas fa-video"></i></button>
             </div>
         </div>
     </div>
@@ -1822,7 +1861,9 @@
                 "usersCount": "عدد المستخدمين",
                 "yourFavorites": "المفضلة (لك)",
                 "retry": "إعادة المحاولة",
-                "playError": "تعذر تشغيل القناة."
+                "playError": "تعذر تشغيل القناة.",
+                "iframeMode": "عرض في الإطار",
+                "videoMode": "مشغل الفيديو"
             },
             fr: {
                 "live": "En direct",
@@ -1904,7 +1945,9 @@
                 "usersCount": "Nombre d'utilisateurs",
                 "yourFavorites": "Favoris (vous)",
                 "retry": "Réessayer",
-                "playError": "Impossible de lire la chaîne."
+                "playError": "Impossible de lire la chaîne.",
+                "iframeMode": "Afficher dans le cadre",
+                "videoMode": "Lecteur vidéo"
             }
         };
 
@@ -1938,6 +1981,7 @@
         let currentPlayerUrl = '';
         let retryCount = 0;
         const MAX_RETRIES = 3;
+        let useIframe = false; // تحديد الوضع الحالي
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2111,16 +2155,28 @@
         }
 
         // ================================================================
-        // 7.  مشغل الفيديو القوي باستخدام hls.js
+        // 7.  مشغل الفيديو المدمج (hls.js + iframe)
         // ================================================================
         function openPlayer(url) {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
+            const iframe = document.getElementById('playerIframe');
             const errorDiv = document.getElementById('playerError');
             const errorMsg = document.getElementById('playerErrorMsg');
+            const ctrlIframeBtn = document.getElementById('ctrlIframeBtn');
+            const ctrlVideoBtn = document.getElementById('ctrlVideoBtn');
+            const switchIframeBtn = document.getElementById('switchIframeBtn');
+            const switchVideoBtn = document.getElementById('switchVideoBtn');
             
-            // إخفاء رسالة الخطأ
+            // إخفاء كل شيء
+            video.style.display = 'none';
+            iframe.style.display = 'none';
             errorDiv.style.display = 'none';
+            ctrlIframeBtn.style.display = 'inline-block';
+            ctrlVideoBtn.style.display = 'inline-block';
+            switchIframeBtn.style.display = 'inline-block';
+            switchVideoBtn.style.display = 'none';
+
             // إيقاف أي تشغيل سابق
             if (hls) {
                 hls.destroy();
@@ -2129,61 +2185,77 @@
             video.pause();
             video.src = '';
             video.load();
+            iframe.src = '';
 
-            // تخزين الرابط للمحاولة لاحقاً
             currentPlayerUrl = url;
             retryCount = 0;
 
-            // التحقق من وجود HLS
-            if (!Hls.isSupported()) {
-                // المتصفح لا يدعم HLS عبر hls.js، نجرب التشغيل المباشر
-                video.src = url;
-                video.play().catch(err => {
-                    showPlayerError(getTranslation('playError'));
+            // تحديد الوضع: إذا كان الرابط .m3u8، نجرب hls.js أولاً، وإلا نستخدم iframe مباشرة
+            const isM3u8 = url.includes('.m3u8') || url.includes('m3u8');
+            if (isM3u8 && Hls.isSupported()) {
+                // محاولة hls.js
+                useIframe = false;
+                video.style.display = 'block';
+                iframe.style.display = 'none';
+                ctrlIframeBtn.style.display = 'inline-block';
+                ctrlVideoBtn.style.display = 'inline-block';
+                switchIframeBtn.style.display = 'inline-block';
+                switchVideoBtn.style.display = 'none';
+
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
                 });
-                modal.classList.add('active');
-                return;
-            }
+                hls.loadSource(url);
+                hls.attachMedia(video);
 
-            // استخدام hls.js
-            hls = new Hls({
-                enableWorker: true,
-                lowLatencyMode: true,
-            });
-            hls.loadSource(url);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                video.play().catch(err => {
-                    console.warn('تشغيل تلقائي فشل:', err);
-                    // نعرض رسالة خطأ مع إعادة المحاولة
-                    showPlayerError(getTranslation('playError'));
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(err => {
+                        console.warn('تشغيل تلقائي فشل:', err);
+                        showPlayerError(getTranslation('playError'));
+                    });
                 });
-            });
 
-            hls.on(Hls.Events.ERROR, function(event, data) {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            // محاولة إعادة التحميل
-                            console.log('خطأ شبكة، محاولة إعادة التحميل...');
-                            if (retryCount < MAX_RETRIES) {
-                                retryCount++;
-                                hls.startLoad();
-                            } else {
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                if (retryCount < MAX_RETRIES) {
+                                    retryCount++;
+                                    hls.startLoad();
+                                } else {
+                                    // فشل hls.js، نعرض خيار iframe
+                                    showPlayerError(getTranslation('playError'));
+                                    switchIframeBtn.style.display = 'inline-block';
+                                }
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hls.recoverMediaError();
+                                break;
+                            default:
                                 showPlayerError(getTranslation('playError'));
-                            }
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.log('خطأ وسائط، محاولة الاسترداد...');
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            showPlayerError(getTranslation('playError'));
-                            break;
+                                switchIframeBtn.style.display = 'inline-block';
+                                break;
+                        }
                     }
-                }
-            });
+                });
+
+                // عند نجاح التشغيل، نخفي زر iframe
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    switchIframeBtn.style.display = 'none';
+                });
+
+            } else {
+                // استخدام iframe مباشرة
+                useIframe = true;
+                video.style.display = 'none';
+                iframe.style.display = 'block';
+                iframe.src = url;
+                ctrlIframeBtn.style.display = 'none';
+                ctrlVideoBtn.style.display = 'inline-block';
+                switchIframeBtn.style.display = 'none';
+                switchVideoBtn.style.display = 'inline-block';
+            }
 
             // إظهار النافذة
             modal.classList.add('active');
@@ -2201,10 +2273,100 @@
             errorDiv.style.display = 'block';
         }
 
+        function switchToIframe() {
+            const video = document.getElementById('playerVideo');
+            const iframe = document.getElementById('playerIframe');
+            const errorDiv = document.getElementById('playerError');
+            const ctrlIframeBtn = document.getElementById('ctrlIframeBtn');
+            const ctrlVideoBtn = document.getElementById('ctrlVideoBtn');
+            const switchIframeBtn = document.getElementById('switchIframeBtn');
+            const switchVideoBtn = document.getElementById('switchVideoBtn');
+
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+            video.pause();
+            video.src = '';
+            video.load();
+            video.style.display = 'none';
+            iframe.style.display = 'block';
+            iframe.src = currentPlayerUrl;
+            errorDiv.style.display = 'none';
+            ctrlIframeBtn.style.display = 'none';
+            ctrlVideoBtn.style.display = 'inline-block';
+            switchIframeBtn.style.display = 'none';
+            switchVideoBtn.style.display = 'inline-block';
+            useIframe = true;
+        }
+
+        function switchToVideo() {
+            const video = document.getElementById('playerVideo');
+            const iframe = document.getElementById('playerIframe');
+            const errorDiv = document.getElementById('playerError');
+            const ctrlIframeBtn = document.getElementById('ctrlIframeBtn');
+            const ctrlVideoBtn = document.getElementById('ctrlVideoBtn');
+            const switchIframeBtn = document.getElementById('switchIframeBtn');
+            const switchVideoBtn = document.getElementById('switchVideoBtn');
+
+            iframe.src = '';
+            iframe.style.display = 'none';
+            video.style.display = 'block';
+            errorDiv.style.display = 'none';
+            ctrlIframeBtn.style.display = 'inline-block';
+            ctrlVideoBtn.style.display = 'inline-block';
+            switchIframeBtn.style.display = 'inline-block';
+            switchVideoBtn.style.display = 'none';
+            useIframe = false;
+
+            // إعادة محاولة hls.js
+            if (Hls.isSupported()) {
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
+                video.pause();
+                video.src = '';
+                video.load();
+
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                });
+                hls.loadSource(currentPlayerUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(err => {
+                        console.warn('تشغيل تلقائي فشل:', err);
+                        showPlayerError(getTranslation('playError'));
+                        switchIframeBtn.style.display = 'inline-block';
+                    });
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        if (retryCount < MAX_RETRIES) {
+                            retryCount++;
+                            hls.startLoad();
+                        } else {
+                            showPlayerError(getTranslation('playError'));
+                            switchIframeBtn.style.display = 'inline-block';
+                        }
+                    }
+                });
+            } else {
+                // المتصفح لا يدعم hls.js
+                showPlayerError('المتصفح لا يدعم HLS، استخدم الإطار');
+                switchIframeBtn.style.display = 'inline-block';
+            }
+        }
+
         function retryPlay() {
             if (currentPlayerUrl) {
-                // إعادة تشغيل المشغل بنفس الرابط
+                // إعادة فتح المشغل بنفس الرابط
                 const video = document.getElementById('playerVideo');
+                const iframe = document.getElementById('playerIframe');
                 const errorDiv = document.getElementById('playerError');
                 errorDiv.style.display = 'none';
                 if (hls) {
@@ -2214,6 +2376,7 @@
                 video.pause();
                 video.src = '';
                 video.load();
+                iframe.src = '';
                 openPlayer(currentPlayerUrl);
             }
         }
@@ -2221,6 +2384,7 @@
         function closePlayer() {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
+            const iframe = document.getElementById('playerIframe');
             if (hls) {
                 hls.destroy();
                 hls = null;
@@ -2228,11 +2392,17 @@
             video.pause();
             video.src = '';
             video.load();
+            iframe.src = '';
             modal.classList.remove('active');
             modal.onclick = null;
-            // إخفاء رسالة الخطأ
             document.getElementById('playerError').style.display = 'none';
         }
+
+        // ربط الدوال بالكائن window لاستخدامها في onclick
+        window.switchToIframe = switchToIframe;
+        window.switchToVideo = switchToVideo;
+        window.retryPlay = retryPlay;
+        window.closePlayer = closePlayer;
 
         // ================================================================
         // 8.  دوال العرض (UI)
@@ -2445,7 +2615,7 @@
         }
 
         // ================================================================
-        // 10.  تشغيل القناة مع مشغل مدمج (hls.js + video)
+        // 10.  تشغيل القناة
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2453,7 +2623,6 @@
                 alert(getTranslation('channelNotFound'));
                 return;
             }
-            // إضافة للسجل
             addToHistory(channel);
 
             let url = channel.url;
@@ -2467,7 +2636,6 @@
                 return;
             }
 
-            // فتح المشغل
             openPlayer(url);
         }
 
@@ -2607,7 +2775,6 @@
             buildSidebar();
             applyFilters();
             renderHistory();
-            // إغلاق المشغل إذا كان مفتوحاً
             closePlayer();
         }
 
@@ -2993,7 +3160,6 @@
             initializeApp(false);
         }
 
-        // إغلاق المشغل عند الضغط على Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeLoginModal();
@@ -3001,15 +3167,11 @@
                 closeAddModal();
                 closeAdminModal();
                 closeEditUserModal();
-                closePlayer(); // إغلاق المشغل
+                closePlayer();
             }
         });
 
-        // ربط دالة retryPlay بالكائن window لاستخدامها في onclick
-        window.retryPlay = retryPlay;
-        window.closePlayer = closePlayer;
-
-        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل قوي (hls.js) وإحصائيات!');
+        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل هجين (hls.js + iframe) وإحصائيات!');
     </script>
 </body>
 </html>
