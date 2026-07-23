@@ -8,24 +8,13 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // ================================================================
-// 1.  إعدادات CORS
+// 1.  إعدادات CORS (محسّنة)
 // ================================================================
 app.use(cors({
     origin: function (origin, callback) {
-        // السماح بكل origins في بيئة التطوير
+        // السماح لكل origins (للتجربة)
         if (!origin) return callback(null, true);
-        const allowedOrigins = [
-            'https://hacene-tv2-0.vercel.app',
-            'http://localhost:3000',
-            'http://localhost:5500',
-            'https://hacenetv2-0.onrender.com'
-        ];
-        const originClean = origin.replace(/\/$/, '');
-        if (allowedOrigins.includes(originClean) || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(null, true); // للتجربة نسمح الكل
-        }
+        callback(null, true);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -44,7 +33,11 @@ if (!MONGODB_URI) {
 }
 
 mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
+    .then(() => {
+        console.log('✅ Connected to MongoDB');
+        // بعد الاتصال، نقوم بإنشاء مستخدم Admin إذا لم يكن موجوداً
+        createDefaultAdmin();
+    })
     .catch(err => {
         console.error('❌ MongoDB connection error:', err);
         process.exit(1);
@@ -77,7 +70,44 @@ const ChannelSchema = new mongoose.Schema({
 const Channel = mongoose.model('Channel', ChannelSchema);
 
 // ================================================================
-// 4.  دوال المساعدة
+// 4.  إنشاء مستخدم Admin افتراضي (إنشاء حساب المدير)
+// ================================================================
+async function createDefaultAdmin() {
+    try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@hacenetv.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
+
+        // التحقق من وجود مستخدم Admin
+        const existingAdmin = await User.findOne({ email: adminEmail });
+        if (!existingAdmin) {
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
+            const admin = new User({
+                email: adminEmail,
+                password: hashedPassword,
+                role: 'admin',
+                isActive: true,
+                xtream: { server: '', username: '', password: '' }
+            });
+            await admin.save();
+            console.log(`✅ Admin user created: ${adminEmail} / ${adminPassword}`);
+            console.log(`⚠️ Please change the default password after first login.`);
+        } else {
+            // إذا كان موجوداً، نتأكد من أن دوره Admin (في حال تم تغييره)
+            if (existingAdmin.role !== 'admin') {
+                existingAdmin.role = 'admin';
+                await existingAdmin.save();
+                console.log(`✅ User ${adminEmail} updated to admin role.`);
+            } else {
+                console.log(`✅ Admin user already exists: ${adminEmail}`);
+            }
+        }
+    } catch (err) {
+        console.error('❌ Error creating default admin:', err);
+    }
+}
+
+// ================================================================
+// 5.  دوال المساعدة (Helper functions)
 // ================================================================
 function generateToken(userId, email, role) {
     return jwt.sign(
@@ -110,14 +140,13 @@ function adminMiddleware(req, res, next) {
 }
 
 // ================================================================
-// 5.  نقاط النهاية (API Endpoints)
+// 6.  نقاط النهاية (API Endpoints)
 // ================================================================
 
-// 5.1 تسجيل مستخدم جديد
+// 6.1 تسجيل مستخدم جديد
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
@@ -159,11 +188,10 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// 5.2 تسجيل الدخول (المُعدّل لإعطاء رسائل خطأ أوضح)
+// 6.2 تسجيل الدخول
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
@@ -197,12 +225,11 @@ app.post('/api/auth/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
-        // إرسال رسالة خطأ مفصلة للمساعدة في التشخيص
         res.status(500).json({ error: 'Server error: ' + err.message });
     }
 });
 
-// 5.3 الحصول على بيانات المستخدم الحالي
+// 6.3 الحصول على بيانات المستخدم الحالي
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId).select('-password');
@@ -216,7 +243,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     }
 });
 
-// 5.4 حفظ بيانات Xtream للمستخدم الحالي
+// 6.4 حفظ بيانات Xtream للمستخدم الحالي
 app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     try {
         const { server, username, password } = req.body;
@@ -245,7 +272,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-// 5.5 جلب القنوات من Xtream (للمستخدم الحالي)
+// 6.5 جلب القنوات من Xtream (للمستخدم الحالي)
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
@@ -259,7 +286,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         }
 
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        // استخدام الرابط المطلق لتجنب مشاكل req.protocol
         const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         
         const response = await fetch(proxyUrl);
@@ -297,7 +323,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     }
 });
 
-// 5.6 الحصول على قنوات المستخدم المحفوظة
+// 6.6 الحصول على قنوات المستخدم المحفوظة
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const channelDoc = await Channel.findOne({ userId: req.user.userId });
@@ -311,7 +337,7 @@ app.get('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// 5.7 حفظ قنوات المستخدم
+// 6.7 حفظ قنوات المستخدم
 app.post('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const { channels } = req.body;
@@ -333,7 +359,7 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
 });
 
 // ================================================================
-// 6.  نقاط النهاية الخاصة بـ Admin
+// 7.  نقاط النهاية الخاصة بـ Admin
 // ================================================================
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
@@ -413,7 +439,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
 });
 
 // ================================================================
-// 7.  نقطة نهاية الـ Proxy (لجلب القنوات من Xtream)
+// 8.  نقطة نهاية الـ Proxy (لجلب القنوات من Xtream)
 // ================================================================
 app.get('/api/proxy', async (req, res) => {
     try {
@@ -436,7 +462,7 @@ app.get('/api/proxy', async (req, res) => {
 });
 
 // ================================================================
-// 8.  نقطة نهاية اختبار الصحة
+// 9.  نقطة نهاية اختبار الصحة
 // ================================================================
 app.get('/api/health', (req, res) => {
     res.json({
@@ -447,7 +473,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ================================================================
-// 9.  تشغيل الخادم
+// 10.  تشغيل الخادم
 // ================================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
