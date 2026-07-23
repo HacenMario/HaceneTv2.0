@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
     <style>
+        /* جميع الأنماط كما هي (لم تتغير) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -914,7 +915,8 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                initializeApp();
+                // إعادة تهيئة التطبيق مع فرض التحديث
+                await initializeApp(true);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -945,7 +947,8 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                initializeApp();
+                // إعادة تهيئة التطبيق مع فرض التحديث
+                await initializeApp(true);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -1225,11 +1228,25 @@
         }
 
         // ================================================================
-        // 9.  التهيئة (Initialization)
+        // 9.  التهيئة (Initialization) - مع دعم التحديث الإجباري
         // ================================================================
 
-        async function initializeApp() {
-            if (appInitialized) return;
+        async function initializeApp(forceRefresh = false) {
+            // إذا كان التطبيق مهيئاً بالفعل وليس هناك طلب إعادة تحميل، نخرج
+            if (appInitialized && !forceRefresh) return;
+            // إذا كان هناك طلب إعادة تحميل، نعيد تعيين العلامة
+            if (forceRefresh) {
+                appInitialized = false;
+                // نمسح التخزين المؤقت للقنوات لضمان تحميل البيانات الجديدة
+                // لكننا لا نمسح token أو user، فقط نعيد تهيئة القنوات
+                // يمكننا الاحتفاظ بالمفضلة لكننا سنحمل القنوات من الخادم أو الافتراضية
+                // نفضل مسح القنوات المحلية لضمان التحديث
+                localStorage.removeItem('hacene_channels');
+                // نعيد ضبط المتغيرات
+                allChannels = [];
+                favorites = [];
+            }
+
             appInitialized = true;
 
             const token = getToken();
@@ -1237,8 +1254,10 @@
 
             if (token && user) {
                 try {
+                    // التحقق من صحة التوكن
                     const data = await apiCall('GET', '/auth/me');
                     setUser(data.user);
+                    // محاولة تحميل القنوات من الخادم
                     const channelsData = await apiCall('GET', '/user/channels');
                     if (channelsData.channels && channelsData.channels.length > 0) {
                         allChannels = channelsData.channels;
@@ -1262,11 +1281,13 @@
                     }
                 } catch (err) {
                     console.error('❌ خطأ في تهيئة التطبيق:', err.message);
+                    // في حالة خطأ التوكن، نخرج المستخدم
                     setToken(null);
                     setUser(null);
                     allChannels = [];
                 }
             } else {
+                // المستخدم غير مسجل، نحاول تحميل من التخزين المحلي
                 const stored = localStorage.getItem('hacene_channels');
                 if (stored) {
                     try {
@@ -1280,7 +1301,10 @@
                 }
             }
 
+            // تحميل المفضلة (إذا كانت موجودة)
             favorites = getFavorites();
+
+            // تحديث واجهة المستخدم
             renderHeader();
             buildSidebar();
             applyFilters();
@@ -1290,9 +1314,10 @@
         // 10.  بدء التطبيق
         // ================================================================
 
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        document.addEventListener('DOMContentLoaded', () => initializeApp(false));
+        // في حالة تحميل الصفحة بعد أن يكون DOM جاهزاً
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            initializeApp();
+            initializeApp(false);
         }
 
         document.addEventListener('keydown', (e) => {
