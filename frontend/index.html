@@ -1555,6 +1555,7 @@
                 "play": "تشغيل",
                 "addFav": "إضافة إلى المفضلة",
                 "removeFav": "إزالة من المفضلة",
+                "general": "عام",
                 // النماذج
                 "xtreamSettings": "إعدادات Xtream",
                 "serverUrl": "رابط الخادم (Server URL)",
@@ -1633,6 +1634,7 @@
                 "play": "Lire",
                 "addFav": "Ajouter aux favoris",
                 "removeFav": "Retirer des favoris",
+                "general": "Général",
                 // النماذج
                 "xtreamSettings": "Paramètres Xtream",
                 "serverUrl": "URL du serveur",
@@ -1688,6 +1690,11 @@
             }
         };
 
+        // تعريف الثوابت
+        const ALL_CATEGORY = 'الكل';
+        const FAVORITES_CATEGORY = 'المفضلة';
+        const GENERAL_CATEGORY = 'عام';
+
         // ================================================================
         // 1.  الإعدادات العامة
         // ================================================================
@@ -1696,7 +1703,7 @@
         let currentUser = null;
         let token = null;
         let allChannels = [];
-        let currentCategory = 'الكل';
+        let currentCategory = ALL_CATEGORY;
         let favorites = [];
         let appInitialized = false;
         let currentLang = 'ar'; // 'ar' أو 'fr'
@@ -1707,18 +1714,25 @@
         function getTranslation(key, params = {}) {
             const langData = translations[currentLang] || translations.ar;
             let text = langData[key] || key;
-            // استبدال المتغيرات مثل {count}
             for (let [k, v] of Object.entries(params)) {
                 text = text.replace(`{${k}}`, v);
             }
             return text;
         }
 
+        function translateCategory(cat) {
+            if (!cat) return cat;
+            if (cat === ALL_CATEGORY) return getTranslation('all');
+            if (cat === FAVORITES_CATEGORY) return getTranslation('favorites');
+            if (cat === GENERAL_CATEGORY) return getTranslation('general');
+            // إذا كان التصنيف غير معروف، نرجعه كما هو (ربما هو اسم بالعربية)
+            return cat;
+        }
+
         function setLanguage(lang) {
             if (lang === 'ar' || lang === 'fr') {
                 currentLang = lang;
                 localStorage.setItem('hacene_lang', lang);
-                // تحديث اتجاه الصفحة
                 document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
                 // تحديث كل النصوص
@@ -1735,59 +1749,7 @@
         }
 
         function updateAllTexts() {
-            // نحدّث جميع العناصر التي تحمل معرفات ثابتة
-            const elements = {
-                // شريط العنوان
-                // ... (سيتم تحديثها في دوال render)
-                // نوافذ
-                'loginModalTitle': 'login',
-                'loginEmailLabel': 'email',
-                'loginPasswordLabel': 'password',
-                'loginBtn': 'login',
-                'noAccountText': 'noAccount',
-                'registerLink': 'registerNow',
-                'registerEmailLabel': 'email',
-                'registerPasswordLabel': 'password',
-                'registerBtn': 'register',
-                'haveAccountText': 'haveAccount',
-                'loginLink': 'loginNow',
-                'xtreamModalTitle': 'xtreamSettings',
-                'xtreamServerLabel': 'serverUrl',
-                'xtreamUsernameLabel': 'username',
-                'xtreamPasswordLabel': 'password',
-                'xtreamSaveBtn': 'saveAndFetch',
-                'addModalTitle': 'addChannel',
-                'addNameLabel': 'channelName',
-                'addCategoryLabel': 'category',
-                'addUrlLabel': 'streamUrl',
-                'addSaveBtn': 'save',
-                'adminModalTitle': 'adminDashboard',
-                'adminUsersTitle': 'userManagement',
-                'adminEmailTh': 'email',
-                'adminStatusTh': 'status',
-                'adminXtreamTh': 'xtream',
-                'adminActionsTh': 'actions',
-                'editUserModalTitle': 'editUser',
-                'editUserEmailLabel': 'email',
-                'editUserStatusLabel': 'status',
-                'editUserStatusActive': 'active',
-                'editUserStatusInactive': 'inactive',
-                'editUserServerLabel': 'serverUrl',
-                'editUserUsernameLabel': 'username',
-                'editUserPasswordLabel': 'password',
-                'editUserSaveBtn': 'saveChanges',
-                'loadingModalTitle': 'loading',
-                'loadingModalText': 'pleaseWait',
-            };
-            for (let [id, key] of Object.entries(elements)) {
-                const el = document.getElementById(id);
-                if (el) {
-                    // تجنب تغيير النص إذا كان يحتوي على أيقونات (نتركها)
-                    // نستبدل النص فقط إذا كان العنصر لا يحتوي على أيقونة داخلية
-                    // سنقوم بمعالجة خاصة في دوال render بدلاً من ذلك
-                }
-            }
-            // تحديث نصوص الأزرار في header سيتم عبر renderHeader
+            // نحدّث العناوين الثابتة في النوافذ (سيتم تحديثها عند فتح النوافذ)
         }
 
         // ================================================================
@@ -1877,7 +1839,6 @@
             const user = getUser();
             const lang = currentLang;
 
-            // زر تبديل اللغة
             const langButtons = `
                 <button class="lang-btn ${lang === 'ar' ? 'active' : ''}" data-lang="ar" onclick="setLanguage('ar')">عربي</button>
                 <button class="lang-btn ${lang === 'fr' ? 'active' : ''}" data-lang="fr" onclick="setLanguage('fr')">Français</button>
@@ -1935,38 +1896,38 @@
                 sidebar.innerHTML = `<div class="cat-item" style="color:#666; text-align:center;">${getTranslation('noChannels')}</div>`;
                 return;
             }
-            const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
-            const sorted = [getTranslation('all'), getTranslation('favorites'), ...Array.from(cats).sort()];
+            const cats = new Set(allChannels.map(ch => ch.category || GENERAL_CATEGORY));
+            // ترتيب التصنيفات: الكل، المفضلة، ثم الباقي
+            const sorted = [ALL_CATEGORY, FAVORITES_CATEGORY, ...Array.from(cats).sort()];
 
             sidebar.innerHTML = sorted.map(cat => {
                 let count = 0;
-                if (cat === getTranslation('all')) {
+                if (cat === ALL_CATEGORY) {
                     count = allChannels.length;
-                } else if (cat === getTranslation('favorites')) {
+                } else if (cat === FAVORITES_CATEGORY) {
                     count = favorites.length;
                 } else {
-                    count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
+                    count = allChannels.filter(ch => (ch.category || GENERAL_CATEGORY) === cat).length;
                 }
                 const active = cat === currentCategory ? 'active' : '';
-                const isCatFav = cat !== getTranslation('all') && cat !== getTranslation('favorites') && isCategoryFavorite(cat);
-                // نحتاج إلى تمرير الاسم الأصلي للتصنيف
-                const catName = cat === getTranslation('all') ? 'الكل' : (cat === getTranslation('favorites') ? 'المفضلة' : cat);
-                return `<div class="cat-item ${active}" data-cat="${catName}" onclick="selectCategory('${catName}')">
-                            <span>${cat}</span>
+                const isCatFav = cat !== ALL_CATEGORY && cat !== FAVORITES_CATEGORY && isCategoryFavorite(cat);
+                const displayName = translateCategory(cat);
+                return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
+                            <span>${displayName}</span>
                             <span class="count">${count}</span>
-                            ${cat !== getTranslation('all') && cat !== getTranslation('favorites') ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${catName}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
+                            ${cat !== ALL_CATEGORY && cat !== FAVORITES_CATEGORY ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
                         </div>`;
             }).join('');
         }
 
         function isCategoryFavorite(category) {
-            const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
+            const catChannels = allChannels.filter(ch => (ch.category || GENERAL_CATEGORY) === category);
             if (catChannels.length === 0) return false;
             return catChannels.every(ch => favorites.includes(getChannelId(ch)));
         }
 
         function toggleCategoryFavorite(category) {
-            const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
+            const catChannels = allChannels.filter(ch => (ch.category || GENERAL_CATEGORY) === category);
             if (catChannels.length === 0) return;
             const isFav = isCategoryFavorite(category);
             if (isFav) {
@@ -1991,10 +1952,10 @@
             const searchVal = search ? search.value.trim().toLowerCase() : '';
             let filtered = allChannels;
 
-            if (currentCategory === getTranslation('favorites')) {
+            if (currentCategory === FAVORITES_CATEGORY) {
                 filtered = allChannels.filter(ch => favorites.includes(getChannelId(ch)));
-            } else if (currentCategory !== getTranslation('all')) {
-                filtered = filtered.filter(ch => (ch.category || 'عام') === currentCategory);
+            } else if (currentCategory !== ALL_CATEGORY) {
+                filtered = filtered.filter(ch => (ch.category || GENERAL_CATEGORY) === currentCategory);
             }
 
             if (searchVal) {
@@ -2007,7 +1968,7 @@
 
         function getChannelId(channel) {
             if (channel.stream_id) return channel.stream_id.toString();
-            return channel.name + '_' + (channel.category || 'عام');
+            return channel.name + '_' + (channel.category || GENERAL_CATEGORY);
         }
 
         function renderGrid(channels) {
@@ -2048,13 +2009,14 @@
                                 const realIndex = allChannels.indexOf(ch);
                                 const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" />` : '';
                                 const isFav = favorites.includes(getChannelId(ch));
+                                const catDisplay = translateCategory(ch.category || GENERAL_CATEGORY);
                                 return `
                                 <div class="channel-card">
                                     <div class="ch-name">
                                         ${iconHtml}
                                         <i class="fas fa-broadcast-tower"></i> ${ch.name || 'بدون اسم'}
                                     </div>
-                                    <span class="ch-cat">${ch.category || 'عام'}</span>
+                                    <span class="ch-cat">${catDisplay}</span>
                                     <div class="card-actions">
                                         <button class="btn-play" onclick="playChannel(${realIndex})">
                                             <i class="fas fa-play"></i> ${getTranslation('play')}
@@ -2149,10 +2111,8 @@
         function showLoadingModal() {
             const modal = document.getElementById('loadingModal');
             modal.classList.add('active');
-            // تحديث النصوص
             document.getElementById('loadingModalTitle').innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> ${getTranslation('loading')}`;
             document.getElementById('loadingModalText').textContent = getTranslation('pleaseWait');
-            // إعادة تعيين شريط التقدم
             const progress = document.getElementById('loadingProgress');
             progress.style.width = '0%';
             let width = 0;
@@ -2259,7 +2219,7 @@
             setUser(null);
             setFavorites([]);
             allChannels = [];
-            currentCategory = getTranslation('all');
+            currentCategory = ALL_CATEGORY;
             renderHeader();
             buildSidebar();
             applyFilters();
@@ -2282,7 +2242,6 @@
             }
 
             document.getElementById('xtreamModal').classList.add('active');
-            // تحديث النصوص
             document.getElementById('xtreamModalTitle').innerHTML = `<i class="fas fa-key" style="color:#9b59b6;"></i> ${getTranslation('xtreamSettings')}`;
             document.getElementById('xtreamServerLabel').textContent = getTranslation('serverUrl');
             document.getElementById('xtreamUsernameLabel').textContent = getTranslation('username');
@@ -2358,7 +2317,6 @@
                 return;
             }
             document.getElementById('addModal').classList.add('active');
-            // تحديث النصوص
             document.getElementById('addModalTitle').innerHTML = `<i class="fas fa-plus-circle" style="color:#00d4ff;"></i> ${getTranslation('addChannel')}`;
             document.getElementById('addNameLabel').textContent = getTranslation('channelName');
             document.getElementById('addCategoryLabel').textContent = getTranslation('category');
@@ -2376,7 +2334,7 @@
 
         async function saveChannel() {
             const name = document.getElementById('inputName').value.trim();
-            const category = document.getElementById('inputCategory').value.trim() || 'عام';
+            const category = document.getElementById('inputCategory').value.trim() || GENERAL_CATEGORY;
             const url = document.getElementById('inputUrl').value.trim();
 
             if (!name) { alert(getTranslation('enterChannelName')); return; }
@@ -2440,7 +2398,6 @@
             document.getElementById('adminModal').classList.add('active');
             document.getElementById('adminStatus').textContent = '';
             document.getElementById('adminStatus').className = 'status-msg';
-            // تحديث النصوص
             document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:#f39c12;"></i> ${getTranslation('adminDashboard')}`;
             document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
             document.getElementById('adminEmailTh').textContent = getTranslation('email');
@@ -2501,7 +2458,6 @@
                     return;
                 }
                 editingUserId = userId;
-                // تحديث النصوص
                 document.getElementById('editUserModalTitle').innerHTML = `<i class="fas fa-user-edit" style="color:#f39c12;"></i> ${getTranslation('editUser')}`;
                 document.getElementById('editUserEmailLabel').textContent = getTranslation('email');
                 document.getElementById('editUserStatusLabel').textContent = getTranslation('status');
@@ -2662,6 +2618,7 @@
                 }
             }
 
+            currentCategory = ALL_CATEGORY;
             favorites = getFavorites();
 
             renderHeader();
