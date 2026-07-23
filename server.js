@@ -331,6 +331,67 @@ app.get('/api/proxy', async (req, res) => {
     }
 });
 
+// إضافة نموذج Notification
+const NotificationSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', NotificationSchema);
+
+// إضافة endpoints
+app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+        // إرسال الإشعار لجميع المستخدمين
+        const users = await User.find({});
+        const notifications = users.map(user => ({
+            userId: user._id,
+            message: message,
+            read: false,
+            createdAt: new Date()
+        }));
+        await Notification.insertMany(notifications);
+        res.json({ success: true, count: notifications.length });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+    try {
+        const notifications = await Notification.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+        res.json({ notifications });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/user/notifications/:id', authMiddleware, async (req, res) => {
+    try {
+        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
+        if (!notification) return res.status(404).json({ error: 'Notification not found' });
+        await notification.deleteOne();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
+    try {
+        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
+        if (!notification) return res.status(404).json({ error: 'Notification not found' });
+        notification.read = true;
+        await notification.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ===== Health =====
 app.get('/api/health', (req, res) => {
     res.json({
