@@ -541,10 +541,8 @@
     <div class="app-container">
         <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content" id="mainContent">
-            <!-- سجل المشاهدة سيظهر هنا -->
             <div id="historyContainer"></div>
             <div id="channelsContainer"></div>
-            <!-- زر تحميل المزيد -->
             <div class="load-more-container" id="loadMoreContainer" style="display:none;">
                 <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreChannels()">
                     <i class="fas fa-chevron-down"></i> تحميل المزيد
@@ -553,8 +551,129 @@
         </main>
     </div>
 
-    <!-- باقي النوافذ المنبثقة (Login, Xtream, Add, Admin, Edit, Loading) -->
-    <!-- ... (كما هي، لا تغيير) ... -->
+    <!-- MODAL: Login -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeLoginModal()">✕</button>
+            <h2 id="loginModalTitle"><i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> تسجيل الدخول</h2>
+            <div id="loginForm">
+                <label id="loginEmailLabel">البريد الإلكتروني</label>
+                <input type="email" id="loginEmail" placeholder="example@email.com" />
+                <label id="loginPasswordLabel">كلمة المرور</label>
+                <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" />
+                <button class="btn-save" id="loginBtn" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+                <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
+                    <span id="noAccountText">ليس لديك حساب؟</span> <span style="color:#00d4ff; cursor:pointer;" onclick="showRegister()" id="registerLink">سجل الآن</span>
+                </div>
+                <div id="loginStatus" class="status-msg"></div>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <label id="registerEmailLabel">البريد الإلكتروني</label>
+                <input type="email" id="registerEmail" placeholder="example@email.com" />
+                <label id="registerPasswordLabel">كلمة المرور</label>
+                <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" />
+                <button class="btn-save" id="registerBtn" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
+                <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
+                    <span id="haveAccountText">لديك حساب؟</span> <span style="color:#00d4ff; cursor:pointer;" onclick="showLogin()" id="loginLink">تسجيل الدخول</span>
+                </div>
+                <div id="registerStatus" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Xtream Settings -->
+    <div class="modal-overlay" id="xtreamModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeXtreamModal()">✕</button>
+            <h2 id="xtreamModalTitle"><i class="fas fa-key" style="color:#9b59b6;"></i> إعدادات Xtream</h2>
+            <label id="xtreamServerLabel">رابط الخادم (Server URL)</label>
+            <input type="url" id="xtreamServer" placeholder="http://example.com:8080" />
+            <label id="xtreamUsernameLabel">اسم المستخدم (Username)</label>
+            <input type="text" id="xtreamUsername" placeholder="أدخل اسم المستخدم" />
+            <label id="xtreamPasswordLabel">كلمة المرور (Password)</label>
+            <input type="password" id="xtreamPassword" placeholder="أدخل كلمة المرور" />
+            <button class="btn-save" id="xtreamSaveBtn" onclick="saveXtreamSettings()"><i class="fas fa-save"></i> حفظ وجلب القنوات</button>
+            <div id="xtreamStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add Channel -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAddModal()">✕</button>
+            <h2 id="addModalTitle"><i class="fas fa-plus-circle" style="color:#00d4ff;"></i> إضافة قناة</h2>
+            <label id="addNameLabel">اسم القناة *</label>
+            <input type="text" id="inputName" placeholder="مثال: beIN Sports 1" />
+            <label id="addCategoryLabel">التصنيف</label>
+            <input type="text" id="inputCategory" placeholder="مثال: رياضة" />
+            <label id="addUrlLabel">رابط المشاهدة (.m3u8) *</label>
+            <input type="url" id="inputUrl" placeholder="http://example.com/stream.m3u8" />
+            <button class="btn-save" id="addSaveBtn" onclick="saveChannel()"><i class="fas fa-save"></i> حفظ</button>
+        </div>
+    </div>
+
+    <!-- MODAL: Admin Panel -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-box" style="max-width: 800px;">
+            <button class="close-modal" onclick="closeAdminModal()">✕</button>
+            <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:#f39c12;"></i> لوحة تحكم المدير</h2>
+            <div id="adminContent">
+                <div class="admin-panel">
+                    <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
+                    <div id="adminUsersTable" style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th id="adminEmailTh">البريد</th>
+                                    <th id="adminStatusTh">الحالة</th>
+                                    <th id="adminXtreamTh">Xtream</th>
+                                    <th id="adminActionsTh">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="adminStatus" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: Edit User -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeEditUserModal()">✕</button>
+            <h2 id="editUserModalTitle"><i class="fas fa-user-edit" style="color:#f39c12;"></i> تعديل المستخدم</h2>
+            <div id="editUserForm">
+                <label id="editUserEmailLabel">البريد الإلكتروني</label>
+                <input type="email" id="editUserEmail" disabled style="opacity:0.6;" />
+                <label id="editUserStatusLabel">الحالة</label>
+                <select id="editUserStatus">
+                    <option value="true" id="editUserStatusActive">نشط</option>
+                    <option value="false" id="editUserStatusInactive">معطل</option>
+                </select>
+                <label id="editUserServerLabel">رابط الخادم (Xtream)</label>
+                <input type="url" id="editUserServer" placeholder="http://example.com:8080" />
+                <label id="editUserUsernameLabel">اسم المستخدم (Xtream)</label>
+                <input type="text" id="editUserUsername" placeholder="أدخل اسم المستخدم" />
+                <label id="editUserPasswordLabel">كلمة المرور (Xtream)</label>
+                <input type="password" id="editUserPassword" placeholder="أدخل كلمة المرور" />
+                <button class="btn-save" id="editUserSaveBtn" onclick="saveEditUser()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <div id="editUserStatusMsg" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NEW MODAL: Loading Channels ===== -->
+    <div class="modal-overlay" id="loadingModal">
+        <div class="modal-box" style="text-align:center; max-width:400px;">
+            <h2 id="loadingModalTitle"><i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> جاري التحميل</h2>
+            <p id="loadingModalText" style="font-size:16px; margin:20px 0;">يرجى الانتظار، سيتم تحميل القنوات...</p>
+            <div style="width:100%; height:4px; background:#1e2636; border-radius:4px; overflow:hidden; margin-top:10px;">
+                <div id="loadingProgress" style="width:0%; height:100%; background:#00d4ff; transition: width 0.5s;"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ================================================================
@@ -1687,7 +1806,7 @@
         const GENERAL_CATEGORY = 'عام';
         const HISTORY_KEY = 'hacene_history';
         const MAX_HISTORY = 10;
-        const CHUNK_SIZE = 20; // عدد القنوات التي تظهر في كل دفعة
+        const CHUNK_SIZE = 20;
 
         // ================================================================
         // 1.  الإعدادات العامة
@@ -1701,7 +1820,8 @@
         let favorites = [];
         let appInitialized = false;
         let currentLang = 'ar';
-        let displayedChunks = 1; // عدد الدفعات المعروضة حالياً
+        let displayedChunks = 1;
+        let currentFilteredChannels = [];
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -1784,11 +1904,8 @@
             if (!channel) return;
             let history = getHistory();
             const id = getChannelId(channel);
-            // إزالة التكرارات
             history = history.filter(item => getChannelId(item) !== id);
-            // إضافة في البداية
             history.unshift(channel);
-            // الحفاظ على الحد الأقصى
             if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
             saveHistory(history);
             renderHistory();
@@ -1824,6 +1941,7 @@
                 'ALGERIA': '🇩🇿',
                 'TUNISIA': '🇹🇳',
                 'MOROCO': '🇲🇦',
+                'MOROCCO': '🇲🇦',
                 'LIBYA': '🇱🇾',
                 'EGYPT': '🇪🇬',
                 'SYRIA': '🇸🇾',
@@ -1846,10 +1964,7 @@
                 'NETFLIX+': '🌍',
                 'QURAN & ROQIA': '🕌',
                 'ISLAMIC': '🕌',
-                'TUNISIA': '🇹🇳',
-                'MOROCCO': '🇲🇦', // تصحيح إملائي محتمل
             };
-            // البحث عن تطابق غير حساس لحالة الأحرف
             const key = Object.keys(map).find(k => k.toLowerCase() === category.toLowerCase());
             return key ? map[key] : '🌍';
         }
@@ -1993,17 +2108,16 @@
                 filtered = filtered.filter(ch => ch.name.toLowerCase().includes(searchVal));
             }
 
-            // إعادة تعيين عدد الدفعات المعروضة
+            currentFilteredChannels = filtered;
             displayedChunks = 1;
             renderGridWithLazy(filtered);
             const countEl = document.getElementById('channelCount');
             if (countEl) countEl.textContent = filtered.length;
-            // إظهار زر التحميل إذا كان العدد أكبر من CHUNK_SIZE
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
             if (filtered.length > CHUNK_SIZE) {
-                loadMoreBtn.style.display = 'block';
+                loadMoreContainer.style.display = 'block';
             } else {
-                loadMoreBtn.style.display = 'none';
+                loadMoreContainer.style.display = 'none';
             }
         }
 
@@ -2015,7 +2129,6 @@
         // ================================================================
         // 8.  عرض القنوات مع Lazy Loading
         // ================================================================
-        let currentFilteredChannels = [];
 
         function renderGridWithLazy(filteredChannels) {
             currentFilteredChannels = filteredChannels;
@@ -2049,8 +2162,7 @@
             }
 
             const total = filteredChannels.length;
-            const chunkSize = CHUNK_SIZE;
-            const end = Math.min(displayedChunks * chunkSize, total);
+            const end = Math.min(displayedChunks * CHUNK_SIZE, total);
             const chunk = filteredChannels.slice(0, end);
 
             let html = `<div class="channels-grid">`;
@@ -2078,7 +2190,6 @@
             html += `</div>`;
             container.innerHTML = html;
 
-            // إظهار/إخفاء زر التحميل
             const loadMoreContainer = document.getElementById('loadMoreContainer');
             if (end < total) {
                 loadMoreContainer.style.display = 'block';
@@ -2102,7 +2213,6 @@
                 alert(getTranslation('channelNotFound'));
                 return;
             }
-            // إضافة للسجل
             addToHistory(channel);
 
             let url = channel.url;
@@ -2127,14 +2237,410 @@
         }
 
         // ================================================================
-        // 10.  باقي الدوال (المصادقة، Xtream، إضافة، Admin، إلخ)
-        //      تم اختصارها للحفاظ على المساحة، لكنها موجودة في الكود الكامل
+        // 10.  دوال المصادقة (Login / Register / Logout)
         // ================================================================
 
-        // (سيتم وضع جميع الدوال الأخرى هنا مع الحفاظ على الوظائف السابقة)
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginStatus').textContent = '';
+            document.getElementById('loginStatus').className = 'status-msg';
+            document.getElementById('loginEmail').focus();
+            // تحديث النصوص
+            document.getElementById('loginModalTitle').innerHTML = `<i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> ${getTranslation('login')}`;
+            document.getElementById('loginEmailLabel').textContent = getTranslation('email');
+            document.getElementById('loginPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('loginBtn').innerHTML = `<i class="fas fa-sign-in-alt"></i> ${getTranslation('login')}`;
+            document.getElementById('noAccountText').textContent = getTranslation('noAccount');
+            document.getElementById('registerLink').textContent = getTranslation('registerNow');
+            document.getElementById('registerEmailLabel').textContent = getTranslation('email');
+            document.getElementById('registerPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('registerBtn').innerHTML = `<i class="fas fa-user-plus"></i> ${getTranslation('register')}`;
+            document.getElementById('haveAccountText').textContent = getTranslation('haveAccount');
+            document.getElementById('loginLink').textContent = getTranslation('loginNow');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('registerStatus').textContent = '';
+            document.getElementById('registerStatus').className = 'status-msg';
+            document.getElementById('registerEmail').focus();
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('loginStatus').textContent = '';
+            document.getElementById('loginStatus').className = 'status-msg';
+            document.getElementById('loginEmail').focus();
+        }
+
+        function openRegisterModal() {
+            document.getElementById('loginModal').classList.add('active');
+            showRegister();
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const statusEl = document.getElementById('loginStatus');
+
+            if (!email || !password) {
+                statusEl.textContent = getTranslation('fillEmailPassword');
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = getTranslation('loginInProgress');
+            statusEl.className = 'status-msg';
+
+            try {
+                const data = await apiCall('POST', '/auth/login', { email, password });
+                setToken(data.token);
+                setUser(data.user);
+                closeLoginModal();
+
+                document.getElementById('loadingModal').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('loadingModal').classList.remove('active');
+                }, 2000);
+                await initializeApp(true);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const statusEl = document.getElementById('registerStatus');
+
+            if (!email || !password) {
+                statusEl.textContent = getTranslation('fillEmailPassword');
+                statusEl.className = 'status-msg error';
+                return;
+            }
+            if (password.length < 6) {
+                statusEl.textContent = getTranslation('passwordMin6');
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = getTranslation('registerInProgress');
+            statusEl.className = 'status-msg';
+
+            try {
+                const data = await apiCall('POST', '/auth/register', { email, password });
+                setToken(data.token);
+                setUser(data.user);
+                closeLoginModal();
+
+                document.getElementById('loadingModal').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('loadingModal').classList.remove('active');
+                }, 2000);
+                await initializeApp(true);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        function logout() {
+            if (!confirm(getTranslation('confirmLogout'))) return;
+            setToken(null);
+            setUser(null);
+            setFavorites([]);
+            allChannels = [];
+            currentCategory = ALL_CATEGORY;
+            renderHeader();
+            buildSidebar();
+            applyFilters();
+            renderHistory();
+        }
 
         // ================================================================
-        // 11.  تطبيق التصنيفات المخصصة
+        // 11.  دوال Xtream
+        // ================================================================
+
+        function openXtreamModal() {
+            const user = getUser();
+            if (!user) {
+                alert(getTranslation('loginFirst'));
+                return;
+            }
+            if (user.role !== 'admin') {
+                alert(getTranslation('adminOnlySettings'));
+                return;
+            }
+
+            document.getElementById('xtreamModal').classList.add('active');
+            document.getElementById('xtreamModalTitle').innerHTML = `<i class="fas fa-key" style="color:#9b59b6;"></i> ${getTranslation('xtreamSettings')}`;
+            document.getElementById('xtreamServerLabel').textContent = getTranslation('serverUrl');
+            document.getElementById('xtreamUsernameLabel').textContent = getTranslation('username');
+            document.getElementById('xtreamPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('xtreamSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveAndFetch')}`;
+
+            document.getElementById('xtreamServer').value = user.xtream?.server || '';
+            document.getElementById('xtreamUsername').value = user.xtream?.username || '';
+            document.getElementById('xtreamPassword').value = user.xtream?.password || '';
+            document.getElementById('xtreamStatus').textContent = '';
+            document.getElementById('xtreamStatus').className = 'status-msg';
+        }
+
+        function closeXtreamModal() {
+            document.getElementById('xtreamModal').classList.remove('active');
+        }
+
+        async function saveXtreamSettings() {
+            const user = getUser();
+            if (!user || user.role !== 'admin') {
+                alert(getTranslation('notAuthorized'));
+                return;
+            }
+
+            const server = document.getElementById('xtreamServer').value.trim();
+            const username = document.getElementById('xtreamUsername').value.trim();
+            const password = document.getElementById('xtreamPassword').value.trim();
+            const statusEl = document.getElementById('xtreamStatus');
+
+            if (!server || !username || !password) {
+                statusEl.textContent = getTranslation('fillAllFields');
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
+            statusEl.className = 'status-msg';
+
+            try {
+                await apiCall('POST', '/user/xtream', { server, username, password });
+                const result = await apiCall('GET', '/user/fetch-channels');
+                allChannels = result.channels || [];
+                allChannels = applyCategoryMap(allChannels);
+                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                const u = getUser();
+                if (u) { u.xtream = { server, username, password }; setUser(u); }
+                setFavorites([]);
+                closeXtreamModal();
+                buildSidebar();
+                applyFilters();
+                statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
+                statusEl.className = 'status-msg success';
+                setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        // ================================================================
+        // 12.  دوال القنوات (إضافة، حفظ، تفضيلات)
+        // ================================================================
+
+        function openAddModal() {
+            const user = getUser();
+            if (!user) {
+                alert(getTranslation('loginFirst'));
+                return;
+            }
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('addModalTitle').innerHTML = `<i class="fas fa-plus-circle" style="color:#00d4ff;"></i> ${getTranslation('addChannel')}`;
+            document.getElementById('addNameLabel').textContent = getTranslation('channelName');
+            document.getElementById('addCategoryLabel').textContent = getTranslation('category');
+            document.getElementById('addUrlLabel').textContent = getTranslation('streamUrl');
+            document.getElementById('addSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('save')}`;
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputCategory').value = '';
+            document.getElementById('inputUrl').value = '';
+            document.getElementById('inputName').focus();
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        async function saveChannel() {
+            const name = document.getElementById('inputName').value.trim();
+            const category = document.getElementById('inputCategory').value.trim() || GENERAL_CATEGORY;
+            const url = document.getElementById('inputUrl').value.trim();
+
+            if (!name) { alert(getTranslation('enterChannelName')); return; }
+            if (!url) { alert(getTranslation('pasteChannelUrl')); return; }
+
+            let finalCategory = category;
+            if (CHANNEL_CATEGORY_MAP[name]) {
+                finalCategory = CHANNEL_CATEGORY_MAP[name];
+            }
+
+            const newChannel = { name, category: finalCategory, url, stream_id: null, stream_icon: '' };
+            allChannels.push(newChannel);
+            await apiCall('POST', '/user/channels', { channels: allChannels });
+            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+            closeAddModal();
+            buildSidebar();
+            applyFilters();
+        }
+
+        function toggleFavorite(index) {
+            const channel = allChannels[index];
+            if (!channel) return;
+            const id = getChannelId(channel);
+            const idx = favorites.indexOf(id);
+            if (idx > -1) favorites.splice(idx, 1);
+            else favorites.push(id);
+            setFavorites(favorites);
+            buildSidebar();
+            applyFilters();
+            apiCall('POST', '/user/channels', { channels: allChannels }).catch(() => {});
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.cat === cat);
+            });
+            applyFilters();
+        }
+
+        // ================================================================
+        // 13.  دوال Admin
+        // ================================================================
+
+        async function openAdminModal() {
+            const user = getUser();
+            if (!user || user.role !== 'admin') {
+                alert(getTranslation('adminOnlyPage'));
+                return;
+            }
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('adminStatus').textContent = '';
+            document.getElementById('adminStatus').className = 'status-msg';
+            document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:#f39c12;"></i> ${getTranslation('adminDashboard')}`;
+            document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
+            document.getElementById('adminEmailTh').textContent = getTranslation('email');
+            document.getElementById('adminStatusTh').textContent = getTranslation('status');
+            document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
+            document.getElementById('adminActionsTh').textContent = getTranslation('actions');
+            await loadAdminUsers();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('active');
+        }
+
+        async function loadAdminUsers() {
+            try {
+                const data = await apiCall('GET', '/admin/users');
+                const tbody = document.getElementById('adminUsersBody');
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">${getTranslation('noUsers')}</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td class="user-email">${u.email}</td>
+                        <td><span class="status-badge ${u.isActive ? 'active' : 'inactive'}">${u.isActive ? getTranslation('active') : getTranslation('inactive')}</span></td>
+                        <td style="font-size:11px;color:#888;">${u.xtream?.server ? '✅' : '❌'}</td>
+                        <td>
+                            <button class="btn-icon warning" onclick="openEditUser('${u._id}')" title="${getTranslation('edit')}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon danger" onclick="deleteUser('${u._id}')" title="${getTranslation('delete')}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                document.getElementById('adminStatus').textContent = '❌ ' + err.message;
+                document.getElementById('adminStatus').className = 'status-msg error';
+            }
+        }
+
+        let editingUserId = null;
+
+        async function openEditUser(userId) {
+            try {
+                const data = await apiCall('GET', '/admin/users');
+                const user = data.users.find(u => u._id === userId);
+                if (!user) {
+                    alert(getTranslation('userNotFound'));
+                    return;
+                }
+                editingUserId = userId;
+                document.getElementById('editUserModalTitle').innerHTML = `<i class="fas fa-user-edit" style="color:#f39c12;"></i> ${getTranslation('editUser')}`;
+                document.getElementById('editUserEmailLabel').textContent = getTranslation('email');
+                document.getElementById('editUserStatusLabel').textContent = getTranslation('status');
+                document.getElementById('editUserStatusActive').textContent = getTranslation('active');
+                document.getElementById('editUserStatusInactive').textContent = getTranslation('inactive');
+                document.getElementById('editUserServerLabel').textContent = getTranslation('serverUrl');
+                document.getElementById('editUserUsernameLabel').textContent = getTranslation('username');
+                document.getElementById('editUserPasswordLabel').textContent = getTranslation('password');
+                document.getElementById('editUserSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveChanges')}`;
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserStatus').value = user.isActive ? 'true' : 'false';
+                document.getElementById('editUserServer').value = user.xtream?.server || '';
+                document.getElementById('editUserUsername').value = user.xtream?.username || '';
+                document.getElementById('editUserPassword').value = user.xtream?.password || '';
+                document.getElementById('editUserStatusMsg').textContent = '';
+                document.getElementById('editUserStatusMsg').className = 'status-msg';
+                document.getElementById('editUserModal').classList.add('active');
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.remove('active');
+            editingUserId = null;
+        }
+
+        async function saveEditUser() {
+            const statusEl = document.getElementById('editUserStatusMsg');
+            if (!editingUserId) {
+                statusEl.textContent = getTranslation('userNotSpecified');
+                statusEl.className = 'status-msg error';
+                return;
+            }
+
+            const isActive = document.getElementById('editUserStatus').value === 'true';
+            const server = document.getElementById('editUserServer').value.trim();
+            const username = document.getElementById('editUserUsername').value.trim();
+            const password = document.getElementById('editUserPassword').value.trim();
+
+            statusEl.textContent = '⏳ ' + getTranslation('saveChanges') + '...';
+            statusEl.className = 'status-msg';
+
+            try {
+                await apiCall('PUT', `/admin/users/${editingUserId}`, { isActive, xtream: { server, username, password } });
+                statusEl.textContent = getTranslation('updateSuccess');
+                statusEl.className = 'status-msg success';
+                setTimeout(() => {
+                    closeEditUserModal();
+                    loadAdminUsers();
+                }, 1000);
+            } catch (err) {
+                statusEl.textContent = '❌ ' + err.message;
+                statusEl.className = 'status-msg error';
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm(getTranslation('confirmDeleteUser'))) return;
+            try {
+                await apiCall('DELETE', `/admin/users/${userId}`);
+                await loadAdminUsers();
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        }
+
+        // ================================================================
+        // 14.  تطبيق التصنيفات المخصصة
         // ================================================================
         function applyCategoryMap(channels) {
             return channels.map(ch => {
@@ -2145,7 +2651,7 @@
         }
 
         // ================================================================
-        // 12. التهيئة (Initialization)
+        // 15. التهيئة (Initialization)
         // ================================================================
 
         async function initializeApp(forceRefresh = false) {
@@ -2216,7 +2722,7 @@
         }
 
         // ================================================================
-        // 13.  بدء التطبيق
+        // 16.  بدء التطبيق وأحداث الإغلاق
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', () => initializeApp(false));
@@ -2224,324 +2730,6 @@
             initializeApp(false);
         }
 
-        // إضافة دوال النوافذ المنبثقة (اختصار)
-        window.openLoginModal = function() {
-            document.getElementById('loginModal').classList.add('active');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginStatus').textContent = '';
-            document.getElementById('loginStatus').className = 'status-msg';
-            // تحديث النصوص
-            document.getElementById('loginModalTitle').innerHTML = `<i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> ${getTranslation('login')}`;
-            document.getElementById('loginEmailLabel').textContent = getTranslation('email');
-            document.getElementById('loginPasswordLabel').textContent = getTranslation('password');
-            document.getElementById('loginBtn').innerHTML = `<i class="fas fa-sign-in-alt"></i> ${getTranslation('login')}`;
-            document.getElementById('noAccountText').textContent = getTranslation('noAccount');
-            document.getElementById('registerLink').textContent = getTranslation('registerNow');
-            document.getElementById('registerEmailLabel').textContent = getTranslation('email');
-            document.getElementById('registerPasswordLabel').textContent = getTranslation('password');
-            document.getElementById('registerBtn').innerHTML = `<i class="fas fa-user-plus"></i> ${getTranslation('register')}`;
-            document.getElementById('haveAccountText').textContent = getTranslation('haveAccount');
-            document.getElementById('loginLink').textContent = getTranslation('loginNow');
-        };
-        window.closeLoginModal = function() { document.getElementById('loginModal').classList.remove('active'); };
-        window.showRegister = function() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('registerStatus').textContent = '';
-            document.getElementById('registerStatus').className = 'status-msg';
-        };
-        window.showLogin = function() {
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('loginStatus').textContent = '';
-            document.getElementById('loginStatus').className = 'status-msg';
-        };
-        window.openRegisterModal = function() {
-            document.getElementById('loginModal').classList.add('active');
-            window.showRegister();
-        };
-
-        window.login = async function() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const statusEl = document.getElementById('loginStatus');
-            if (!email || !password) {
-                statusEl.textContent = getTranslation('fillEmailPassword');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            statusEl.textContent = getTranslation('loginInProgress');
-            statusEl.className = 'status-msg';
-            try {
-                const data = await apiCall('POST', '/auth/login', { email, password });
-                setToken(data.token);
-                setUser(data.user);
-                closeLoginModal();
-                // إظهار نافذة التحميل
-                document.getElementById('loadingModal').classList.add('active');
-                setTimeout(() => {
-                    document.getElementById('loadingModal').classList.remove('active');
-                }, 2000);
-                await initializeApp(true);
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        };
-
-        window.register = async function() {
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-            const statusEl = document.getElementById('registerStatus');
-            if (!email || !password) {
-                statusEl.textContent = getTranslation('fillEmailPassword');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            if (password.length < 6) {
-                statusEl.textContent = getTranslation('passwordMin6');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            statusEl.textContent = getTranslation('registerInProgress');
-            statusEl.className = 'status-msg';
-            try {
-                const data = await apiCall('POST', '/auth/register', { email, password });
-                setToken(data.token);
-                setUser(data.user);
-                closeLoginModal();
-                document.getElementById('loadingModal').classList.add('active');
-                setTimeout(() => {
-                    document.getElementById('loadingModal').classList.remove('active');
-                }, 2000);
-                await initializeApp(true);
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        };
-
-        window.logout = function() {
-            if (!confirm(getTranslation('confirmLogout'))) return;
-            setToken(null);
-            setUser(null);
-            setFavorites([]);
-            allChannels = [];
-            currentCategory = ALL_CATEGORY;
-            renderHeader();
-            buildSidebar();
-            applyFilters();
-            renderHistory();
-        };
-
-        // دوال Xtream
-        window.openXtreamModal = function() {
-            const user = getUser();
-            if (!user) { alert(getTranslation('loginFirst')); return; }
-            if (user.role !== 'admin') { alert(getTranslation('adminOnlySettings')); return; }
-            document.getElementById('xtreamModal').classList.add('active');
-            document.getElementById('xtreamModalTitle').innerHTML = `<i class="fas fa-key" style="color:#9b59b6;"></i> ${getTranslation('xtreamSettings')}`;
-            document.getElementById('xtreamServerLabel').textContent = getTranslation('serverUrl');
-            document.getElementById('xtreamUsernameLabel').textContent = getTranslation('username');
-            document.getElementById('xtreamPasswordLabel').textContent = getTranslation('password');
-            document.getElementById('xtreamSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveAndFetch')}`;
-            document.getElementById('xtreamServer').value = user.xtream?.server || '';
-            document.getElementById('xtreamUsername').value = user.xtream?.username || '';
-            document.getElementById('xtreamPassword').value = user.xtream?.password || '';
-            document.getElementById('xtreamStatus').textContent = '';
-            document.getElementById('xtreamStatus').className = 'status-msg';
-        };
-        window.closeXtreamModal = function() { document.getElementById('xtreamModal').classList.remove('active'); };
-        window.saveXtreamSettings = async function() {
-            const user = getUser();
-            if (!user || user.role !== 'admin') { alert(getTranslation('notAuthorized')); return; }
-            const server = document.getElementById('xtreamServer').value.trim();
-            const username = document.getElementById('xtreamUsername').value.trim();
-            const password = document.getElementById('xtreamPassword').value.trim();
-            const statusEl = document.getElementById('xtreamStatus');
-            if (!server || !username || !password) {
-                statusEl.textContent = getTranslation('fillAllFields');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
-            statusEl.className = 'status-msg';
-            try {
-                await apiCall('POST', '/user/xtream', { server, username, password });
-                const result = await apiCall('GET', '/user/fetch-channels');
-                allChannels = result.channels || [];
-                allChannels = applyCategoryMap(allChannels);
-                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-                const u = getUser();
-                if (u) { u.xtream = { server, username, password }; setUser(u); }
-                setFavorites([]);
-                closeXtreamModal();
-                buildSidebar();
-                applyFilters();
-                statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
-                statusEl.className = 'status-msg success';
-                setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        };
-
-        // دوال إضافة القنوات
-        window.openAddModal = function() {
-            const user = getUser();
-            if (!user) { alert(getTranslation('loginFirst')); return; }
-            document.getElementById('addModal').classList.add('active');
-            document.getElementById('addModalTitle').innerHTML = `<i class="fas fa-plus-circle" style="color:#00d4ff;"></i> ${getTranslation('addChannel')}`;
-            document.getElementById('addNameLabel').textContent = getTranslation('channelName');
-            document.getElementById('addCategoryLabel').textContent = getTranslation('category');
-            document.getElementById('addUrlLabel').textContent = getTranslation('streamUrl');
-            document.getElementById('addSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('save')}`;
-            document.getElementById('inputName').value = '';
-            document.getElementById('inputCategory').value = '';
-            document.getElementById('inputUrl').value = '';
-        };
-        window.closeAddModal = function() { document.getElementById('addModal').classList.remove('active'); };
-        window.saveChannel = async function() {
-            const name = document.getElementById('inputName').value.trim();
-            const category = document.getElementById('inputCategory').value.trim() || GENERAL_CATEGORY;
-            const url = document.getElementById('inputUrl').value.trim();
-            if (!name) { alert(getTranslation('enterChannelName')); return; }
-            if (!url) { alert(getTranslation('pasteChannelUrl')); return; }
-            let finalCategory = category;
-            if (CHANNEL_CATEGORY_MAP[name]) finalCategory = CHANNEL_CATEGORY_MAP[name];
-            const newChannel = { name, category: finalCategory, url, stream_id: null, stream_icon: '' };
-            allChannels.push(newChannel);
-            await apiCall('POST', '/user/channels', { channels: allChannels });
-            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
-            closeAddModal();
-            buildSidebar();
-            applyFilters();
-        };
-
-        // دوال Admin (اختصار)
-        window.openAdminModal = async function() {
-            const user = getUser();
-            if (!user || user.role !== 'admin') { alert(getTranslation('adminOnlyPage')); return; }
-            document.getElementById('adminModal').classList.add('active');
-            document.getElementById('adminStatus').textContent = '';
-            document.getElementById('adminStatus').className = 'status-msg';
-            document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:#f39c12;"></i> ${getTranslation('adminDashboard')}`;
-            document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
-            document.getElementById('adminEmailTh').textContent = getTranslation('email');
-            document.getElementById('adminStatusTh').textContent = getTranslation('status');
-            document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
-            document.getElementById('adminActionsTh').textContent = getTranslation('actions');
-            await loadAdminUsers();
-        };
-        window.closeAdminModal = function() { document.getElementById('adminModal').classList.remove('active'); };
-
-        async function loadAdminUsers() {
-            try {
-                const data = await apiCall('GET', '/admin/users');
-                const tbody = document.getElementById('adminUsersBody');
-                if (!data.users || data.users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">${getTranslation('noUsers')}</td></tr>`;
-                    return;
-                }
-                tbody.innerHTML = data.users.map(u => `
-                    <tr>
-                        <td class="user-email">${u.email}</td>
-                        <td><span class="status-badge ${u.isActive ? 'active' : 'inactive'}">${u.isActive ? getTranslation('active') : getTranslation('inactive')}</span></td>
-                        <td style="font-size:11px;color:#888;">${u.xtream?.server ? '✅' : '❌'}</td>
-                        <td>
-                            <button class="btn-icon warning" onclick="openEditUser('${u._id}')" title="${getTranslation('edit')}"><i class="fas fa-edit"></i></button>
-                            <button class="btn-icon danger" onclick="deleteUser('${u._id}')" title="${getTranslation('delete')}"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                document.getElementById('adminStatus').textContent = '❌ ' + err.message;
-                document.getElementById('adminStatus').className = 'status-msg error';
-            }
-        }
-
-        window.openEditUser = async function(userId) {
-            try {
-                const data = await apiCall('GET', '/admin/users');
-                const user = data.users.find(u => u._id === userId);
-                if (!user) { alert(getTranslation('userNotFound')); return; }
-                editingUserId = userId;
-                document.getElementById('editUserModalTitle').innerHTML = `<i class="fas fa-user-edit" style="color:#f39c12;"></i> ${getTranslation('editUser')}`;
-                document.getElementById('editUserEmailLabel').textContent = getTranslation('email');
-                document.getElementById('editUserStatusLabel').textContent = getTranslation('status');
-                document.getElementById('editUserStatusActive').textContent = getTranslation('active');
-                document.getElementById('editUserStatusInactive').textContent = getTranslation('inactive');
-                document.getElementById('editUserServerLabel').textContent = getTranslation('serverUrl');
-                document.getElementById('editUserUsernameLabel').textContent = getTranslation('username');
-                document.getElementById('editUserPasswordLabel').textContent = getTranslation('password');
-                document.getElementById('editUserSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveChanges')}`;
-                document.getElementById('editUserEmail').value = user.email;
-                document.getElementById('editUserStatus').value = user.isActive ? 'true' : 'false';
-                document.getElementById('editUserServer').value = user.xtream?.server || '';
-                document.getElementById('editUserUsername').value = user.xtream?.username || '';
-                document.getElementById('editUserPassword').value = user.xtream?.password || '';
-                document.getElementById('editUserStatusMsg').textContent = '';
-                document.getElementById('editUserStatusMsg').className = 'status-msg';
-                document.getElementById('editUserModal').classList.add('active');
-            } catch (err) { alert('❌ ' + err.message); }
-        };
-        window.closeEditUserModal = function() { document.getElementById('editUserModal').classList.remove('active'); editingUserId = null; };
-        let editingUserId = null;
-        window.saveEditUser = async function() {
-            const statusEl = document.getElementById('editUserStatusMsg');
-            if (!editingUserId) { statusEl.textContent = getTranslation('userNotSpecified'); statusEl.className = 'status-msg error'; return; }
-            const isActive = document.getElementById('editUserStatus').value === 'true';
-            const server = document.getElementById('editUserServer').value.trim();
-            const username = document.getElementById('editUserUsername').value.trim();
-            const password = document.getElementById('editUserPassword').value.trim();
-            statusEl.textContent = '⏳ ' + getTranslation('saveChanges') + '...';
-            statusEl.className = 'status-msg';
-            try {
-                await apiCall('PUT', `/admin/users/${editingUserId}`, { isActive, xtream: { server, username, password } });
-                statusEl.textContent = getTranslation('updateSuccess');
-                statusEl.className = 'status-msg success';
-                setTimeout(() => { closeEditUserModal(); loadAdminUsers(); }, 1000);
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        };
-        window.deleteUser = async function(userId) {
-            if (!confirm(getTranslation('confirmDeleteUser'))) return;
-            try {
-                await apiCall('DELETE', `/admin/users/${userId}`);
-                await loadAdminUsers();
-            } catch (err) { alert('❌ ' + err.message); }
-        };
-
-        // دوال التفضيلات
-        window.toggleFavorite = function(index) {
-            const channel = allChannels[index];
-            if (!channel) return;
-            const id = getChannelId(channel);
-            const idx = favorites.indexOf(id);
-            if (idx > -1) favorites.splice(idx, 1);
-            else favorites.push(id);
-            setFavorites(favorites);
-            buildSidebar();
-            applyFilters();
-            // حفظ في الخادم
-            apiCall('POST', '/user/channels', { channels: allChannels }).catch(() => {});
-        };
-
-        window.selectCategory = function(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
-                el.classList.toggle('active', el.dataset.cat === cat);
-            });
-            applyFilters();
-        };
-
-        // ================================================================
-        // 14.  أحداث إغلاق النوافذ بـ Escape
-        // ================================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeLoginModal();
