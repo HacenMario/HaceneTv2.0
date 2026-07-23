@@ -751,6 +751,8 @@
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
                     <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
+                    <label id="adminNotifTargetLabel">البريد الإلكتروني المستهدف (اختياري)</label>
+                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
                     <button class="btn-save" onclick="sendNotification()" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> إرسال الإشعار</button>
                     <div id="adminNotifStatus" class="status-msg"></div>
                 </div>
@@ -1801,6 +1803,7 @@
         // ================================================================
         const translations = {
             ar: {
+                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "live": "مباشر",
                 "login": "دخول",
                 "register": "تسجيل",
@@ -1901,6 +1904,7 @@
                 "telegram": "تيليجرام",
             },
             fr: {
+                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "live": "En direct",
                 "login": "Connexion",
                 "register": "S'inscrire",
@@ -2700,6 +2704,8 @@
             document.getElementById('adminNotifMessage').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
+            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
+            document.getElementById('adminNotifTarget').placeholder = getTranslation('adminNotifTargetPlaceholder') || 'example@email.com - اترك فارغاً للإرسال للجميع';
             await loadAdminUsers();
         }
 
@@ -2790,27 +2796,34 @@
         }
 
         // ===== Admin Notification =====
-        async function sendNotification() {
-            const message = document.getElementById('adminNotifMessage').value.trim();
-            const statusEl = document.getElementById('adminNotifStatus');
-            if (!message) {
-                statusEl.textContent = getTranslation('fillAllFields');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
-            statusEl.className = 'status-msg';
-            try {
-                const result = await apiCall('POST', '/admin/notifications', { message });
-                statusEl.textContent = getTranslation('notificationSent', { count: result.count });
-                statusEl.className = 'status-msg success';
-                document.getElementById('adminNotifMessage').value = '';
-                if (currentUser) await loadNotifications();
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        }
+async function sendNotification() {
+    const message = document.getElementById('adminNotifMessage').value.trim();
+    const targetEmail = document.getElementById('adminNotifTarget').value.trim();
+    const statusEl = document.getElementById('adminNotifStatus');
+    if (!message) {
+        statusEl.textContent = getTranslation('fillAllFields');
+        statusEl.className = 'status-msg error';
+        return;
+    }
+    statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
+    statusEl.className = 'status-msg';
+    try {
+        // إرسال الطلب مع البريد المستهدف (إذا كان موجوداً)
+        const body = { message };
+        if (targetEmail) body.targetEmail = targetEmail;
+        const result = await apiCall('POST', '/admin/notifications', body);
+        const count = result.count || 0;
+        const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
+        statusEl.textContent = msg;
+        statusEl.className = 'status-msg success';
+        document.getElementById('adminNotifMessage').value = '';
+        document.getElementById('adminNotifTarget').value = '';
+        if (currentUser) await loadNotifications();
+    } catch (err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.className = 'status-msg error';
+    }
+}
 
         // ================================================================
         // 10.  الإشعارات
