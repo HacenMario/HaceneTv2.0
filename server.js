@@ -8,13 +8,23 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // ================================================================
-// 1.  إعدادات CORS (محسّنة)
+// 1.  إعدادات CORS
 // ================================================================
 app.use(cors({
     origin: function (origin, callback) {
-        // السماح لكل origins (للتجربة)
         if (!origin) return callback(null, true);
-        callback(null, true);
+        const allowedOrigins = [
+            'https://hacene-tv2-0.vercel.app',
+            'http://localhost:3000',
+            'http://localhost:5500',
+            'https://hacenetv2-0.onrender.com'
+        ];
+        const originClean = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes(originClean) || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, true);
+        }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -28,16 +38,12 @@ app.use(express.json());
 // ================================================================
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI is not defined in environment variables');
+    console.error('❌ MONGODB_URI is not defined');
     process.exit(1);
 }
 
 mongoose.connect(MONGODB_URI)
-    .then(() => {
-        console.log('✅ Connected to MongoDB');
-        // بعد الاتصال، نقوم بإنشاء مستخدم Admin إذا لم يكن موجوداً
-        createDefaultAdmin();
-    })
+    .then(() => console.log('✅ Connected to MongoDB'))
     .catch(err => {
         console.error('❌ MongoDB connection error:', err);
         process.exit(1);
@@ -70,44 +76,7 @@ const ChannelSchema = new mongoose.Schema({
 const Channel = mongoose.model('Channel', ChannelSchema);
 
 // ================================================================
-// 4.  إنشاء مستخدم Admin افتراضي (إنشاء حساب المدير)
-// ================================================================
-async function createDefaultAdmin() {
-    try {
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@hacenetv.com';
-        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
-
-        // التحقق من وجود مستخدم Admin
-        const existingAdmin = await User.findOne({ email: adminEmail });
-        if (!existingAdmin) {
-            const hashedPassword = await bcrypt.hash(adminPassword, 10);
-            const admin = new User({
-                email: adminEmail,
-                password: hashedPassword,
-                role: 'admin',
-                isActive: true,
-                xtream: { server: '', username: '', password: '' }
-            });
-            await admin.save();
-            console.log(`✅ Admin user created: ${adminEmail} / ${adminPassword}`);
-            console.log(`⚠️ Please change the default password after first login.`);
-        } else {
-            // إذا كان موجوداً، نتأكد من أن دوره Admin (في حال تم تغييره)
-            if (existingAdmin.role !== 'admin') {
-                existingAdmin.role = 'admin';
-                await existingAdmin.save();
-                console.log(`✅ User ${adminEmail} updated to admin role.`);
-            } else {
-                console.log(`✅ Admin user already exists: ${adminEmail}`);
-            }
-        }
-    } catch (err) {
-        console.error('❌ Error creating default admin:', err);
-    }
-}
-
-// ================================================================
-// 5.  دوال المساعدة (Helper functions)
+// 4.  دوال المساعدة
 // ================================================================
 function generateToken(userId, email, role) {
     return jwt.sign(
@@ -140,6 +109,34 @@ function adminMiddleware(req, res, next) {
 }
 
 // ================================================================
+// 5.  إنشاء حساب Admin تلقائياً عند أول تشغيل
+// ================================================================
+async function createDefaultAdmin() {
+    try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@hacenetv.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123456';
+
+        const existingAdmin = await User.findOne({ email: adminEmail });
+        if (!existingAdmin) {
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
+            const admin = new User({
+                email: adminEmail,
+                password: hashedPassword,
+                role: 'admin',
+                isActive: true,
+                xtream: { server: '', username: '', password: '' }
+            });
+            await admin.save();
+            console.log(`✅ Admin user created: ${adminEmail} / ${adminPassword}`);
+        } else {
+            console.log(`✅ Admin user already exists: ${adminEmail}`);
+        }
+    } catch (err) {
+        console.error('❌ Error creating admin:', err);
+    }
+}
+
+// ================================================================
 // 6.  نقاط النهاية (API Endpoints)
 // ================================================================
 
@@ -147,6 +144,7 @@ function adminMiddleware(req, res, next) {
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
@@ -192,6 +190,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
@@ -439,7 +438,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
 });
 
 // ================================================================
-// 8.  نقطة نهاية الـ Proxy (لجلب القنوات من Xtream)
+// 8.  نقطة نهاية الـ Proxy
 // ================================================================
 app.get('/api/proxy', async (req, res) => {
     try {
@@ -476,6 +475,12 @@ app.get('/api/health', (req, res) => {
 // 10.  تشغيل الخادم
 // ================================================================
 const PORT = process.env.PORT || 3001;
+
+// إنشاء حساب Admin عند بدء التشغيل
+mongoose.connection.once('open', async () => {
+    await createDefaultAdmin();
+});
+
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`📡 API URL: http://localhost:${PORT}/api`);
