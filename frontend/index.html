@@ -6,8 +6,9 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* جميع الأنماط الحالية + تحسينات الشاشات الصغيرة */
+        /* جميع الأنماط الحالية + تحسينات المشغل */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -394,6 +395,29 @@
         .modal-box .status-msg.success { color: #2ecc71; border: 1px solid #2ecc71; }
         .modal-box .status-msg.error { color: #e74c3c; border: 1px solid #e74c3c; }
 
+        /* ===== مشغل الفيديو ===== */
+        #playerModal .modal-box {
+            max-width: 900px;
+            background: #000;
+            padding: 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #playerModal .close-modal {
+            color: #fff;
+            font-size: 30px;
+            top: 8px;
+            right: 15px;
+            z-index: 10;
+        }
+        #playerModal .close-modal:hover { color: #00d4ff; }
+        #playerVideo {
+            width: 100%;
+            max-height: 80vh;
+            background: #000;
+            display: block;
+        }
+
         /* ===== لوحة المدير ===== */
         .admin-panel {
             background: #11161f;
@@ -442,6 +466,31 @@
         .admin-panel .btn-icon.danger:hover { color: #e74c3c; }
         .admin-panel .btn-icon.success:hover { color: #2ecc71; }
         .admin-panel .btn-icon.warning:hover { color: #f39c12; }
+
+        /* ===== إحصائيات ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: #1e2636;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #2a3344;
+        }
+        .stat-card .num {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
 
         /* ===== تحسينات الشاشات الصغيرة ===== */
         @media (max-width: 768px) {
@@ -498,6 +547,9 @@
             .history-item { font-size: 12px; padding: 3px 10px; }
             .history-item .h-name { max-width: 60px; }
             .badge-count { font-size: 11px; padding: 2px 8px; }
+            #playerModal .modal-box { max-width: 100%; border-radius: 0; }
+            #playerVideo { max-height: 60vh; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 480px) {
             .header { padding: 8px 10px; }
@@ -509,6 +561,7 @@
             .channel-card .btn-play { font-size: 11px; padding: 4px 0; }
             .modal-box { padding: 14px; }
             .modal-box h2 { font-size: 18px; }
+            .stats-grid { grid-template-columns: 1fr; }
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -618,6 +671,24 @@
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
             <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:#f39c12;"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
+                <!-- الإحصائيات -->
+                <div class="admin-panel" id="statsPanel">
+                    <h3>📊 الإحصائيات</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="num" id="statChannels">0</div>
+                            <div class="label">عدد القنوات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="num" id="statUsers">0</div>
+                            <div class="label">عدد المستخدمين</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="num" id="statFavorites">0</div>
+                            <div class="label">المفضلة (لك)</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="admin-panel">
                     <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
@@ -664,7 +735,7 @@
         </div>
     </div>
 
-    <!-- ===== NEW MODAL: Loading Channels ===== -->
+    <!-- MODAL: Loading -->
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-box" style="text-align:center; max-width:400px;">
             <h2 id="loadingModalTitle"><i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> جاري التحميل</h2>
@@ -672,6 +743,14 @@
             <div style="width:100%; height:4px; background:#1e2636; border-radius:4px; overflow:hidden; margin-top:10px;">
                 <div id="loadingProgress" style="width:0%; height:100%; background:#00d4ff; transition: width 0.5s;"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Player -->
+    <div class="modal-overlay" id="playerModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closePlayer()" style="color:#fff; font-size:30px; top:8px; right:15px; z-index:10;">✕</button>
+            <video id="playerVideo" controls autoplay style="width:100%; max-height:80vh; background:#000; display:block;"></video>
         </div>
     </div>
 
@@ -687,7 +766,6 @@
         // 0b.  خريطة التصنيفات المخصصة (من ملف Excel)
         // ================================================================
         const CHANNEL_CATEGORY_MAP = {
-            // ----- ALGERIA -----
             "ALG: ZAHRA TV": "ALGERIA",
             "ALG: TV8 HD": "ALGERIA",
             "ALG: TV7 HD": "ALGERIA",
@@ -1670,7 +1748,6 @@
                 "general": "عام",
                 "history": "آخر المشاهدة",
                 "loadMore": "تحميل المزيد",
-                // النماذج
                 "xtreamSettings": "إعدادات Xtream",
                 "serverUrl": "رابط الخادم (Server URL)",
                 "username": "اسم المستخدم (Username)",
@@ -1719,6 +1796,10 @@
                 "haveAccount": "لديك حساب؟",
                 "loginNow": "تسجيل الدخول",
                 "lang": "اللغة",
+                "stats": "الإحصائيات",
+                "channelsCount": "عدد القنوات",
+                "usersCount": "عدد المستخدمين",
+                "yourFavorites": "المفضلة (لك)",
             },
             fr: {
                 "live": "En direct",
@@ -1795,6 +1876,10 @@
                 "haveAccount": "Déjà un compte ?",
                 "loginNow": "Se connecter",
                 "lang": "Langue",
+                "stats": "Statistiques",
+                "channelsCount": "Nombre de chaînes",
+                "usersCount": "Nombre d'utilisateurs",
+                "yourFavorites": "Favoris (vous)",
             }
         };
 
@@ -1822,6 +1907,7 @@
         let currentLang = 'ar';
         let displayedChunks = 1;
         let currentFilteredChannels = [];
+        let hls = null; // متغير HLS
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -1995,7 +2081,73 @@
         }
 
         // ================================================================
-        // 7.  دوال العرض (UI)
+        // 7.  مشغل الفيديو المدمج
+        // ================================================================
+        function openPlayer(url) {
+            const modal = document.getElementById('playerModal');
+            const video = document.getElementById('playerVideo');
+            // إيقاف أي تشغيل سابق
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+            video.pause();
+            video.src = '';
+            video.load();
+
+            // إذا كان HLS مدعوماً (m3u8)
+            if (url.includes('.m3u8') || url.includes('m3u8')) {
+                if (Hls.isSupported()) {
+                    hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play();
+                    });
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.error('HLS Error:', data);
+                        // محاولة إعادة التحميل أو عرض رسالة
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Safari native HLS
+                    video.src = url;
+                    video.play();
+                } else {
+                    alert('المتصفح لا يدعم تشغيل تدفقات HLS.');
+                    closePlayer();
+                    return;
+                }
+            } else {
+                // رابط مباشر (mp4 أو غيره)
+                video.src = url;
+                video.play();
+            }
+
+            modal.classList.add('active');
+            // عند إغلاق النافذة، إيقاف التشغيل
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closePlayer();
+                }
+            };
+        }
+
+        function closePlayer() {
+            const modal = document.getElementById('playerModal');
+            const video = document.getElementById('playerVideo');
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+            video.pause();
+            video.src = '';
+            video.load();
+            modal.classList.remove('active');
+            modal.onclick = null;
+        }
+
+        // ================================================================
+        // 8.  دوال العرض (UI)
         // ================================================================
 
         function renderHeader() {
@@ -2127,7 +2279,7 @@
         }
 
         // ================================================================
-        // 8.  عرض القنوات مع Lazy Loading
+        // 9.  عرض القنوات مع Lazy Loading
         // ================================================================
 
         function renderGridWithLazy(filteredChannels) {
@@ -2205,7 +2357,7 @@
         }
 
         // ================================================================
-        // 9.  تشغيل القناة مع إضافة إلى السجل
+        // 10.  تشغيل القناة مع مشغل مدمج
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2213,6 +2365,7 @@
                 alert(getTranslation('channelNotFound'));
                 return;
             }
+            // إضافة للسجل
             addToHistory(channel);
 
             let url = channel.url;
@@ -2225,7 +2378,9 @@
                 alert(getTranslation('invalidUrl'));
                 return;
             }
-            window.location.href = url;
+
+            // فتح المشغل بدلاً من الانتقال
+            openPlayer(url);
         }
 
         function playChannelById(id) {
@@ -2237,7 +2392,7 @@
         }
 
         // ================================================================
-        // 10.  دوال المصادقة (Login / Register / Logout)
+        // 11.  دوال المصادقة (Login / Register / Logout)
         // ================================================================
 
         function openLoginModal() {
@@ -2364,10 +2519,12 @@
             buildSidebar();
             applyFilters();
             renderHistory();
+            // إغلاق المشغل إذا كان مفتوحاً
+            closePlayer();
         }
 
         // ================================================================
-        // 11.  دوال Xtream
+        // 12.  دوال Xtream
         // ================================================================
 
         function openXtreamModal() {
@@ -2442,7 +2599,7 @@
         }
 
         // ================================================================
-        // 12.  دوال القنوات (إضافة، حفظ، تفضيلات)
+        // 13.  دوال القنوات (إضافة، حفظ، تفضيلات)
         // ================================================================
 
         function openAddModal() {
@@ -2511,7 +2668,7 @@
         }
 
         // ================================================================
-        // 13.  دوال Admin
+        // 14.  دوال Admin مع الإحصائيات
         // ================================================================
 
         async function openAdminModal() {
@@ -2529,7 +2686,19 @@
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
             document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
+
+            // تحديث الإحصائيات
+            updateStats();
+
             await loadAdminUsers();
+        }
+
+        function updateStats() {
+            // عدد القنوات
+            document.getElementById('statChannels').textContent = allChannels.length;
+            // المفضلة للمستخدم الحالي
+            document.getElementById('statFavorites').textContent = favorites.length;
+            // عدد المستخدمين سيتم تحديثه بعد جلبهم
         }
 
         function closeAdminModal() {
@@ -2540,6 +2709,9 @@
             try {
                 const data = await apiCall('GET', '/admin/users');
                 const tbody = document.getElementById('adminUsersBody');
+                // تحديث عدد المستخدمين
+                document.getElementById('statUsers').textContent = data.users ? data.users.length : 0;
+
                 if (!data.users || data.users.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">${getTranslation('noUsers')}</td></tr>`;
                     return;
@@ -2634,13 +2806,16 @@
             try {
                 await apiCall('DELETE', `/admin/users/${userId}`);
                 await loadAdminUsers();
+                // تحديث عدد المستخدمين
+                const data = await apiCall('GET', '/admin/users');
+                document.getElementById('statUsers').textContent = data.users ? data.users.length : 0;
             } catch (err) {
                 alert('❌ ' + err.message);
             }
         }
 
         // ================================================================
-        // 14.  تطبيق التصنيفات المخصصة
+        // 15.  تطبيق التصنيفات المخصصة
         // ================================================================
         function applyCategoryMap(channels) {
             return channels.map(ch => {
@@ -2651,7 +2826,7 @@
         }
 
         // ================================================================
-        // 15. التهيئة (Initialization)
+        // 16. التهيئة (Initialization)
         // ================================================================
 
         async function initializeApp(forceRefresh = false) {
@@ -2722,7 +2897,7 @@
         }
 
         // ================================================================
-        // 16.  بدء التطبيق وأحداث الإغلاق
+        // 17.  بدء التطبيق وأحداث الإغلاق
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', () => initializeApp(false));
@@ -2730,6 +2905,7 @@
             initializeApp(false);
         }
 
+        // إغلاق المشغل عند الضغط على Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeLoginModal();
@@ -2737,10 +2913,11 @@
                 closeAddModal();
                 closeAdminModal();
                 closeEditUserModal();
+                closePlayer(); // إغلاق المشغل
             }
         });
 
-        console.log('🚀 HACENE TV تم التحميل بنجاح مع الميزات الجديدة!');
+        console.log('🚀 HACENE TV تم التحميل بنجاح مع مشغل مدمج وإحصائيات!');
     </script>
 </body>
 </html>
