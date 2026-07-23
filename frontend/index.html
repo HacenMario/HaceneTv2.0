@@ -1958,7 +1958,8 @@
                 updateAllTexts();
                 renderHeader();
                 buildSidebar();
-                applyFilters();
+                applyFilters(true);
+                setupInfiniteScroll();
                 document.querySelectorAll('.lang-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.lang === lang);
                 });
@@ -2017,7 +2018,6 @@
                 </button>
             `;
 
-            // زر الإشعارات
             let notifBtn = '';
             if (user) {
                 notifBtn = `
@@ -2073,10 +2073,9 @@
                 <button class="btn btn-danger btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> ${getTranslation('logout')}
                 </button>
-                <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="applyFilters()" />
+                <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="applyFilters(true)" />
                 <span class="channel-counter" id="channelCount">0</span>
             `;
-            // تحديث زر الإشعارات بعد render
             updateNotifBadge();
         }
 
@@ -2147,12 +2146,24 @@
             }
             setFavorites(favorites);
             buildSidebar();
-            applyFilters();
+            applyFilters(true);
         }
 
         function getChannelId(channel) {
             if (channel.stream_id) return channel.stream_id.toString();
             return channel.name + '_' + (channel.category || 'عام');
+        }
+
+        // ===== Normalize channels (ensure icon field) =====
+        function normalizeChannels(channels) {
+            return channels.map(ch => {
+                // تأكد من وجود حقل icon من stream_icon إذا كان موجوداً
+                if (ch.stream_icon && !ch.icon) ch.icon = ch.stream_icon;
+                if (ch.icon && !ch.stream_icon) ch.stream_icon = ch.icon; // للتوحيد
+                if (!ch.category) ch.category = 'عام';
+                if (!ch.url) ch.url = '';
+                return ch;
+            });
         }
 
         // ===== Infinite Scroll =====
@@ -2175,7 +2186,6 @@
             if (resetDisplay) {
                 displayCount = Math.min(STEP, allChannelsFiltered.length);
             } else {
-                // زيادة العرض بمقدار STEP
                 displayCount = Math.min(displayCount + STEP, allChannelsFiltered.length);
             }
             renderGrid(allChannelsFiltered.slice(0, displayCount), allChannelsFiltered.length);
@@ -2268,7 +2278,6 @@
             const trigger = document.getElementById('scrollTrigger');
             if (trigger) observer.observe(trigger);
             else {
-                // في حال لم يتم العثور على العنصر، نضيفه
                 const container = document.getElementById('channelsContainer');
                 const el = document.createElement('div');
                 el.id = 'scrollTrigger';
@@ -2313,7 +2322,6 @@
             document.getElementById('loginStatus').textContent = '';
             document.getElementById('loginStatus').className = 'status-msg';
             document.getElementById('loginEmail').focus();
-            // تحديث النصوص
             document.getElementById('loginModalTitle').innerHTML = `<i class="fas fa-sign-in-alt" style="color:var(--accent);"></i> ${getTranslation('login')}`;
             document.getElementById('loginEmailLabel').textContent = getTranslation('email');
             document.getElementById('loginPasswordLabel').textContent = getTranslation('password');
@@ -2482,7 +2490,7 @@
             try {
                 await apiCall('POST', '/user/xtream', { server, username, password });
                 const result = await apiCall('GET', '/user/fetch-channels');
-                allChannels = result.channels || [];
+                allChannels = normalizeChannels(result.channels || []);
                 applyCategoryMap();
                 localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                 const user = getUser();
@@ -2566,6 +2574,7 @@
                 if (newCat) ch.category = newCat;
                 return ch;
             });
+            allChannels = normalizeChannels(allChannels);
         }
 
         // ================================================================
@@ -2693,7 +2702,6 @@
                 statusEl.textContent = getTranslation('notificationSent', { count: result.count });
                 statusEl.className = 'status-msg success';
                 document.getElementById('adminNotifMessage').value = '';
-                // تحديث الإشعارات للمستخدم الحالي إذا كان admin
                 if (currentUser) await loadNotifications();
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -2734,7 +2742,6 @@
             dropdown.classList.toggle('active');
             if (dropdown.classList.contains('active')) {
                 renderNotifDropdown();
-                // تحديد جميع الإشعارات كمقروءة تلقائياً عند الفتح
                 markAllAsRead();
             }
         }
@@ -2825,12 +2832,12 @@
                     setUser(data.user);
                     const channelsData = await apiCall('GET', '/user/channels');
                     if (channelsData.channels && channelsData.channels.length > 0) {
-                        allChannels = channelsData.channels;
+                        allChannels = normalizeChannels(channelsData.channels);
                         applyCategoryMap();
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                     } else {
                         if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
-                            allChannels = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+                            allChannels = normalizeChannels(JSON.parse(JSON.stringify(DEFAULT_CHANNELS)));
                             applyCategoryMap();
                             try {
                                 await apiCall('POST', '/user/channels', { channels: allChannels });
@@ -2851,7 +2858,7 @@
                 const stored = localStorage.getItem('hacene_channels');
                 if (stored) {
                     try {
-                        allChannels = JSON.parse(stored);
+                        allChannels = normalizeChannels(JSON.parse(stored));
                         applyCategoryMap();
                     } catch (e) { allChannels = []; }
                 } else {
@@ -2869,7 +2876,6 @@
             applyFilters(true);
             setupInfiniteScroll();
 
-            // تحديث الإشعارات بعد التحميل
             if (getUser()) {
                 setTimeout(() => loadNotifications(), 500);
             }
@@ -2881,7 +2887,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
             window.addEventListener('scroll', handleScroll);
-            // إغلاق قائمة الإشعارات عند النقر خارجها
             document.addEventListener('click', (e) => {
                 const wrapper = document.querySelector('.notif-wrapper');
                 const dropdown = document.getElementById('notifDropdown');
