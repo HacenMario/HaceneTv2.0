@@ -6,8 +6,8 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        /* جميع الأنماط السابقة مع تعديلات بسيطة */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
@@ -1797,10 +1797,12 @@
         let displayedChunks = 1;
         let currentFilteredChannels = [];
 
-        let hls = null;
         let currentPlayerUrl = '';
         let retryCount = 0;
         const MAX_RETRIES = 3;
+        let detectIframe = null;
+        let detectInterval = null;
+        let detectTimeout = null;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -1972,66 +1974,89 @@
         }
 
         // ================================================================
-        // 7.  كشف الرابط النهائي (شفاف تماماً)
+        // 7.  كشف الرابط النهائي باستخدام iframe مخفي (شفاف تماماً)
         // ================================================================
         function detectFinalUrl(initialUrl, callback) {
-            let win = window.open(initialUrl, '_blank', 'width=1,height=1,menubar=no,toolbar=no,location=yes,status=no,scrollbars=no');
-            if (!win) {
-                // فشل فتح النافذة، نستخدم الرابط الأصلي
-                callback(initialUrl);
-                return;
+            // إزالة أي iframe سابق
+            if (detectIframe) {
+                document.body.removeChild(detectIframe);
+                detectIframe = null;
             }
+            if (detectInterval) {
+                clearInterval(detectInterval);
+                detectInterval = null;
+            }
+            if (detectTimeout) {
+                clearTimeout(detectTimeout);
+                detectTimeout = null;
+            }
+
             let lastUrl = initialUrl;
             let attempts = 0;
-            const maxAttempts = 20; // 20 ثانية
-            const interval = setInterval(() => {
+            const maxAttempts = 25; // 25 ثانية
+
+            // إنشاء iframe مخفي
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = initialUrl;
+            document.body.appendChild(iframe);
+            detectIframe = iframe;
+
+            detectInterval = setInterval(() => {
                 attempts++;
                 try {
-                    let currentUrl = win.location.href;
+                    // محاولة قراءة عنوان iframe الحالي
+                    const currentUrl = iframe.contentWindow.location.href;
                     if (currentUrl && currentUrl !== lastUrl && !currentUrl.includes('about:blank')) {
                         lastUrl = currentUrl;
-                        // إذا كان الرابط النهائي (يحتوي على m3u8 أو mp4 أو ts أو manifest)
+                        // إذا كان الرابط النهائي (يحتوي على m3u8 أو mp4 أو ts أو manifest أو playlist)
                         if (currentUrl.includes('.m3u8') || currentUrl.includes('.mp4') || currentUrl.includes('.ts') ||
-                            currentUrl.includes('manifest') || currentUrl.includes('playlist') || currentUrl.includes('master')) {
-                            clearInterval(interval);
-                            clearTimeout(timeout);
-                            win.close();
+                            currentUrl.includes('manifest') || currentUrl.includes('playlist') || currentUrl.includes('master') ||
+                            currentUrl.includes('m3u8') || currentUrl.includes('mp4')) {
+                            // وجدنا الرابط النهائي
+                            clearInterval(detectInterval);
+                            clearTimeout(detectTimeout);
+                            document.body.removeChild(iframe);
+                            detectIframe = null;
                             callback(currentUrl);
                             return;
                         }
                     }
                 } catch(e) {
-                    // CORS أو تغيير نطاق
+                    // CORS أو تغيير نطاق، نستمر
                 }
+
                 if (attempts >= maxAttempts) {
-                    clearInterval(interval);
-                    clearTimeout(timeout);
-                    win.close();
+                    clearInterval(detectInterval);
+                    clearTimeout(detectTimeout);
+                    if (detectIframe) {
+                        document.body.removeChild(detectIframe);
+                        detectIframe = null;
+                    }
+                    // نستخدم آخر عنوان تم الحصول عليه
                     callback(lastUrl);
                 }
             }, 1000);
 
-            const timeout = setTimeout(() => {
-                clearInterval(interval);
-                try { win.close(); } catch(e) {}
-                callback(initialUrl);
+            detectTimeout = setTimeout(() => {
+                clearInterval(detectInterval);
+                if (detectIframe) {
+                    document.body.removeChild(detectIframe);
+                    detectIframe = null;
+                }
+                callback(lastUrl);
             }, 25000);
         }
 
         // ================================================================
-        // 8.  مشغل الفيديو باستخدام hls.js
+        // 8.  مشغل الفيديو (video فقط)
         // ================================================================
         function openPlayer(url) {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
             const errorDiv = document.getElementById('playerError');
-            const errorMsg = document.getElementById('playerErrorMsg');
 
             errorDiv.style.display = 'none';
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
             video.pause();
             video.src = '';
             video.load();
@@ -2039,45 +2064,11 @@
             currentPlayerUrl = url;
             retryCount = 0;
 
-            if (!Hls.isSupported()) {
-                video.src = url;
-                video.play().catch(err => {
-                    showPlayerError(getTranslation('playError'));
-                });
-                modal.classList.add('active');
-                return;
-            }
-
-            hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-            hls.loadSource(url);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                video.play().catch(err => {
-                    console.warn('تشغيل تلقائي فشل:', err);
-                    showPlayerError(getTranslation('playError'));
-                });
-            });
-
-            hls.on(Hls.Events.ERROR, function(event, data) {
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            if (retryCount < MAX_RETRIES) {
-                                retryCount++;
-                                hls.startLoad();
-                            } else {
-                                showPlayerError(getTranslation('playError'));
-                            }
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            showPlayerError(getTranslation('playError'));
-                            break;
-                    }
-                }
+            // تعيين المصدر مباشرة
+            video.src = url;
+            video.play().catch(err => {
+                console.warn('تشغيل تلقائي فشل:', err);
+                showPlayerError(getTranslation('playError'));
             });
 
             modal.classList.add('active');
@@ -2099,10 +2090,6 @@
                 const video = document.getElementById('playerVideo');
                 const errorDiv = document.getElementById('playerError');
                 errorDiv.style.display = 'none';
-                if (hls) {
-                    hls.destroy();
-                    hls = null;
-                }
                 video.pause();
                 video.src = '';
                 video.load();
@@ -2113,10 +2100,6 @@
         function closePlayer() {
             const modal = document.getElementById('playerModal');
             const video = document.getElementById('playerVideo');
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
             video.pause();
             video.src = '';
             video.load();
@@ -2339,7 +2322,7 @@
         }
 
         // ================================================================
-        // 11.  تشغيل القناة (شفاف)
+        // 11.  تشغيل القناة (شفاف تماماً)
         // ================================================================
         function playChannel(index) {
             const channel = allChannels[index];
@@ -2363,6 +2346,7 @@
             // كشف الرابط النهائي في الخلفية (بدون أي مؤشرات)
             detectFinalUrl(url, (finalUrl) => {
                 if (finalUrl) {
+                    // تشغيل القناة مباشرة باستخدام عنصر video
                     openPlayer(finalUrl);
                 } else {
                     alert(getTranslation('playError'));
@@ -2493,6 +2477,13 @@
             applyFilters();
             renderHistory();
             closePlayer();
+            // إزالة iframe الكشف إن وجد
+            if (detectIframe) {
+                document.body.removeChild(detectIframe);
+                detectIframe = null;
+            }
+            if (detectInterval) clearInterval(detectInterval);
+            if (detectTimeout) clearTimeout(detectTimeout);
         }
 
         // ================================================================
@@ -2819,10 +2810,17 @@
                 closeAdminModal();
                 closeEditUserModal();
                 closePlayer();
+                // تنظيف iframe الكشف
+                if (detectIframe) {
+                    document.body.removeChild(detectIframe);
+                    detectIframe = null;
+                }
+                if (detectInterval) clearInterval(detectInterval);
+                if (detectTimeout) clearTimeout(detectTimeout);
             }
         });
 
-        console.log('🚀 HACENE TV تم التحميل مع كشف إعادة التوجيه الشفاف والمشغل المدمج!');
+        console.log('🚀 HACENE TV - تشغيل شفاف باستخدام iframe مخفي ومشغل video مباشر');
     </script>
 </body>
 </html>
