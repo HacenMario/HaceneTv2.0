@@ -7,20 +7,18 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
-// ================================================================
-// 1.  إعدادات CORS
-// ================================================================
+// CORS
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
-        const allowedOrigins = [
+        const allowed = [
             'https://hacene-tv2-0.vercel.app',
             'http://localhost:3000',
             'http://localhost:5500',
             'https://hacenetv2-0.onrender.com'
         ];
-        const originClean = origin.replace(/\/$/, '');
-        if (allowedOrigins.includes(originClean) || allowedOrigins.includes(origin)) {
+        const clean = origin.replace(/\/$/, '');
+        if (allowed.includes(clean) || allowed.includes(origin)) {
             callback(null, true);
         } else {
             callback(null, true);
@@ -33,12 +31,10 @@ app.use(cors({
 
 app.use(express.json());
 
-// ================================================================
-// 2.  الاتصال بقاعدة البيانات MongoDB
-// ================================================================
+// MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI is not defined');
+    console.error('❌ MONGODB_URI not defined');
     process.exit(1);
 }
 
@@ -49,9 +45,7 @@ mongoose.connect(MONGODB_URI)
         process.exit(1);
     });
 
-// ================================================================
-// 3.  نماذج البيانات (Schemas)
-// ================================================================
+// ===== Schemas =====
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
@@ -75,9 +69,7 @@ const ChannelSchema = new mongoose.Schema({
 
 const Channel = mongoose.model('Channel', ChannelSchema);
 
-// ================================================================
-// 4.  دوال المساعدة
-// ================================================================
+// ===== Helpers =====
 function generateToken(userId, email, role) {
     return jwt.sign(
         { userId, email, role },
@@ -89,7 +81,7 @@ function generateToken(userId, email, role) {
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized: No token provided' });
+        return res.status(401).json({ error: 'Unauthorized' });
     }
     const token = authHeader.split(' ')[1];
     try {
@@ -97,78 +89,42 @@ function authMiddleware(req, res, next) {
         req.user = decoded;
         next();
     } catch (err) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+        return res.status(401).json({ error: 'Invalid token' });
     }
 }
 
 function adminMiddleware(req, res, next) {
     if (req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Forbidden: Admin access required' });
+        return res.status(403).json({ error: 'Admin required' });
     }
     next();
 }
 
-// ================================================================
-// 5.  إنشاء حساب Admin تلقائياً عند أول تشغيل
-// ================================================================
-async function createDefaultAdmin() {
-    try {
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@hacenetv.com';
-        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123456';
-
-        const existingAdmin = await User.findOne({ email: adminEmail });
-        if (!existingAdmin) {
-            const hashedPassword = await bcrypt.hash(adminPassword, 10);
-            const admin = new User({
-                email: adminEmail,
-                password: hashedPassword,
-                role: 'admin',
-                isActive: true,
-                xtream: { server: '', username: '', password: '' }
-            });
-            await admin.save();
-            console.log(`✅ Admin user created: ${adminEmail} / ${adminPassword}`);
-        } else {
-            console.log(`✅ Admin user already exists: ${adminEmail}`);
-        }
-    } catch (err) {
-        console.error('❌ Error creating admin:', err);
-    }
-}
-
-// ================================================================
-// 6.  نقاط النهاية (API Endpoints)
-// ================================================================
-
-// 6.1 تسجيل مستخدم جديد
+// ===== Auth endpoints =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+        if (password.length < 6) return res.status(400).json({ error: 'Password min 6 chars' });
 
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
-        }
-        if (password.length < 6) {
-            return res.status(400).json({ error: 'Password must be at least 6 characters' });
-        }
+        const existing = await User.findOne({ email: email.toLowerCase() });
+        if (existing) return res.status(400).json({ error: 'Email already registered' });
 
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email already registered' });
-        }
+        const hashed = await bcrypt.hash(password, 10);
+        // أول مستخدم يسجل يصبح Admin
+        const count = await User.countDocuments();
+        const role = count === 0 ? 'admin' : 'user';
 
-        const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             email: email.toLowerCase(),
-            password: hashedPassword,
-            role: 'user',
+            password: hashed,
+            role: role,
             isActive: true,
             xtream: { server: '', username: '', password: '' }
         });
-
         await user.save();
-        const token = generateToken(user._id, user.email, user.role);
 
+        const token = generateToken(user._id, user.email, user.role);
         res.status(201).json({
             success: true,
             token,
@@ -186,31 +142,20 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// 6.2 تسجيل الدخول
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
-        }
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
         const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        if (!user) return res.status(401).json({ error: 'Invalid email or password' });
 
-        if (!user.isActive) {
-            return res.status(403).json({ error: 'Account is disabled. Contact administrator.' });
-        }
+        if (!user.isActive) return res.status(403).json({ error: 'Account disabled' });
 
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
 
         const token = generateToken(user._id, user.email, user.role);
-
         res.json({
             success: true,
             token,
@@ -228,74 +173,48 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// 6.3 الحصول على بيانات المستخدم الحالي
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId).select('-password');
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ error: 'User not found' });
         res.json({ user });
     } catch (err) {
-        console.error('Get user error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// 6.4 حفظ بيانات Xtream للمستخدم الحالي
+// ===== User Xtream & Channels =====
 app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     try {
         const { server, username, password } = req.body;
-        const userId = req.user.userId;
-
         if (!server || !username || !password) {
-            return res.status(400).json({ error: 'Server, username, and password are required' });
+            return res.status(400).json({ error: 'All fields required' });
         }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
         user.xtream = { server, username, password };
         await user.save();
-
-        res.json({
-            success: true,
-            message: 'Xtream settings saved successfully',
-            xtream: user.xtream
-        });
+        res.json({ success: true, xtream: user.xtream });
     } catch (err) {
-        console.error('Save Xtream error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// 6.5 جلب القنوات من Xtream (للمستخدم الحالي)
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
+        if (!user) return res.status(404).json({ error: 'User not found' });
         const { server, username, password } = user.xtream;
         if (!server || !username || !password) {
-            return res.status(400).json({ error: 'Xtream credentials not configured' });
+            return res.status(400).json({ error: 'Xtream not configured' });
         }
 
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
         const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
-        
         const response = await fetch(proxyUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-
-        if (!Array.isArray(data)) {
-            throw new Error('Invalid response from Xtream server');
-        }
+        if (!Array.isArray(data)) throw new Error('Invalid response');
 
         const channels = data.map(item => ({
             name: item.name || 'بدون اسم',
@@ -311,61 +230,43 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             { upsert: true, new: true }
         );
 
-        res.json({
-            success: true,
-            channels: channels,
-            count: channels.length
-        });
+        res.json({ success: true, channels, count: channels.length });
     } catch (err) {
         console.error('Fetch channels error:', err);
-        res.status(500).json({ error: err.message || 'Failed to fetch channels' });
+        res.status(500).json({ error: err.message });
     }
 });
 
-// 6.6 الحصول على قنوات المستخدم المحفوظة
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
-        const channelDoc = await Channel.findOne({ userId: req.user.userId });
-        if (!channelDoc) {
-            return res.json({ channels: [] });
-        }
-        res.json({ channels: channelDoc.channels });
+        const doc = await Channel.findOne({ userId: req.user.userId });
+        res.json({ channels: doc ? doc.channels : [] });
     } catch (err) {
-        console.error('Get channels error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// 6.7 حفظ قنوات المستخدم
 app.post('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const { channels } = req.body;
-        if (!Array.isArray(channels)) {
-            return res.status(400).json({ error: 'Channels must be an array' });
-        }
-
+        if (!Array.isArray(channels)) return res.status(400).json({ error: 'Channels must be array' });
         await Channel.findOneAndUpdate(
             { userId: req.user.userId },
             { userId: req.user.userId, channels, updatedAt: Date.now() },
             { upsert: true, new: true }
         );
-
         res.json({ success: true, channels });
     } catch (err) {
-        console.error('Save channels error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// ================================================================
-// 7.  نقاط النهاية الخاصة بـ Admin
-// ================================================================
+// ===== Admin endpoints =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
         res.json({ users });
     } catch (err) {
-        console.error('Admin get users error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -373,29 +274,20 @@ app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) =>
 app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
-        const { isActive, xtream, role } = req.body;
+        const { isActive, xtream } = req.body;
+        if (userId === req.user.userId) return res.status(403).json({ error: 'Cannot modify self' });
 
         const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        if (userId === req.user.userId) {
-            return res.status(403).json({ error: 'Cannot modify your own account' });
-        }
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
         if (isActive !== undefined) user.isActive = isActive;
-        if (role && role === 'admin') {
-            return res.status(403).json({ error: 'Cannot assign admin role' });
-        }
         if (xtream) {
             user.xtream = {
-                server: xtream.server || user.xtream.server || '',
-                username: xtream.username || user.xtream.username || '',
-                password: xtream.password || user.xtream.password || ''
+                server: xtream.server || '',
+                username: xtream.username || '',
+                password: xtream.password || ''
             };
         }
-
         await user.save();
 
         res.json({
@@ -409,7 +301,6 @@ app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req,
             }
         });
     } catch (err) {
-        console.error('Admin update user error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -417,52 +308,30 @@ app.put('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req,
 app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { userId } = req.params;
-
-        if (userId === req.user.userId) {
-            return res.status(403).json({ error: 'Cannot delete your own account' });
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        await Channel.findOneAndDelete({ userId });
+        if (userId === req.user.userId) return res.status(403).json({ error: 'Cannot delete self' });
         await User.findByIdAndDelete(userId);
-
-        res.json({ success: true, message: 'User deleted successfully' });
+        await Channel.findOneAndDelete({ userId });
+        res.json({ success: true });
     } catch (err) {
-        console.error('Admin delete user error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// ================================================================
-// 8.  نقطة نهاية الـ Proxy
-// ================================================================
+// ===== Proxy =====
 app.get('/api/proxy', async (req, res) => {
     try {
-        const targetUrl = req.query.url;
-        if (!targetUrl) {
-            return res.status(400).json({ error: 'Missing url parameter' });
-        }
-
-        const response = await fetch(targetUrl);
-        if (!response.ok) {
-            return res.status(response.status).json({ error: 'Failed to fetch' });
-        }
-
+        const target = req.query.url;
+        if (!target) return res.status(400).json({ error: 'Missing url' });
+        const response = await fetch(target);
+        if (!response.ok) return res.status(response.status).json({ error: 'Fetch failed' });
         const data = await response.json();
         res.json(data);
     } catch (err) {
-        console.error('Proxy error:', err);
         res.status(500).json({ error: 'Proxy error: ' + err.message });
     }
 });
 
-// ================================================================
-// 9.  نقطة نهاية اختبار الصحة
-// ================================================================
+// ===== Health =====
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -471,17 +340,7 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// ================================================================
-// 10.  تشغيل الخادم
-// ================================================================
 const PORT = process.env.PORT || 3001;
-
-// إنشاء حساب Admin عند بدء التشغيل
-mongoose.connection.once('open', async () => {
-    await createDefaultAdmin();
-});
-
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📡 API URL: http://localhost:${PORT}/api`);
 });
