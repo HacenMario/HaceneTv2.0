@@ -417,6 +417,9 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #0c1017; }
         ::-webkit-scrollbar-thumb { background: #2a3344; border-radius: 10px; }
+        .lang-btn { background: transparent; border: 1px solid #555; color: #aaa; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .lang-btn:hover { border-color: #00d4ff; color: #fff; }
+        .lang-btn.active { border-color: #00d4ff; color: #00d4ff; }
     </style>
 </head>
 <body>
@@ -439,26 +442,26 @@
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeLoginModal()">✕</button>
-            <h2><i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> تسجيل الدخول</h2>
+            <h2 id="loginModalTitle"><i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> تسجيل الدخول</h2>
             <div id="loginForm">
-                <label>البريد الإلكتروني</label>
+                <label id="loginEmailLabel">البريد الإلكتروني</label>
                 <input type="email" id="loginEmail" placeholder="example@email.com" />
-                <label>كلمة المرور</label>
+                <label id="loginPasswordLabel">كلمة المرور</label>
                 <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" />
-                <button class="btn-save" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+                <button class="btn-save" id="loginBtn" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
                 <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
-                    ليس لديك حساب؟ <span style="color:#00d4ff; cursor:pointer;" onclick="showRegister()">سجل الآن</span>
+                    <span id="noAccountText">ليس لديك حساب؟</span> <span style="color:#00d4ff; cursor:pointer;" onclick="showRegister()" id="registerLink">سجل الآن</span>
                 </div>
                 <div id="loginStatus" class="status-msg"></div>
             </div>
             <div id="registerForm" style="display:none;">
-                <label>البريد الإلكتروني</label>
+                <label id="registerEmailLabel">البريد الإلكتروني</label>
                 <input type="email" id="registerEmail" placeholder="example@email.com" />
-                <label>كلمة المرور</label>
+                <label id="registerPasswordLabel">كلمة المرور</label>
                 <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" />
-                <button class="btn-save" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
+                <button class="btn-save" id="registerBtn" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
                 <div style="text-align:center; margin-top:12px; color:#888; font-size:13px;">
-                    لديك حساب؟ <span style="color:#00d4ff; cursor:pointer;" onclick="showLogin()">تسجيل الدخول</span>
+                    <span id="haveAccountText">لديك حساب؟</span> <span style="color:#00d4ff; cursor:pointer;" onclick="showLogin()" id="loginLink">تسجيل الدخول</span>
                 </div>
                 <div id="registerStatus" class="status-msg"></div>
             </div>
@@ -469,14 +472,14 @@
     <div class="modal-overlay" id="xtreamModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeXtreamModal()">✕</button>
-            <h2><i class="fas fa-key" style="color:#9b59b6;"></i> إعدادات Xtream</h2>
-            <label>رابط الخادم (Server URL)</label>
+            <h2 id="xtreamModalTitle"><i class="fas fa-key" style="color:#9b59b6;"></i> إعدادات Xtream</h2>
+            <label id="xtreamServerLabel">رابط الخادم (Server URL)</label>
             <input type="url" id="xtreamServer" placeholder="http://example.com:8080" />
-            <label>اسم المستخدم (Username)</label>
+            <label id="xtreamUsernameLabel">اسم المستخدم (Username)</label>
             <input type="text" id="xtreamUsername" placeholder="أدخل اسم المستخدم" />
-            <label>كلمة المرور (Password)</label>
+            <label id="xtreamPasswordLabel">كلمة المرور (Password)</label>
             <input type="password" id="xtreamPassword" placeholder="أدخل كلمة المرور" />
-            <button class="btn-save" onclick="saveXtreamSettings()"><i class="fas fa-save"></i> حفظ وجلب القنوات</button>
+            <button class="btn-save" id="xtreamSaveBtn" onclick="saveXtreamSettings()"><i class="fas fa-save"></i> حفظ وجلب القنوات</button>
             <div id="xtreamStatus" class="status-msg"></div>
         </div>
     </div>
@@ -485,14 +488,14 @@
     <div class="modal-overlay" id="addModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeAddModal()">✕</button>
-            <h2><i class="fas fa-plus-circle" style="color:#00d4ff;"></i> إضافة قناة</h2>
-            <label>اسم القناة *</label>
+            <h2 id="addModalTitle"><i class="fas fa-plus-circle" style="color:#00d4ff;"></i> إضافة قناة</h2>
+            <label id="addNameLabel">اسم القناة *</label>
             <input type="text" id="inputName" placeholder="مثال: beIN Sports 1" />
-            <label>التصنيف</label>
+            <label id="addCategoryLabel">التصنيف</label>
             <input type="text" id="inputCategory" placeholder="مثال: رياضة" />
-            <label>رابط المشاهدة (.m3u8) *</label>
+            <label id="addUrlLabel">رابط المشاهدة (.m3u8) *</label>
             <input type="url" id="inputUrl" placeholder="http://example.com/stream.m3u8" />
-            <button class="btn-save" onclick="saveChannel()"><i class="fas fa-save"></i> حفظ</button>
+            <button class="btn-save" id="addSaveBtn" onclick="saveChannel()"><i class="fas fa-save"></i> حفظ</button>
         </div>
     </div>
 
@@ -500,18 +503,18 @@
     <div class="modal-overlay" id="adminModal">
         <div class="modal-box" style="max-width: 800px;">
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
-            <h2><i class="fas fa-users-cog" style="color:#f39c12;"></i> لوحة تحكم المدير</h2>
+            <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:#f39c12;"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
                 <div class="admin-panel">
-                    <h3>إدارة المستخدمين</h3>
+                    <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>البريد</th>
-                                    <th>الحالة</th>
-                                    <th>Xtream</th>
-                                    <th>الإجراءات</th>
+                                    <th id="adminEmailTh">البريد</th>
+                                    <th id="adminStatusTh">الحالة</th>
+                                    <th id="adminXtreamTh">Xtream</th>
+                                    <th id="adminActionsTh">الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="adminUsersBody"></tbody>
@@ -527,22 +530,22 @@
     <div class="modal-overlay" id="editUserModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeEditUserModal()">✕</button>
-            <h2><i class="fas fa-user-edit" style="color:#f39c12;"></i> تعديل المستخدم</h2>
+            <h2 id="editUserModalTitle"><i class="fas fa-user-edit" style="color:#f39c12;"></i> تعديل المستخدم</h2>
             <div id="editUserForm">
-                <label>البريد الإلكتروني</label>
+                <label id="editUserEmailLabel">البريد الإلكتروني</label>
                 <input type="email" id="editUserEmail" disabled style="opacity:0.6;" />
-                <label>الحالة</label>
+                <label id="editUserStatusLabel">الحالة</label>
                 <select id="editUserStatus">
-                    <option value="true">نشط</option>
-                    <option value="false">معطل</option>
+                    <option value="true" id="editUserStatusActive">نشط</option>
+                    <option value="false" id="editUserStatusInactive">معطل</option>
                 </select>
-                <label>رابط الخادم (Xtream)</label>
+                <label id="editUserServerLabel">رابط الخادم (Xtream)</label>
                 <input type="url" id="editUserServer" placeholder="http://example.com:8080" />
-                <label>اسم المستخدم (Xtream)</label>
+                <label id="editUserUsernameLabel">اسم المستخدم (Xtream)</label>
                 <input type="text" id="editUserUsername" placeholder="أدخل اسم المستخدم" />
-                <label>كلمة المرور (Xtream)</label>
+                <label id="editUserPasswordLabel">كلمة المرور (Xtream)</label>
                 <input type="password" id="editUserPassword" placeholder="أدخل كلمة المرور" />
-                <button class="btn-save" onclick="saveEditUser()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <button class="btn-save" id="editUserSaveBtn" onclick="saveEditUser()"><i class="fas fa-save"></i> حفظ التعديلات</button>
                 <div id="editUserStatusMsg" class="status-msg"></div>
             </div>
         </div>
@@ -551,8 +554,8 @@
     <!-- ===== NEW MODAL: Loading Channels ===== -->
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-box" style="text-align:center; max-width:400px;">
-            <h2><i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> جاري التحميل</h2>
-            <p style="font-size:16px; margin:20px 0;">يرجى الانتظار، سيتم تحميل القنوات...</p>
+            <h2 id="loadingModalTitle"><i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> جاري التحميل</h2>
+            <p id="loadingModalText" style="font-size:16px; margin:20px 0;">يرجى الانتظار، سيتم تحميل القنوات...</p>
             <div style="width:100%; height:4px; background:#1e2636; border-radius:4px; overflow:hidden; margin-top:10px;">
                 <div id="loadingProgress" style="width:0%; height:100%; background:#00d4ff; transition: width 0.5s;"></div>
             </div>
@@ -1524,6 +1527,168 @@
         };
 
         // ================================================================
+        // 0c.  الترجمات (i18n)
+        // ================================================================
+        const translations = {
+            ar: {
+                // عام
+                "live": "مباشر",
+                "login": "دخول",
+                "register": "تسجيل",
+                "adminPanel": "لوحة التحكم",
+                "xtream": "Xtream",
+                "add": "إضافة",
+                "logout": "خروج",
+                "search": "بحث",
+                "all": "الكل",
+                "favorites": "المفضلة",
+                "removeCatFav": "إزالة التصنيف من المفضلة",
+                "addCatFav": "إضافة التصنيف إلى المفضلة",
+                "noChannels": "لا توجد قنوات",
+                "pleaseLogin": "يرجى تسجيل الدخول",
+                "loginToView": "سجل الدخول لمشاهدة القنوات وإدارة اشتراكك.",
+                "loginButton": "تسجيل الدخول",
+                "setupXtream": "قم بإعداد حساب Xtream بالضغط على زر",
+                "adminOnly": "للمدير فقط",
+                "orAddManual": "أو أضف قناة يدوياً.",
+                "addNewChannel": "إضافة قناة جديدة",
+                "play": "تشغيل",
+                "addFav": "إضافة إلى المفضلة",
+                "removeFav": "إزالة من المفضلة",
+                // النماذج
+                "xtreamSettings": "إعدادات Xtream",
+                "serverUrl": "رابط الخادم (Server URL)",
+                "username": "اسم المستخدم (Username)",
+                "password": "كلمة المرور (Password)",
+                "saveAndFetch": "حفظ وجلب القنوات",
+                "addChannel": "إضافة قناة",
+                "channelName": "اسم القناة *",
+                "category": "التصنيف",
+                "streamUrl": "رابط المشاهدة (.m3u8) *",
+                "save": "حفظ",
+                "adminDashboard": "لوحة تحكم المدير",
+                "userManagement": "إدارة المستخدمين",
+                "email": "البريد",
+                "status": "الحالة",
+                "actions": "الإجراءات",
+                "active": "نشط",
+                "inactive": "معطل",
+                "edit": "تعديل",
+                "delete": "حذف",
+                "editUser": "تعديل المستخدم",
+                "saveChanges": "حفظ التعديلات",
+                "loading": "جاري التحميل",
+                "pleaseWait": "يرجى الانتظار، سيتم تحميل القنوات...",
+                "noUsers": "لا يوجد مستخدمون",
+                // رسائل
+                "fillEmailPassword": "⚠️ يرجى إدخال البريد وكلمة المرور",
+                "passwordMin6": "⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+                "updateSuccess": "✅ تم التحديث بنجاح",
+                "userNotSpecified": "⚠️ لم يتم تحديد المستخدم",
+                "adminOnlyPage": "⚠️ هذه الصفحة مخصصة للمدير فقط",
+                "adminOnlySettings": "⚠️ هذه الإعدادات متاحة للمدير فقط",
+                "notAuthorized": "⚠️ غير مصرح لك بتعديل هذه الإعدادات",
+                "loginFirst": "⚠️ يرجى تسجيل الدخول أولاً",
+                "channelNotFound": "⚠️ القناة غير موجودة.",
+                "invalidUrl": "⚠️ هذا الرابط غير صحيح.",
+                "fillAllFields": "⚠️ يرجى ملء جميع الحقول",
+                "enterChannelName": "⚠️ يرجى إدخال اسم القناة.",
+                "pasteChannelUrl": "⚠️ يرجى لصق رابط القناة.",
+                "userNotFound": "المستخدم غير موجود",
+                "confirmLogout": "هل أنت متأكد من تسجيل الخروج؟",
+                "confirmDeleteUser": "هل أنت متأكد من حذف هذا المستخدم نهائياً؟",
+                "loginInProgress": "⏳ جاري تسجيل الدخول...",
+                "registerInProgress": "⏳ جاري إنشاء الحساب...",
+                "fetchSuccess": "✅ تم جلب {count} قناة بنجاح",
+                // نوافذ
+                "noAccount": "ليس لديك حساب؟",
+                "registerNow": "سجل الآن",
+                "haveAccount": "لديك حساب؟",
+                "loginNow": "تسجيل الدخول",
+                // الإتجاه
+                "lang": "اللغة",
+            },
+            fr: {
+                // عام
+                "live": "En direct",
+                "login": "Connexion",
+                "register": "S'inscrire",
+                "adminPanel": "Tableau de bord",
+                "xtream": "Xtream",
+                "add": "Ajouter",
+                "logout": "Déconnexion",
+                "search": "Rechercher",
+                "all": "Tout",
+                "favorites": "Favoris",
+                "removeCatFav": "Retirer la catégorie des favoris",
+                "addCatFav": "Ajouter la catégorie aux favoris",
+                "noChannels": "Aucune chaîne",
+                "pleaseLogin": "Veuillez vous connecter",
+                "loginToView": "Connectez-vous pour voir les chaînes et gérer votre abonnement.",
+                "loginButton": "Se connecter",
+                "setupXtream": "Configurez un compte Xtream en cliquant sur le bouton",
+                "adminOnly": "réservé à l'administrateur",
+                "orAddManual": "ou ajoutez une chaîne manuellement.",
+                "addNewChannel": "Ajouter une nouvelle chaîne",
+                "play": "Lire",
+                "addFav": "Ajouter aux favoris",
+                "removeFav": "Retirer des favoris",
+                // النماذج
+                "xtreamSettings": "Paramètres Xtream",
+                "serverUrl": "URL du serveur",
+                "username": "Nom d'utilisateur",
+                "password": "Mot de passe",
+                "saveAndFetch": "Enregistrer et récupérer les chaînes",
+                "addChannel": "Ajouter une chaîne",
+                "channelName": "Nom de la chaîne *",
+                "category": "Catégorie",
+                "streamUrl": "Lien de visionnage (.m3u8) *",
+                "save": "Enregistrer",
+                "adminDashboard": "Tableau de bord de l'administrateur",
+                "userManagement": "Gestion des utilisateurs",
+                "email": "Email",
+                "status": "Statut",
+                "actions": "Actions",
+                "active": "Actif",
+                "inactive": "Inactif",
+                "edit": "Modifier",
+                "delete": "Supprimer",
+                "editUser": "Modifier l'utilisateur",
+                "saveChanges": "Enregistrer les modifications",
+                "loading": "Chargement en cours",
+                "pleaseWait": "Veuillez patienter, les chaînes sont en cours de chargement...",
+                "noUsers": "Aucun utilisateur",
+                // رسائل
+                "fillEmailPassword": "⚠️ Veuillez saisir l'email et le mot de passe",
+                "passwordMin6": "⚠️ Le mot de passe doit comporter au moins 6 caractères",
+                "updateSuccess": "✅ Mise à jour réussie",
+                "userNotSpecified": "⚠️ Utilisateur non spécifié",
+                "adminOnlyPage": "⚠️ Cette page est réservée à l'administrateur",
+                "adminOnlySettings": "⚠️ Ces paramètres sont réservés à l'administrateur",
+                "notAuthorized": "⚠️ Vous n'êtes pas autorisé à modifier ces paramètres",
+                "loginFirst": "⚠️ Veuillez vous connecter d'abord",
+                "channelNotFound": "⚠️ La chaîne n'existe pas.",
+                "invalidUrl": "⚠️ Ce lien n'est pas valide.",
+                "fillAllFields": "⚠️ Veuillez remplir tous les champs",
+                "enterChannelName": "⚠️ Veuillez entrer le nom de la chaîne.",
+                "pasteChannelUrl": "⚠️ Veuillez coller le lien de la chaîne.",
+                "userNotFound": "Utilisateur introuvable",
+                "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ?",
+                "confirmDeleteUser": "Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?",
+                "loginInProgress": "⏳ Connexion en cours...",
+                "registerInProgress": "⏳ Création du compte en cours...",
+                "fetchSuccess": "✅ {count} chaînes récupérées avec succès",
+                // نوافذ
+                "noAccount": "Pas de compte ?",
+                "registerNow": "S'inscrire",
+                "haveAccount": "Déjà un compte ?",
+                "loginNow": "Se connecter",
+                // الإتجاه
+                "lang": "Langue",
+            }
+        };
+
+        // ================================================================
         // 1.  الإعدادات العامة
         // ================================================================
         const API_URL = 'https://hacenetv2-0.onrender.com/api';
@@ -1534,9 +1699,99 @@
         let currentCategory = 'الكل';
         let favorites = [];
         let appInitialized = false;
+        let currentLang = 'ar'; // 'ar' أو 'fr'
 
         // ================================================================
-        // 2.  إدارة التوكن والتخزين المحلي
+        // 2.  دوال الترجمة
+        // ================================================================
+        function getTranslation(key, params = {}) {
+            const langData = translations[currentLang] || translations.ar;
+            let text = langData[key] || key;
+            // استبدال المتغيرات مثل {count}
+            for (let [k, v] of Object.entries(params)) {
+                text = text.replace(`{${k}}`, v);
+            }
+            return text;
+        }
+
+        function setLanguage(lang) {
+            if (lang === 'ar' || lang === 'fr') {
+                currentLang = lang;
+                localStorage.setItem('hacene_lang', lang);
+                // تحديث اتجاه الصفحة
+                document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
+                document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                // تحديث كل النصوص
+                updateAllTexts();
+                // إعادة بناء الواجهة
+                renderHeader();
+                buildSidebar();
+                applyFilters();
+                // تحديث الأزرار
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+            }
+        }
+
+        function updateAllTexts() {
+            // نحدّث جميع العناصر التي تحمل معرفات ثابتة
+            const elements = {
+                // شريط العنوان
+                // ... (سيتم تحديثها في دوال render)
+                // نوافذ
+                'loginModalTitle': 'login',
+                'loginEmailLabel': 'email',
+                'loginPasswordLabel': 'password',
+                'loginBtn': 'login',
+                'noAccountText': 'noAccount',
+                'registerLink': 'registerNow',
+                'registerEmailLabel': 'email',
+                'registerPasswordLabel': 'password',
+                'registerBtn': 'register',
+                'haveAccountText': 'haveAccount',
+                'loginLink': 'loginNow',
+                'xtreamModalTitle': 'xtreamSettings',
+                'xtreamServerLabel': 'serverUrl',
+                'xtreamUsernameLabel': 'username',
+                'xtreamPasswordLabel': 'password',
+                'xtreamSaveBtn': 'saveAndFetch',
+                'addModalTitle': 'addChannel',
+                'addNameLabel': 'channelName',
+                'addCategoryLabel': 'category',
+                'addUrlLabel': 'streamUrl',
+                'addSaveBtn': 'save',
+                'adminModalTitle': 'adminDashboard',
+                'adminUsersTitle': 'userManagement',
+                'adminEmailTh': 'email',
+                'adminStatusTh': 'status',
+                'adminXtreamTh': 'xtream',
+                'adminActionsTh': 'actions',
+                'editUserModalTitle': 'editUser',
+                'editUserEmailLabel': 'email',
+                'editUserStatusLabel': 'status',
+                'editUserStatusActive': 'active',
+                'editUserStatusInactive': 'inactive',
+                'editUserServerLabel': 'serverUrl',
+                'editUserUsernameLabel': 'username',
+                'editUserPasswordLabel': 'password',
+                'editUserSaveBtn': 'saveChanges',
+                'loadingModalTitle': 'loading',
+                'loadingModalText': 'pleaseWait',
+            };
+            for (let [id, key] of Object.entries(elements)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    // تجنب تغيير النص إذا كان يحتوي على أيقونات (نتركها)
+                    // نستبدل النص فقط إذا كان العنصر لا يحتوي على أيقونة داخلية
+                    // سنقوم بمعالجة خاصة في دوال render بدلاً من ذلك
+                }
+            }
+            // تحديث نصوص الأزرار في header سيتم عبر renderHeader
+        }
+
+        // ================================================================
+        // 3.  إدارة التوكن والتخزين المحلي
         // ================================================================
         function getToken() {
             return localStorage.getItem('hacene_token');
@@ -1582,7 +1837,7 @@
         }
 
         // ================================================================
-        // 3.  دوال المصادقة (Authentication)
+        // 4.  دوال المصادقة (Authentication)
         // ================================================================
 
         function getAuthHeaders() {
@@ -1614,21 +1869,29 @@
         }
 
         // ================================================================
-        // 4.  دوال العرض (UI)
+        // 5.  دوال العرض (UI) - مع الترجمة
         // ================================================================
 
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
+            const lang = currentLang;
+
+            // زر تبديل اللغة
+            const langButtons = `
+                <button class="lang-btn ${lang === 'ar' ? 'active' : ''}" data-lang="ar" onclick="setLanguage('ar')">عربي</button>
+                <button class="lang-btn ${lang === 'fr' ? 'active' : ''}" data-lang="fr" onclick="setLanguage('fr')">Français</button>
+            `;
 
             if (!user) {
                 container.innerHTML = `
-                    <span class="badge-count"><i class="fas fa-play"></i> مباشر</span>
+                    ${langButtons}
+                    <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
                     <button class="btn btn-primary" onclick="openLoginModal()">
-                        <i class="fas fa-sign-in-alt"></i> دخول
+                        <i class="fas fa-sign-in-alt"></i> ${getTranslation('login')}
                     </button>
                     <button class="btn btn-outline" onclick="openRegisterModal()">
-                        <i class="fas fa-user-plus"></i> تسجيل
+                        <i class="fas fa-user-plus"></i> ${getTranslation('register')}
                     </button>
                 `;
                 return;
@@ -1638,29 +1901,30 @@
             let xtreamBtn = '';
             if (user.role === 'admin') {
                 adminBtn = `<button class="btn btn-warning btn-sm" onclick="openAdminModal()">
-                    <i class="fas fa-users-cog"></i> لوحة التحكم
+                    <i class="fas fa-users-cog"></i> ${getTranslation('adminPanel')}
                 </button>`;
                 xtreamBtn = `<button class="btn btn-outline btn-sm" onclick="openXtreamModal()">
-                    <i class="fas fa-key"></i> Xtream
+                    <i class="fas fa-key"></i> ${getTranslation('xtream')}
                 </button>`;
             }
 
             container.innerHTML = `
-                <span class="badge-count"><i class="fas fa-play"></i> مباشر</span>
+                ${langButtons}
+                <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
                 <div class="user-info">
                     <i class="fas fa-user-circle"></i>
                     <span class="email" title="${user.email}">${user.email}</span>
-                    ${user.role === 'admin' ? '<span style="color:#f39c12;font-size:11px;">(مدير)</span>' : ''}
+                    ${user.role === 'admin' ? '<span style="color:#f39c12;font-size:11px;">('+getTranslation('adminPanel')+')</span>' : ''}
                 </div>
                 ${adminBtn}
                 ${xtreamBtn}
                 <button class="btn btn-primary btn-sm" onclick="openAddModal()">
-                    <i class="fas fa-plus"></i> إضافة
+                    <i class="fas fa-plus"></i> ${getTranslation('add')}
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> خروج
+                    <i class="fas fa-sign-out-alt"></i> ${getTranslation('logout')}
                 </button>
-                <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث..." oninput="applyFilters()" />
+                <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="applyFilters()" />
                 <span class="channel-counter" id="channelCount">0</span>
             `;
         }
@@ -1668,27 +1932,29 @@
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
             if (!allChannels || allChannels.length === 0) {
-                sidebar.innerHTML = `<div class="cat-item" style="color:#666; text-align:center;">لا توجد قنوات</div>`;
+                sidebar.innerHTML = `<div class="cat-item" style="color:#666; text-align:center;">${getTranslation('noChannels')}</div>`;
                 return;
             }
             const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
-            const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
+            const sorted = [getTranslation('all'), getTranslation('favorites'), ...Array.from(cats).sort()];
 
             sidebar.innerHTML = sorted.map(cat => {
                 let count = 0;
-                if (cat === 'الكل') {
+                if (cat === getTranslation('all')) {
                     count = allChannels.length;
-                } else if (cat === 'المفضلة') {
+                } else if (cat === getTranslation('favorites')) {
                     count = favorites.length;
                 } else {
                     count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
                 }
                 const active = cat === currentCategory ? 'active' : '';
-                const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
-                return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
+                const isCatFav = cat !== getTranslation('all') && cat !== getTranslation('favorites') && isCategoryFavorite(cat);
+                // نحتاج إلى تمرير الاسم الأصلي للتصنيف
+                const catName = cat === getTranslation('all') ? 'الكل' : (cat === getTranslation('favorites') ? 'المفضلة' : cat);
+                return `<div class="cat-item ${active}" data-cat="${catName}" onclick="selectCategory('${catName}')">
                             <span>${cat}</span>
                             <span class="count">${count}</span>
-                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? 'إزالة التصنيف من المفضلة' : 'إضافة التصنيف إلى المفضلة'}"><i class="fas fa-star"></i></button>` : ''}
+                            ${cat !== getTranslation('all') && cat !== getTranslation('favorites') ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${catName}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
                         </div>`;
             }).join('');
         }
@@ -1725,9 +1991,9 @@
             const searchVal = search ? search.value.trim().toLowerCase() : '';
             let filtered = allChannels;
 
-            if (currentCategory === 'المفضلة') {
+            if (currentCategory === getTranslation('favorites')) {
                 filtered = allChannels.filter(ch => favorites.includes(getChannelId(ch)));
-            } else if (currentCategory !== 'الكل') {
+            } else if (currentCategory !== getTranslation('all')) {
                 filtered = filtered.filter(ch => (ch.category || 'عام') === currentCategory);
             }
 
@@ -1752,10 +2018,10 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-sign-in-alt"></i>
-                        <h2>يرجى تسجيل الدخول</h2>
-                        <p>سجل الدخول لمشاهدة القنوات وإدارة اشتراكك.</p>
+                        <h2>${getTranslation('pleaseLogin')}</h2>
+                        <p>${getTranslation('loginToView')}</p>
                         <button class="btn-add-large" onclick="openLoginModal()">
-                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                            <i class="fas fa-sign-in-alt"></i> ${getTranslation('loginButton')}
                         </button>
                     </div>
                 `;
@@ -1766,10 +2032,10 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-tv"></i>
-                        <h2>لا توجد قنوات</h2>
-                        <p>قم بإعداد حساب Xtream بالضغط على زر <strong>"Xtream"</strong> (للمدير فقط)، أو أضف قناة يدوياً.</p>
+                        <h2>${getTranslation('noChannels')}</h2>
+                        <p>${getTranslation('setupXtream')} <strong>"${getTranslation('xtream')}"</strong> ${getTranslation('adminOnly')}، ${getTranslation('orAddManual')}</p>
                         <button class="btn-add-large" onclick="openAddModal()">
-                            <i class="fas fa-plus"></i> إضافة قناة جديدة
+                            <i class="fas fa-plus"></i> ${getTranslation('addNewChannel')}
                         </button>
                     </div>
                 `;
@@ -1791,9 +2057,9 @@
                                     <span class="ch-cat">${ch.category || 'عام'}</span>
                                     <div class="card-actions">
                                         <button class="btn-play" onclick="playChannel(${realIndex})">
-                                            <i class="fas fa-play"></i> تشغيل
+                                            <i class="fas fa-play"></i> ${getTranslation('play')}
                                         </button>
-                                        <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite(${realIndex})" title="${isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}">
+                                        <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite(${realIndex})" title="${isFav ? getTranslation('removeFav') : getTranslation('addFav')}">
                                             <i class="fas fa-star"></i>
                                         </button>
                                     </div>
@@ -1828,7 +2094,7 @@
         }
 
         // ================================================================
-        // 5.  دوال المصادقة (Login / Register / Logout)
+        // 6.  دوال المصادقة (Login / Register / Logout) - مع ترجمة الرسائل
         // ================================================================
 
         function openLoginModal() {
@@ -1838,6 +2104,18 @@
             document.getElementById('loginStatus').textContent = '';
             document.getElementById('loginStatus').className = 'status-msg';
             document.getElementById('loginEmail').focus();
+            // تحديث النصوص
+            document.getElementById('loginModalTitle').innerHTML = `<i class="fas fa-sign-in-alt" style="color:#00d4ff;"></i> ${getTranslation('login')}`;
+            document.getElementById('loginEmailLabel').textContent = getTranslation('email');
+            document.getElementById('loginPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('loginBtn').innerHTML = `<i class="fas fa-sign-in-alt"></i> ${getTranslation('login')}`;
+            document.getElementById('noAccountText').textContent = getTranslation('noAccount');
+            document.getElementById('registerLink').textContent = getTranslation('registerNow');
+            document.getElementById('registerEmailLabel').textContent = getTranslation('email');
+            document.getElementById('registerPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('registerBtn').innerHTML = `<i class="fas fa-user-plus"></i> ${getTranslation('register')}`;
+            document.getElementById('haveAccountText').textContent = getTranslation('haveAccount');
+            document.getElementById('loginLink').textContent = getTranslation('loginNow');
         }
 
         function closeLoginModal() {
@@ -1871,27 +2149,27 @@
         function showLoadingModal() {
             const modal = document.getElementById('loadingModal');
             modal.classList.add('active');
+            // تحديث النصوص
+            document.getElementById('loadingModalTitle').innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#00d4ff;"></i> ${getTranslation('loading')}`;
+            document.getElementById('loadingModalText').textContent = getTranslation('pleaseWait');
             // إعادة تعيين شريط التقدم
             const progress = document.getElementById('loadingProgress');
             progress.style.width = '0%';
-            // تحريك الشريط حتى 100% خلال 5 ثوانٍ
             let width = 0;
             const interval = setInterval(() => {
                 if (width >= 100) {
                     clearInterval(interval);
                     return;
                 }
-                width += 2; // 2% كل 100ms = 20% في الثانية، 100% في 5 ثوانٍ
+                width += 2;
                 progress.style.width = width + '%';
             }, 100);
-            // تخزين معرف المؤقت للإزالة لاحقاً (اختياري)
             window._loadingInterval = interval;
         }
 
         function hideLoadingModal() {
             const modal = document.getElementById('loadingModal');
             modal.classList.remove('active');
-            // إيقاف المؤقت إن كان لا يزال يعمل
             if (window._loadingInterval) {
                 clearInterval(window._loadingInterval);
                 window._loadingInterval = null;
@@ -1899,7 +2177,7 @@
         }
 
         // ================================================================
-        //  تعديل دوال login و register لاستخدام النافذة الجديدة
+        //  تعديل دوال login و register لاستخدام النافذة الجديدة والترجمة
         // ================================================================
 
         async function login() {
@@ -1908,12 +2186,12 @@
             const statusEl = document.getElementById('loginStatus');
 
             if (!email || !password) {
-                statusEl.textContent = '⚠️ يرجى إدخال البريد وكلمة المرور';
+                statusEl.textContent = getTranslation('fillEmailPassword');
                 statusEl.className = 'status-msg error';
                 return;
             }
 
-            statusEl.textContent = '⏳ جاري تسجيل الدخول...';
+            statusEl.textContent = getTranslation('loginInProgress');
             statusEl.className = 'status-msg';
 
             try {
@@ -1922,13 +2200,10 @@
                 setUser(data.user);
                 closeLoginModal();
 
-                // إظهار نافذة التحميل
                 showLoadingModal();
 
-                // بدء تحميل القنوات في الخلفية (بدون انتظار)
                 initializeApp(true).catch(err => console.error('Error loading channels:', err));
 
-                // بعد 5 ثوانٍ إخفاء النافذة (التحميل مستمر في الخلفية)
                 setTimeout(() => {
                     hideLoadingModal();
                 }, 5000);
@@ -1945,17 +2220,17 @@
             const statusEl = document.getElementById('registerStatus');
 
             if (!email || !password) {
-                statusEl.textContent = '⚠️ يرجى إدخال البريد وكلمة المرور';
+                statusEl.textContent = getTranslation('fillEmailPassword');
                 statusEl.className = 'status-msg error';
                 return;
             }
             if (password.length < 6) {
-                statusEl.textContent = '⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                statusEl.textContent = getTranslation('passwordMin6');
                 statusEl.className = 'status-msg error';
                 return;
             }
 
-            statusEl.textContent = '⏳ جاري إنشاء الحساب...';
+            statusEl.textContent = getTranslation('registerInProgress');
             statusEl.className = 'status-msg';
 
             try {
@@ -1964,13 +2239,10 @@
                 setUser(data.user);
                 closeLoginModal();
 
-                // إظهار نافذة التحميل
                 showLoadingModal();
 
-                // بدء تحميل القنوات في الخلفية (بدون انتظار)
                 initializeApp(true).catch(err => console.error('Error loading channels:', err));
 
-                // بعد 5 ثوانٍ إخفاء النافذة
                 setTimeout(() => {
                     hideLoadingModal();
                 }, 5000);
@@ -1982,35 +2254,41 @@
         }
 
         function logout() {
-            if (!confirm('هل أنت متأكد من تسجيل الخروج؟')) return;
+            if (!confirm(getTranslation('confirmLogout'))) return;
             setToken(null);
             setUser(null);
             setFavorites([]);
             allChannels = [];
-            currentCategory = 'الكل';
+            currentCategory = getTranslation('all');
             renderHeader();
             buildSidebar();
             applyFilters();
         }
 
         // ================================================================
-        // 6.  دوال Xtream (معدلة لمنع المستخدم العادي من رؤية المعلومات)
+        // 7.  دوال Xtream (معدلة لمنع المستخدم العادي من رؤية المعلومات)
         // ================================================================
 
         function openXtreamModal() {
             const user = getUser();
             if (!user) {
-                alert('⚠️ يرجى تسجيل الدخول أولاً');
+                alert(getTranslation('loginFirst'));
                 return;
             }
 
-            // التأكد من أن المستخدم هو admin
             if (user.role !== 'admin') {
-                alert('⚠️ هذه الإعدادات متاحة للمدير فقط');
+                alert(getTranslation('adminOnlySettings'));
                 return;
             }
 
             document.getElementById('xtreamModal').classList.add('active');
+            // تحديث النصوص
+            document.getElementById('xtreamModalTitle').innerHTML = `<i class="fas fa-key" style="color:#9b59b6;"></i> ${getTranslation('xtreamSettings')}`;
+            document.getElementById('xtreamServerLabel').textContent = getTranslation('serverUrl');
+            document.getElementById('xtreamUsernameLabel').textContent = getTranslation('username');
+            document.getElementById('xtreamPasswordLabel').textContent = getTranslation('password');
+            document.getElementById('xtreamSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveAndFetch')}`;
+
             document.getElementById('xtreamServer').value = user.xtream?.server || '';
             document.getElementById('xtreamUsername').value = user.xtream?.username || '';
             document.getElementById('xtreamPassword').value = user.xtream?.password || '';
@@ -2025,7 +2303,7 @@
         async function saveXtreamSettings() {
             const user = getUser();
             if (!user || user.role !== 'admin') {
-                alert('⚠️ غير مصرح لك بتعديل هذه الإعدادات');
+                alert(getTranslation('notAuthorized'));
                 return;
             }
 
@@ -2035,12 +2313,12 @@
             const statusEl = document.getElementById('xtreamStatus');
 
             if (!server || !username || !password) {
-                statusEl.textContent = '⚠️ يرجى ملء جميع الحقول';
+                statusEl.textContent = getTranslation('fillAllFields');
                 statusEl.className = 'status-msg error';
                 return;
             }
 
-            statusEl.textContent = '⏳ جاري الحفظ وجلب القنوات...';
+            statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
             statusEl.className = 'status-msg';
 
             try {
@@ -2057,7 +2335,7 @@
                 closeXtreamModal();
                 buildSidebar();
                 applyFilters();
-                statusEl.textContent = `✅ تم جلب ${allChannels.length} قناة بنجاح`;
+                statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
                 statusEl.className = 'status-msg success';
                 setTimeout(() => {
                     statusEl.textContent = '';
@@ -2070,16 +2348,22 @@
         }
 
         // ================================================================
-        // 7.  دوال القنوات
+        // 8.  دوال القنوات
         // ================================================================
 
         function openAddModal() {
             const user = getUser();
             if (!user) {
-                alert('⚠️ يرجى تسجيل الدخول أولاً');
+                alert(getTranslation('loginFirst'));
                 return;
             }
             document.getElementById('addModal').classList.add('active');
+            // تحديث النصوص
+            document.getElementById('addModalTitle').innerHTML = `<i class="fas fa-plus-circle" style="color:#00d4ff;"></i> ${getTranslation('addChannel')}`;
+            document.getElementById('addNameLabel').textContent = getTranslation('channelName');
+            document.getElementById('addCategoryLabel').textContent = getTranslation('category');
+            document.getElementById('addUrlLabel').textContent = getTranslation('streamUrl');
+            document.getElementById('addSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('save')}`;
             document.getElementById('inputName').value = '';
             document.getElementById('inputCategory').value = '';
             document.getElementById('inputUrl').value = '';
@@ -2095,10 +2379,9 @@
             const category = document.getElementById('inputCategory').value.trim() || 'عام';
             const url = document.getElementById('inputUrl').value.trim();
 
-            if (!name) { alert('⚠️ يرجى إدخال اسم القناة.'); return; }
-            if (!url) { alert('⚠️ يرجى لصق رابط القناة.'); return; }
+            if (!name) { alert(getTranslation('enterChannelName')); return; }
+            if (!url) { alert(getTranslation('pasteChannelUrl')); return; }
 
-            // تطبيق التصنيف المخصص تلقائياً إذا كان الاسم موجوداً في الخريطة
             let finalCategory = category;
             if (CHANNEL_CATEGORY_MAP[name]) {
                 finalCategory = CHANNEL_CATEGORY_MAP[name];
@@ -2124,7 +2407,7 @@
         function playChannel(index) {
             const channel = allChannels[index];
             if (!channel) {
-                alert('⚠️ القناة غير موجودة.');
+                alert(getTranslation('channelNotFound'));
                 return;
             }
 
@@ -2137,7 +2420,7 @@
             }
 
             if (!url || url === '#') {
-                alert('⚠️ هذا الرابط غير صحيح.');
+                alert(getTranslation('invalidUrl'));
                 return;
             }
 
@@ -2145,18 +2428,25 @@
         }
 
         // ================================================================
-        // 8.  دوال Admin
+        // 9.  دوال Admin
         // ================================================================
 
         async function openAdminModal() {
             const user = getUser();
             if (!user || user.role !== 'admin') {
-                alert('⚠️ هذه الصفحة مخصصة للمدير فقط');
+                alert(getTranslation('adminOnlyPage'));
                 return;
             }
             document.getElementById('adminModal').classList.add('active');
             document.getElementById('adminStatus').textContent = '';
             document.getElementById('adminStatus').className = 'status-msg';
+            // تحديث النصوص
+            document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:#f39c12;"></i> ${getTranslation('adminDashboard')}`;
+            document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
+            document.getElementById('adminEmailTh').textContent = getTranslation('email');
+            document.getElementById('adminStatusTh').textContent = getTranslation('status');
+            document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
+            document.getElementById('adminActionsTh').textContent = getTranslation('actions');
             await loadAdminUsers();
         }
 
@@ -2169,7 +2459,7 @@
                 const data = await apiCall('GET', '/admin/users');
                 const tbody = document.getElementById('adminUsersBody');
                 if (!data.users || data.users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">لا يوجد مستخدمون</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;">${getTranslation('noUsers')}</td></tr>`;
                     return;
                 }
                 tbody.innerHTML = data.users.map(u => `
@@ -2177,17 +2467,17 @@
                         <td class="user-email">${u.email}</td>
                         <td>
                             <span class="status-badge ${u.isActive ? 'active' : 'inactive'}">
-                                ${u.isActive ? 'نشط' : 'معطل'}
+                                ${u.isActive ? getTranslation('active') : getTranslation('inactive')}
                             </span>
                         </td>
                         <td style="font-size:11px;color:#888;">
                             ${u.xtream?.server ? '✅' : '❌'}
                         </td>
                         <td>
-                            <button class="btn-icon warning" onclick="openEditUser('${u._id}')" title="تعديل">
+                            <button class="btn-icon warning" onclick="openEditUser('${u._id}')" title="${getTranslation('edit')}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn-icon danger" onclick="deleteUser('${u._id}')" title="حذف">
+                            <button class="btn-icon danger" onclick="deleteUser('${u._id}')" title="${getTranslation('delete')}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -2207,10 +2497,21 @@
                 const data = await apiCall('GET', '/admin/users');
                 const user = data.users.find(u => u._id === userId);
                 if (!user) {
-                    alert('المستخدم غير موجود');
+                    alert(getTranslation('userNotFound'));
                     return;
                 }
                 editingUserId = userId;
+                // تحديث النصوص
+                document.getElementById('editUserModalTitle').innerHTML = `<i class="fas fa-user-edit" style="color:#f39c12;"></i> ${getTranslation('editUser')}`;
+                document.getElementById('editUserEmailLabel').textContent = getTranslation('email');
+                document.getElementById('editUserStatusLabel').textContent = getTranslation('status');
+                document.getElementById('editUserStatusActive').textContent = getTranslation('active');
+                document.getElementById('editUserStatusInactive').textContent = getTranslation('inactive');
+                document.getElementById('editUserServerLabel').textContent = getTranslation('serverUrl');
+                document.getElementById('editUserUsernameLabel').textContent = getTranslation('username');
+                document.getElementById('editUserPasswordLabel').textContent = getTranslation('password');
+                document.getElementById('editUserSaveBtn').innerHTML = `<i class="fas fa-save"></i> ${getTranslation('saveChanges')}`;
+
                 document.getElementById('editUserEmail').value = user.email;
                 document.getElementById('editUserStatus').value = user.isActive ? 'true' : 'false';
                 document.getElementById('editUserServer').value = user.xtream?.server || '';
@@ -2232,7 +2533,7 @@
         async function saveEditUser() {
             const statusEl = document.getElementById('editUserStatusMsg');
             if (!editingUserId) {
-                statusEl.textContent = '⚠️ لم يتم تحديد المستخدم';
+                statusEl.textContent = getTranslation('userNotSpecified');
                 statusEl.className = 'status-msg error';
                 return;
             }
@@ -2242,7 +2543,7 @@
             const username = document.getElementById('editUserUsername').value.trim();
             const password = document.getElementById('editUserPassword').value.trim();
 
-            statusEl.textContent = '⏳ جاري الحفظ...';
+            statusEl.textContent = '⏳ ' + getTranslation('saveChanges') + '...';
             statusEl.className = 'status-msg';
 
             try {
@@ -2250,7 +2551,7 @@
                     isActive,
                     xtream: { server, username, password }
                 });
-                statusEl.textContent = '✅ تم التحديث بنجاح';
+                statusEl.textContent = getTranslation('updateSuccess');
                 statusEl.className = 'status-msg success';
                 setTimeout(() => {
                     closeEditUserModal();
@@ -2263,7 +2564,7 @@
         }
 
         async function deleteUser(userId) {
-            if (!confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')) return;
+            if (!confirm(getTranslation('confirmDeleteUser'))) return;
             try {
                 await apiCall('DELETE', `/admin/users/${userId}`);
                 await loadAdminUsers();
@@ -2273,7 +2574,7 @@
         }
 
         // ================================================================
-        // 9.  تطبيق التصنيفات المخصصة على القنوات
+        // 10.  تطبيق التصنيفات المخصصة على القنوات
         // ================================================================
         function applyCategoryMap(channels) {
             return channels.map(ch => {
@@ -2286,20 +2587,27 @@
         }
 
         // ================================================================
-        // 10. التهيئة (Initialization) - مع دعم التحديث الإجباري
+        // 11. التهيئة (Initialization) - مع دعم التحديث الإجباري
         // ================================================================
 
         async function initializeApp(forceRefresh = false) {
-            // إذا كان التطبيق مهيئاً بالفعل وليس هناك طلب إعادة تحميل، نخرج
             if (appInitialized && !forceRefresh) return;
-            // إذا كان هناك طلب إعادة تحميل، نعيد تعيين العلامة
             if (forceRefresh) {
                 appInitialized = false;
-                // نمسح التخزين المؤقت للقنوات لضمان تحميل البيانات الجديدة
                 localStorage.removeItem('hacene_channels');
                 allChannels = [];
                 favorites = [];
             }
+
+            // تحميل اللغة المحفوظة
+            const savedLang = localStorage.getItem('hacene_lang');
+            if (savedLang && (savedLang === 'ar' || savedLang === 'fr')) {
+                currentLang = savedLang;
+            } else {
+                currentLang = 'ar';
+            }
+            document.documentElement.lang = currentLang === 'ar' ? 'ar' : 'fr';
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
 
             appInitialized = true;
 
@@ -2308,14 +2616,11 @@
 
             if (token && user) {
                 try {
-                    // التحقق من صحة التوكن
                     const data = await apiCall('GET', '/auth/me');
                     setUser(data.user);
-                    // محاولة تحميل القنوات من الخادم
                     const channelsData = await apiCall('GET', '/user/channels');
                     if (channelsData.channels && channelsData.channels.length > 0) {
                         allChannels = channelsData.channels;
-                        // تطبيق التصنيفات المخصصة
                         allChannels = applyCategoryMap(allChannels);
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                         console.log('✅ تم تحميل القنوات من الخادم:', allChannels.length);
@@ -2323,7 +2628,6 @@
                         console.log('ℹ️ لا توجد قنوات محفوظة على الخادم، جاري تحميل القنوات الافتراضية...');
                         if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
                             allChannels = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-                            // تطبيق التصنيفات المخصصة
                             allChannels = applyCategoryMap(allChannels);
                             try {
                                 await apiCall('POST', '/user/channels', { channels: allChannels });
@@ -2339,18 +2643,15 @@
                     }
                 } catch (err) {
                     console.error('❌ خطأ في تهيئة التطبيق:', err.message);
-                    // في حالة خطأ التوكن، نخرج المستخدم
                     setToken(null);
                     setUser(null);
                     allChannels = [];
                 }
             } else {
-                // المستخدم غير مسجل، نحاول تحميل من التخزين المحلي
                 const stored = localStorage.getItem('hacene_channels');
                 if (stored) {
                     try {
                         allChannels = JSON.parse(stored);
-                        // تطبيق التصنيفات المخصصة
                         allChannels = applyCategoryMap(allChannels);
                         console.log('✅ تم تحميل القنوات من التخزين المحلي:', allChannels.length);
                     } catch (e) {
@@ -2361,21 +2662,18 @@
                 }
             }
 
-            // تحميل المفضلة (إذا كانت موجودة)
             favorites = getFavorites();
 
-            // تحديث واجهة المستخدم
             renderHeader();
             buildSidebar();
             applyFilters();
         }
 
         // ================================================================
-        // 11.  بدء التطبيق
+        // 12.  بدء التطبيق
         // ================================================================
 
         document.addEventListener('DOMContentLoaded', () => initializeApp(false));
-        // في حالة تحميل الصفحة بعد أن يكون DOM جاهزاً
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             initializeApp(false);
         }
@@ -2387,8 +2685,6 @@
                 closeAddModal();
                 closeAdminModal();
                 closeEditUserModal();
-                // إخفاء نافذة التحميل أيضاً (اختياري)
-                // hideLoadingModal();
             }
         });
     </script>
