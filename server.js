@@ -209,7 +209,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // استخدام وكيل لتجنب مشاكل CORS
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
         const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
@@ -219,10 +218,13 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
 
         const channels = data.map(item => {
             let streamId = item.stream_id;
-            // ✅ تنظيف stream_id: استخراج الرقم الأخير إذا كان يحتوي على "/"
+            // ✅ استخراج الرقم الأخير فقط من stream_id إذا كان يحتوي على "/"
             if (streamId) {
-                const parts = String(streamId).split('/');
-                streamId = parts[parts.length - 1];
+                const str = String(streamId);
+                if (str.includes('/')) {
+                    const parts = str.split('/');
+                    streamId = parts[parts.length - 1];
+                }
             }
             return {
                 name: item.name || 'بدون اسم',
@@ -245,7 +247,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const doc = await Channel.findOne({ userId: req.user.userId });
