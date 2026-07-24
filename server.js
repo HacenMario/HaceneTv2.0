@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com';
 
 // CORS
 app.use(cors({
@@ -201,10 +202,6 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
 });
 
 // ===== جلب القنوات باستخدام الوكيل المخصص =====
-const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com'; // استخدم متغير البيئة أو الرابط الثابت
-
-const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com';
-
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
