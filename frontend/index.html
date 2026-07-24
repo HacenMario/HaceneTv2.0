@@ -1702,36 +1702,36 @@
         }
 
         // ===== دالة التشغيل المعدلة =====
-        function playChannel(index) {
-            const channel = allChannels[index];
-            if (!channel) {
-                alert(getTranslation('channelNotFound'));
-                return;
-            }
+function playChannel(index) {
+    const channel = allChannels[index];
+    if (!channel) {
+        alert(getTranslation('channelNotFound'));
+        return;
+    }
 
-            let url = channel.url;
-            const user = getUser();
+    let url = channel.url;
+    const user = getUser();
 
-            // إذا كانت القناة من Xtream ولديها stream_id
-            if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
-                const { server, username, password } = user.xtream;
-                let streamId = channel.stream_id;
-                // إذا كان stream_id يحتوي على "/" نستخرج الرقم الأخير
-                if (streamId.includes('/')) {
-                    const parts = streamId.split('/');
-                    streamId = parts[parts.length - 1];
-                }
-                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
-            }
-
-            // إذا لم يكن هناك رابط صالح
-            if (!url || url === '#' || url === '') {
-                alert(getTranslation('invalidUrl'));
-                return;
-            }
-
-            window.location.href = url;
+    // إذا كانت القناة من Xtream ولديها stream_id
+    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+        const { server, username, password } = user.xtream;
+        let streamId = String(channel.stream_id); // <-- التعديل هنا
+        // إذا كان stream_id يحتوي على "/" نستخرج الرقم الأخير
+        if (streamId.includes('/')) {
+            const parts = streamId.split('/');
+            streamId = parts[parts.length - 1];
         }
+        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
+    }
+
+    // إذا لم يكن هناك رابط صالح
+    if (!url || url === '#' || url === '') {
+        alert(getTranslation('invalidUrl'));
+        return;
+    }
+
+    window.location.href = url;
+}
 
         function applyCategoryMap() {
             allChannels = allChannels.map(ch => {
