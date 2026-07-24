@@ -2502,11 +2502,11 @@
                 return;
             }
 
+            // عرض رسالة "جاري التحميل..."
             const statusEl = document.getElementById('xtreamStatus');
-            if (statusEl) {
-                statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
-                statusEl.className = 'status-msg';
-            }
+            const isAdmin = user.role === 'admin';
+            const alertMsg = isAdmin ? '⏳ جاري جلب القنوات...' : '⏳ جاري جلب القنوات... يرجى الانتظار.';
+            alert(alertMsg);
 
             try {
                 const result = await apiCall('GET', '/user/fetch-channels');
@@ -2527,6 +2527,9 @@
                 applyFilters(true);
                 setupInfiniteScroll();
 
+                // رسالة نجاح
+                alert(getTranslation('fetchSuccess', { count: allChannels.length }));
+
                 if (statusEl) {
                     statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
                     statusEl.className = 'status-msg success';
@@ -2534,6 +2537,8 @@
                 }
                 return true;
             } catch (err) {
+                // رسالة فشل
+                alert('❌ فشل جلب القنوات: ' + err.message);
                 if (statusEl) {
                     statusEl.textContent = '❌ ' + err.message;
                     statusEl.className = 'status-msg error';
