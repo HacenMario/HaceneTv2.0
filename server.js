@@ -200,7 +200,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
+pp.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -209,9 +209,11 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
+        // ✅ اتصل مباشرة بالمزود، ليس عبر الوكيل
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
+        
+        // استخدم fetch مباشرة (بدون وكيل)
+        const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Invalid response');
