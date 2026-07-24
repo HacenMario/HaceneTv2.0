@@ -637,12 +637,8 @@
             color: var(--accent);
             font-size: 18px;
         }
-        .modal-box .contact-item a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        .modal-box .contact-item a:hover {
-            text-decoration: underline;
+        .modal-box .contact-item span {
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -808,7 +804,7 @@
             <h2 id="aboutModalTitle"><i class="fas fa-info-circle" style="color:var(--accent);"></i> من نحن</h2>
             <div class="about-content" id="aboutContent">
                 <p>HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية.</p>
-                <p>نحن نقدم خدمة مستقرة وسريعة مع دعم لبوابات Xtream Codes، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
+                <p>نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر ، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
                 <p>تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة.</p>
                 <p><strong>نسعى دائماً لتقديم الأفضل لمستخدمينا.</strong></p>
             </div>
@@ -824,11 +820,11 @@
                 <p>للتواصل معنا، يمكنك استخدام المعلومات التالية:</p>
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
-                    <a href="mailto:stevenhacen@gmail.com">stevenhacen@gmail.com</a>
+                    <span>stevenhacen@gmail.com</span>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-phone-alt"></i>
-                    <a href="tel:0542163526">0542163526</a>
+                    <span>0542163526</span>
                 </div>
                 <p style="margin-top:15px;">نحن في انتظار استفساراتكم واقتراحاتكم.</p>
             </div>
@@ -1805,6 +1801,7 @@
         // ================================================================
         const translations = {
             ar: {
+                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "live": "مباشر",
                 "login": "دخول",
                 "register": "تسجيل",
@@ -1883,7 +1880,6 @@
                 "notificationMessage": "نص الإشعار",
                 "send": "إرسال",
                 "notificationSent": "✅ تم إرسال الإشعار إلى {count} مستخدم",
-                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "theme": "المظهر",
                 "scrollToTop": "الرجوع للأعلى",
                 "loadingMore": "جاري تحميل المزيد...",
@@ -1894,12 +1890,19 @@
                 "contact": "تواصل معنا",
                 "aboutTitle": "من نحن",
                 "contactTitle": "تواصل معنا",
-                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم لبوابات Xtream Codes، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
+                "email": "البريد الإلكتروني",
+                "phone": "الهاتف",
+                "facebook": "فيسبوك",
                 "contactInfo": "للتواصل معنا، يمكنك استخدام المعلومات التالية:",
+                "contactEmail": "البريد الإلكتروني",
+                "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
-                "adminXtreamTh": "Xtream"
+                "telegram": "تيليجرام",
             },
             fr: {
+                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "live": "En direct",
                 "login": "Connexion",
                 "register": "S'inscrire",
@@ -1978,7 +1981,6 @@
                 "notificationMessage": "Message de la notification",
                 "send": "Envoyer",
                 "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
-                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "theme": "Thème",
                 "scrollToTop": "Retour en haut",
                 "loadingMore": "Chargement...",
@@ -1989,10 +1991,16 @@
                 "contact": "Nous contacter",
                 "aboutTitle": "À propos de nous",
                 "contactTitle": "Nous contacter",
-                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support des portails Xtream Codes, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
+                "email": "Email",
+                "phone": "Téléphone",
+                "facebook": "Facebook",
                 "contactInfo": "Pour nous contacter, vous pouvez utiliser les informations suivantes :",
+                "contactEmail": "Email",
+                "contactPhone": "Téléphone",
                 "contactWaiting": "Nous attendons vos questions et suggestions.",
-                "adminXtreamTh": "Xtream"
+                "telegram": "Telegram",
             }
         };
 
@@ -2493,7 +2501,7 @@
                 showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
-                setTimeout(hideLoadingModal, 3000);
+                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2524,7 +2532,7 @@
                 showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
-                setTimeout(hideLoadingModal, 3000);
+                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2652,31 +2660,16 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
-        // ===== دالة التشغيل المعدلة (المفتاح) =====
         function playChannel(index) {
             const channel = allChannels[index];
-            if (!channel) {
-                alert(getTranslation('channelNotFound'));
-                return;
-            }
-
+            if (!channel) { alert(getTranslation('channelNotFound')); return; }
             let url = channel.url;
             const user = getUser();
-
-            // إذا كانت القناة من Xtream ولديها stream_id
             if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
                 const { server, username, password } = user.xtream;
-                // بناء الرابط بصيغة Xtream القياسية
                 url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
             }
-
-            // إذا لم يكن هناك رابط صالح
-            if (!url || url === '#' || url === '') {
-                alert(getTranslation('invalidUrl'));
-                return;
-            }
-
-            // فتح الرابط في نفس النافذة
+            if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
             window.location.href = url;
         }
 
@@ -2702,15 +2695,15 @@
             document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
             document.getElementById('adminEmailTh').textContent = getTranslation('email');
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
-            document.getElementById('adminXtreamTh').textContent = getTranslation('adminXtreamTh');
+            document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
             document.getElementById('adminNotifTitle').innerHTML = `<i class="fas fa-bell"></i> ${getTranslation('sendNotification')}`;
             document.getElementById('adminNotifLabel').textContent = getTranslation('notificationMessage');
-            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
             document.getElementById('adminNotifMessage').value = '';
-            document.getElementById('adminNotifTarget').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
+            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
+            document.getElementById('adminNotifTarget').placeholder = getTranslation('adminNotifTargetPlaceholder') || 'example@email.com - اترك فارغاً للإرسال للجميع';
             await loadAdminUsers();
         }
 
@@ -2801,33 +2794,34 @@
         }
 
         // ===== Admin Notification =====
-        async function sendNotification() {
-            const message = document.getElementById('adminNotifMessage').value.trim();
-            const targetEmail = document.getElementById('adminNotifTarget').value.trim();
-            const statusEl = document.getElementById('adminNotifStatus');
-            if (!message) {
-                statusEl.textContent = getTranslation('fillAllFields');
-                statusEl.className = 'status-msg error';
-                return;
-            }
-            statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
-            statusEl.className = 'status-msg';
-            try {
-                const body = { message };
-                if (targetEmail) body.targetEmail = targetEmail;
-                const result = await apiCall('POST', '/admin/notifications', body);
-                const count = result.count || 0;
-                const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
-                statusEl.textContent = msg;
-                statusEl.className = 'status-msg success';
-                document.getElementById('adminNotifMessage').value = '';
-                document.getElementById('adminNotifTarget').value = '';
-                if (currentUser) await loadNotifications();
-            } catch (err) {
-                statusEl.textContent = '❌ ' + err.message;
-                statusEl.className = 'status-msg error';
-            }
-        }
+async function sendNotification() {
+    const message = document.getElementById('adminNotifMessage').value.trim();
+    const targetEmail = document.getElementById('adminNotifTarget').value.trim();
+    const statusEl = document.getElementById('adminNotifStatus');
+    if (!message) {
+        statusEl.textContent = getTranslation('fillAllFields');
+        statusEl.className = 'status-msg error';
+        return;
+    }
+    statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
+    statusEl.className = 'status-msg';
+    try {
+        // إرسال الطلب مع البريد المستهدف (إذا كان موجوداً)
+        const body = { message };
+        if (targetEmail) body.targetEmail = targetEmail;
+        const result = await apiCall('POST', '/admin/notifications', body);
+        const count = result.count || 0;
+        const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
+        statusEl.textContent = msg;
+        statusEl.className = 'status-msg success';
+        document.getElementById('adminNotifMessage').value = '';
+        document.getElementById('adminNotifTarget').value = '';
+        if (currentUser) await loadNotifications();
+    } catch (err) {
+        statusEl.textContent = '❌ ' + err.message;
+        statusEl.className = 'status-msg error';
+    }
+}
 
         // ================================================================
         // 10.  الإشعارات
@@ -2920,23 +2914,23 @@
             document.getElementById('aboutModal').classList.remove('active');
         }
 
-        function openContactModal() {
-            const modal = document.getElementById('contactModal');
-            modal.classList.add('active');
-            document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
-            document.getElementById('contactContent').innerHTML = `
-                <p>${getTranslation('contactInfo')}</p>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <a href="mailto:stevenhacen@gmail.com">stevenhacen@gmail.com</a>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone-alt"></i>
-                    <a href="tel:0542163526">0542163526</a>
-                </div>
-                <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
-            `;
-        }
+function openContactModal() {
+    const modal = document.getElementById('contactModal');
+    modal.classList.add('active');
+    document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
+    document.getElementById('contactContent').innerHTML = `
+        <p>${getTranslation('contactInfo')}</p>
+        <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:stevenhacen@gmail.com" style="color:var(--accent); text-decoration:none;">stevenhacen@gmail.com</a>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <a href="tel:0542163526" style="color:var(--accent); text-decoration:none;">0542163526</a>
+        </div>
+        <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
+    `;
+}
 
         function closeContactModal() {
             document.getElementById('contactModal').classList.remove('active');
