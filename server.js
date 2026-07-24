@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
+// CORS
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
@@ -15,6 +16,7 @@ app.use(cors({
             'http://localhost:3000',
             'http://localhost:5500',
             'https://hacenetv2-0.onrender.com',
+            'https://hacenetv2-0-ua0u.onrender.com',
             'https://hacenetvstalker.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
@@ -31,6 +33,7 @@ app.use(cors({
 
 app.use(express.json());
 
+// MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI not defined');
@@ -55,8 +58,6 @@ const UserSchema = new mongoose.Schema({
         username: { type: String, default: '' },
         password: { type: String, default: '' }
     },
-    vod: { type: Array, default: [] },
-    notifications: { type: Array, default: [] },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -101,7 +102,7 @@ function adminMiddleware(req, res, next) {
     next();
 }
 
-// ===== Auth =====
+// ===== Auth endpoints =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -120,9 +121,7 @@ app.post('/api/auth/register', async (req, res) => {
             password: hashed,
             role: role,
             isActive: true,
-            xtream: { server: '', username: '', password: '' },
-            vod: [],
-            notifications: []
+            xtream: { server: '', username: '', password: '' }
         });
         await user.save();
 
@@ -135,8 +134,7 @@ app.post('/api/auth/register', async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isActive: user.isActive,
-                xtream: user.xtream,
-                vod: user.vod
+                xtream: user.xtream
             }
         });
     } catch (err) {
@@ -167,8 +165,7 @@ app.post('/api/auth/login', async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isActive: user.isActive,
-                xtream: user.xtream,
-                vod: user.vod
+                xtream: user.xtream
             }
         });
     } catch (err) {
@@ -187,7 +184,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== Xtream =====
+// ===== User Xtream & Channels =====
 app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     try {
         const { server, username, password } = req.body;
@@ -213,6 +210,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
+        // استخدام وكيل لتجنب مشاكل CORS
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
         const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
@@ -265,98 +263,13 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== VOD Endpoints =====
-app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        const { server, username, password } = user.xtream;
-        if (!server || !username || !password) {
-            return res.status(400).json({ error: 'Xtream not configured' });
-        }
-
-        // جلب الأفلام
-        const vodUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_vod_streams`;
-        const proxyVodUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(vodUrl)}`;
-        const vodResponse = await fetch(proxyVodUrl);
-        if (!vodResponse.ok) throw new Error(`HTTP ${vodResponse.status}`);
-        const vodData = await vodResponse.json();
-        
-        let vodItems = [];
-        if (Array.isArray(vodData)) {
-            vodItems = vodData.map(item => ({
-                name: item.name || 'بدون اسم',
-                category: item.category_name || 'أفلام',
-                stream_id: item.stream_id,
-                icon: item.stream_icon || '',
-                url: '',
-                type: 'movie'
-            }));
-        }
-
-        // جلب المسلسلات (اختياري)
-        try {
-            const seriesUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_series`;
-            const proxySeriesUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(seriesUrl)}`;
-            const seriesResponse = await fetch(proxySeriesUrl);
-            if (seriesResponse.ok) {
-                const seriesData = await seriesResponse.json();
-                if (Array.isArray(seriesData)) {
-                    const seriesItems = seriesData.map(item => ({
-                        name: item.name || 'بدون اسم',
-                        category: item.category_name || 'مسلسلات',
-                        stream_id: item.series_id || item.stream_id,
-                        icon: item.stream_icon || item.cover || '',
-                        url: '',
-                        type: 'series'
-                    }));
-                    vodItems = vodItems.concat(seriesItems);
-                }
-            }
-        } catch (e) { /* تجاهل أخطاء المسلسلات */ }
-
-        // حفظ VOD في المستخدم
-        user.vod = vodItems;
-        await user.save();
-
-        res.json({ success: true, vod: vodItems, count: vodItems.length });
-    } catch (err) {
-        console.error('Fetch VOD error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/api/user/vod', authMiddleware, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json({ vod: user.vod || [] });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-app.post('/api/user/vod', authMiddleware, async (req, res) => {
-    try {
-        const { vod } = req.body;
-        if (!Array.isArray(vod)) return res.status(400).json({ error: 'VOD must be array' });
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        user.vod = vod;
-        await user.save();
-        res.json({ success: true, vod });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ===== Notifications Endpoints =====
+// ===== Notifications (without VOD) =====
 app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     try {
-        // إشعارات مؤقتة (للتجربة)
+        // إشعارات مؤقتة (لتجربة الواجهة)
         const user = await User.findById(req.user.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        // يمكنك تخزين الإشعارات في قاعدة بيانات، لكن حالياً نعيد مصفوفة فارغة
+        // يمكن تخزين الإشعارات في قاعدة بيانات، لكن حالياً نعيد مصفوفة فارغة
         res.json({ notifications: [] });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
@@ -365,45 +278,14 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
 
 app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
     try {
+        // وهمي للتجربة
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
-    try {
-        const { message, targetEmail } = req.body;
-        if (!message) return res.status(400).json({ error: 'Message required' });
-
-        let users = [];
-        if (targetEmail) {
-            const user = await User.findOne({ email: targetEmail.toLowerCase() });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            users = [user];
-        } else {
-            users = await User.find({});
-        }
-
-        const notif = {
-            _id: new mongoose.Types.ObjectId(),
-            message,
-            createdAt: new Date(),
-            read: false
-        };
-
-        for (let u of users) {
-            u.notifications.push(notif);
-            await u.save();
-        }
-
-        res.json({ success: true, count: users.length });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ===== Admin Users =====
+// ===== Admin endpoints =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -459,6 +341,28 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
+app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { message, targetEmail } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+
+        let users = [];
+        if (targetEmail) {
+            const user = await User.findOne({ email: targetEmail.toLowerCase() });
+            if (!user) return res.status(404).json({ error: 'User not found' });
+            users = [user];
+        } else {
+            users = await User.find({});
+        }
+
+        // هنا يمكن حفظ الإشعارات في قاعدة البيانات أو إرسالها عبر WebSocket
+        // لكن في هذا الإصدار نعيد فقط عدد المستخدمين المستلمين
+        res.json({ success: true, count: users.length, message });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ===== Proxy =====
 app.get('/api/proxy', async (req, res) => {
     try {
@@ -482,6 +386,7 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// ===== Start server =====
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
