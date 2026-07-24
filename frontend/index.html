@@ -2658,19 +2658,45 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
-        function playChannel(index) {
-            const channel = allChannels[index];
-            if (!channel) { alert(getTranslation('channelNotFound')); return; }
-            let url = channel.url;
-            const user = getUser();
-            if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
-                const { server, username, password } = user.xtream;
-                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
-            }
-            if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
-            window.location.href = url;
-        }
+function playChannel(index) {
+    const channel = allChannels[index];
+    if (!channel) {
+        alert(getTranslation('channelNotFound'));
+        return;
+    }
 
+    let url = channel.url;
+    const user = getUser();
+
+    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+        const { server, username, password } = user.xtream;
+        let streamId = String(channel.stream_id);
+
+        // التحقق مما إذا كان stream_id هو مسار كامل (يحتوي على '/')
+        // أو مجرد معرف رقمي
+        if (streamId.includes('/')) {
+            // الحالة 1: stream_id هو مسار كامل (مثل live/user/pass/12345)
+            // نستخدمه مباشرة كمسار، ونضيف .m3u8 إذا لم يكن موجوداً
+            if (!streamId.endsWith('.m3u8') && !streamId.endsWith('.ts')) {
+                streamId += '.m3u8';
+            }
+            url = `${server}/${streamId}`;
+        } else {
+            // الحالة 2: stream_id هو مجرد معرف (مثل 85692671)
+            // نستخدم الصيغة التقليدية
+            url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
+        }
+    }
+
+    // التحقق النهائي من صحة الرابط قبل التوجيه
+    if (!url || url === '#' || url === '') {
+        alert(getTranslation('invalidUrl'));
+        return;
+    }
+
+    // فتح الرابط في نفس النافذة
+    window.location.href = url;
+}
         function applyCategoryMap() {
             allChannels = allChannels.map(ch => {
                 const newCat = CHANNEL_CATEGORY_MAP[ch.name];
