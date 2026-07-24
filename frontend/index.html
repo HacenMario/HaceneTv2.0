@@ -1717,14 +1717,15 @@ function playChannel(index) {
         const { server, username, password } = user.xtream;
         let streamId = String(channel.stream_id);
         
-        // ✅ استخدم stream_id كاملاً كما هو من API المزود
-        // إذا كان stream_id يبدأ بـ "live/" فهذا يعني أنه يحتوي على المسار كاملاً
-        // نضيف الامتداد .m3u8 فقط في النهاية
-        let path = streamId;
-        if (!path.endsWith('.m3u8') && !path.endsWith('.ts')) {
-            path = path + '.m3u8';
-        }
-        url = `${server}/${path}`;
+        // إزالة أي تكرار لـ "live/username/password/" من stream_id
+        // المزود يرسل stream_id بالصيغة: live/username/password/streamID
+        // لذا نستخرج الجزء الأخير فقط (streamID)
+        let parts = streamId.split('/');
+        // نأخذ آخر جزء كمعرف القناة
+        let id = parts[parts.length - 1];
+        
+        // بناء الرابط بالصيغة الصحيحة
+        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${id}.m3u8`;
     }
 
     // إذا لم يكن هناك رابط صالح
