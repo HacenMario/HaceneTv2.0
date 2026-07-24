@@ -238,7 +238,10 @@
             align-items: center;
             gap: 8px;
             word-break: break-word;
+            cursor: pointer;
+            transition: var(--transition);
         }
+        .channel-card .ch-name:hover { color: var(--accent); }
         .channel-card .ch-name i { color: var(--accent); font-size: 14px; flex-shrink: 0; }
         .channel-card .ch-icon {
             width: 30px;
@@ -751,6 +754,9 @@
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
                     <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
+                    <!-- ===== حقل البريد المستهدف (تمت إعادته) ===== -->
+                    <label id="adminNotifTargetLabel">البريد الإلكتروني المستهدف (اختياري)</label>
+                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
                     <button class="btn-save" onclick="sendNotification()" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> إرسال الإشعار</button>
                     <div id="adminNotifStatus" class="status-msg"></div>
                 </div>
@@ -1877,6 +1883,7 @@
                 "notificationMessage": "نص الإشعار",
                 "send": "إرسال",
                 "notificationSent": "✅ تم إرسال الإشعار إلى {count} مستخدم",
+                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "theme": "المظهر",
                 "scrollToTop": "الرجوع للأعلى",
                 "loadingMore": "جاري تحميل المزيد...",
@@ -1978,6 +1985,7 @@
                 "notificationMessage": "Message de la notification",
                 "send": "Envoyer",
                 "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
+                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "theme": "Thème",
                 "scrollToTop": "Retour en haut",
                 "loadingMore": "Chargement...",
@@ -2343,7 +2351,8 @@
                         const catDisplay = translateCategory(ch.category || 'عام');
                         return `
                             <div class="channel-card">
-                                <div class="ch-name">
+                                <!-- ===== اسم القناة قابل للنقر ===== -->
+                                <div class="ch-name" onclick="playChannel(${realIndex})">
                                     ${iconHtml}
                                     <i class="fas fa-broadcast-tower"></i> ${ch.name || 'بدون اسم'}
                                 </div>
@@ -2488,7 +2497,6 @@
         async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
-                // عرض رسالة في xtreamStatus
                 const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = '⚠️ ' + getTranslation('loginFirst');
@@ -2525,7 +2533,6 @@
                 applyCategoryMap();
                 localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
 
-                // تحديث بيانات المستخدم المحلية
                 const currentUser = getUser();
                 if (currentUser) {
                     const userData = await apiCall('GET', '/auth/me');
@@ -2542,7 +2549,6 @@
                     hideLoadingModal();
                 }
 
-                // عرض رسالة نجاح في xtreamStatus
                 const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
@@ -2584,7 +2590,6 @@
                 await initializeApp(true);
                 await loadNotifications();
 
-                // ===== جلب القنوات تلقائياً بعد تسجيل الدخول =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -2621,7 +2626,6 @@
                 await initializeApp(true);
                 await loadNotifications();
 
-                // ===== جلب القنوات تلقائياً بعد التسجيل =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -2791,9 +2795,12 @@
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
             document.getElementById('adminXtreamTh').textContent = getTranslation('xtream');
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
+            // تحديث الترجمة لحقل البريد المستهدف
             document.getElementById('adminNotifTitle').innerHTML = `<i class="fas fa-bell"></i> ${getTranslation('sendNotification')}`;
             document.getElementById('adminNotifLabel').textContent = getTranslation('notificationMessage');
+            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
             document.getElementById('adminNotifMessage').value = '';
+            document.getElementById('adminNotifTarget').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
             await loadAdminUsers();
@@ -2885,9 +2892,10 @@
             } catch (err) { alert('❌ ' + err.message); }
         }
 
-        // ===== Admin Notification =====
+        // ===== Admin Notification (مع دعم البريد المستهدف) =====
         async function sendNotification() {
             const message = document.getElementById('adminNotifMessage').value.trim();
+            const targetEmail = document.getElementById('adminNotifTarget').value.trim();
             const statusEl = document.getElementById('adminNotifStatus');
             if (!message) {
                 statusEl.textContent = getTranslation('fillAllFields');
@@ -2897,10 +2905,15 @@
             statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
             statusEl.className = 'status-msg';
             try {
-                const result = await apiCall('POST', '/admin/notifications', { message });
-                statusEl.textContent = getTranslation('notificationSent', { count: result.count });
+                const body = { message };
+                if (targetEmail) body.targetEmail = targetEmail;
+                const result = await apiCall('POST', '/admin/notifications', body);
+                const count = result.count || 0;
+                const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
+                statusEl.textContent = msg;
                 statusEl.className = 'status-msg success';
                 document.getElementById('adminNotifMessage').value = '';
+                document.getElementById('adminNotifTarget').value = '';
                 if (currentUser) await loadNotifications();
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -3073,7 +3086,6 @@ function openContactModal() {
                         applyCategoryMap();
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                     } else {
-                        // إذا لم تكن هناك قنوات محفوظة، نحاول جلبها تلقائياً
                         if (user.xtream && user.xtream.server) {
                             try {
                                 await fetchChannelsForUser(true);
