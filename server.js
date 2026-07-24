@@ -15,7 +15,7 @@ app.use(cors({
             'https://hacene-tv2-0.vercel.app',
             'http://localhost:3000',
             'http://localhost:5500',
-            'https://hacenetv2-0.onrender.com',
+            'https://hacenetv2-0-ua0u.onrender.com',
             'https://hacenetvstalker.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
