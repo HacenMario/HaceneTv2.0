@@ -2484,29 +2484,40 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
-        // ===== دالة جلب القنوات للمستخدم الحالي (للمستخدم العادي) =====
-        async function fetchChannelsForUser() {
+        // ===== دالة جلب القنوات (بدون alert) =====
+        async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
-                alert(getTranslation('loginFirst'));
-                return;
-            }
-
-            // التحقق من وجود إعدادات Xtream
-            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
-                if (user.role !== 'admin') {
-                    alert('⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.');
-                } else {
-                    alert('⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.');
+                // عرض رسالة في xtreamStatus
+                const statusEl = document.getElementById('xtreamStatus');
+                if (statusEl) {
+                    statusEl.textContent = '⚠️ ' + getTranslation('loginFirst');
+                    statusEl.className = 'status-msg error';
+                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
                 }
-                return;
+                return false;
+            }
+            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
+                const statusEl = document.getElementById('xtreamStatus');
+                if (user.role !== 'admin') {
+                    if (statusEl) {
+                        statusEl.textContent = '⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.';
+                        statusEl.className = 'status-msg error';
+                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.textContent = '⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.';
+                        statusEl.className = 'status-msg error';
+                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
+                    }
+                }
+                return false;
             }
 
-            // عرض رسالة "جاري التحميل..."
-            const statusEl = document.getElementById('xtreamStatus');
-            const isAdmin = user.role === 'admin';
-            const alertMsg = isAdmin ? '⏳ جاري جلب القنوات...' : '⏳ جاري جلب القنوات... يرجى الانتظار.';
-            alert(alertMsg);
+            if (showLoading) {
+                showLoadingModal();
+            }
 
             try {
                 const result = await apiCall('GET', '/user/fetch-channels');
@@ -2527,9 +2538,12 @@
                 applyFilters(true);
                 setupInfiniteScroll();
 
-                // رسالة نجاح
-                alert(getTranslation('fetchSuccess', { count: allChannels.length }));
+                if (showLoading) {
+                    hideLoadingModal();
+                }
 
+                // عرض رسالة نجاح في xtreamStatus
+                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
                     statusEl.className = 'status-msg success';
@@ -2537,11 +2551,14 @@
                 }
                 return true;
             } catch (err) {
-                // رسالة فشل
-                alert('❌ فشل جلب القنوات: ' + err.message);
+                if (showLoading) {
+                    hideLoadingModal();
+                }
+                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = '❌ ' + err.message;
                     statusEl.className = 'status-msg error';
+                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
                 }
                 return false;
             }
@@ -2563,17 +2580,16 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                showLoadingModal();
+
                 await initializeApp(true);
                 await loadNotifications();
 
                 // ===== جلب القنوات تلقائياً بعد تسجيل الدخول =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser();
+                    await fetchChannelsForUser(true);
                 }
 
-                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2601,17 +2617,16 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                showLoadingModal();
+
                 await initializeApp(true);
                 await loadNotifications();
 
                 // ===== جلب القنوات تلقائياً بعد التسجيل =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser();
+                    await fetchChannelsForUser(true);
                 }
 
-                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -3061,7 +3076,7 @@ function openContactModal() {
                         // إذا لم تكن هناك قنوات محفوظة، نحاول جلبها تلقائياً
                         if (user.xtream && user.xtream.server) {
                             try {
-                                await fetchChannelsForUser();
+                                await fetchChannelsForUser(true);
                             } catch (e) {
                                 console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message);
                             }
