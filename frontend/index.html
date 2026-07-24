@@ -802,7 +802,7 @@
             <h2 id="aboutModalTitle"><i class="fas fa-info-circle" style="color:var(--accent);"></i> من نحن</h2>
             <div class="about-content" id="aboutContent">
                 <p>HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية.</p>
-                <p>نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر ، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
+                <p>نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
                 <p>تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة.</p>
                 <p><strong>نسعى دائماً لتقديم الأفضل لمستخدمينا.</strong></p>
             </div>
@@ -1897,6 +1897,7 @@
                 "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
                 "telegram": "تيليجرام",
+                "fetchChannels": "جلب القنوات"
             },
             fr: {
                 "live": "En direct",
@@ -1997,6 +1998,7 @@
                 "contactPhone": "Téléphone",
                 "contactWaiting": "Nous attendons vos questions et suggestions.",
                 "telegram": "Telegram",
+                "fetchChannels": "Récupérer les chaînes"
             }
         };
 
@@ -2174,6 +2176,10 @@
                 ${xtreamBtn}
                 <button class="btn btn-primary btn-sm" onclick="openAddModal()">
                     <i class="fas fa-plus"></i> ${getTranslation('add')}
+                </button>
+                <!-- ===== زر جلب القنوات (لجميع المستخدمين) ===== -->
+                <button class="btn btn-success btn-sm" onclick="fetchChannelsForUser()">
+                    <i class="fas fa-cloud-download-alt"></i> ${getTranslation('fetchChannels')}
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> ${getTranslation('logout')}
@@ -2478,6 +2484,64 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
+        // ===== دالة جلب القنوات للمستخدم الحالي (للمستخدم العادي) =====
+        async function fetchChannelsForUser() {
+            const user = getUser();
+            if (!user) {
+                alert(getTranslation('loginFirst'));
+                return;
+            }
+
+            // التحقق من وجود إعدادات Xtream
+            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
+                if (user.role !== 'admin') {
+                    alert('⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.');
+                } else {
+                    alert('⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.');
+                }
+                return;
+            }
+
+            const statusEl = document.getElementById('xtreamStatus');
+            if (statusEl) {
+                statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
+                statusEl.className = 'status-msg';
+            }
+
+            try {
+                const result = await apiCall('GET', '/user/fetch-channels');
+                allChannels = normalizeChannels(result.channels || []);
+                applyCategoryMap();
+                localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+
+                // تحديث بيانات المستخدم المحلية
+                const currentUser = getUser();
+                if (currentUser) {
+                    const userData = await apiCall('GET', '/auth/me');
+                    setUser(userData.user);
+                }
+
+                setFavorites([]);
+                buildSidebar();
+                displayCount = STEP;
+                applyFilters(true);
+                setupInfiniteScroll();
+
+                if (statusEl) {
+                    statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
+                    statusEl.className = 'status-msg success';
+                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
+                }
+                return true;
+            } catch (err) {
+                if (statusEl) {
+                    statusEl.textContent = '❌ ' + err.message;
+                    statusEl.className = 'status-msg error';
+                }
+                return false;
+            }
+        }
+
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -2497,6 +2561,13 @@
                 showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
+
+                // ===== جلب القنوات تلقائياً بعد تسجيل الدخول =====
+                const userData = getUser();
+                if (userData && userData.xtream && userData.xtream.server) {
+                    await fetchChannelsForUser();
+                }
+
                 setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -2528,6 +2599,13 @@
                 showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
+
+                // ===== جلب القنوات تلقائياً بعد التسجيل =====
+                const userData = getUser();
+                if (userData && userData.xtream && userData.xtream.server) {
+                    await fetchChannelsForUser();
+                }
+
                 setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -2975,13 +3053,13 @@ function openContactModal() {
                         applyCategoryMap();
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                     } else {
-                        if (DEFAULT_CHANNELS && DEFAULT_CHANNELS.length > 0) {
-                            allChannels = normalizeChannels(JSON.parse(JSON.stringify(DEFAULT_CHANNELS)));
-                            applyCategoryMap();
+                        // إذا لم تكن هناك قنوات محفوظة، نحاول جلبها تلقائياً
+                        if (user.xtream && user.xtream.server) {
                             try {
-                                await apiCall('POST', '/user/channels', { channels: allChannels });
-                            } catch (saveErr) { console.warn('⚠️ Failed to save default channels:', saveErr.message); }
-                            localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
+                                await fetchChannelsForUser();
+                            } catch (e) {
+                                console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message);
+                            }
                         } else {
                             allChannels = [];
                         }
