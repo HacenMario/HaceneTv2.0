@@ -218,19 +218,27 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         }
 
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Invalid response');
 
-        const channels = data.map(item => ({
-            name: item.name || 'بدون اسم',
-            category: item.category_name || 'عام',
-            stream_id: item.stream_id,
-            icon: item.stream_icon || '',
-            url: ''
-        }));
+        const channels = data.map(item => {
+            let streamId = item.stream_id;
+            // استخراج الرقم الأخير إذا كان المسار يحتوي على "/"
+            if (streamId && String(streamId).includes('/')) {
+                const parts = String(streamId).split('/');
+                streamId = parts[parts.length - 1];
+            }
+            return {
+                name: item.name || 'بدون اسم',
+                category: item.category_name || 'عام',
+                stream_id: streamId,  // الآن مجرد معرف رقمي
+                icon: item.stream_icon || '',
+                url: ''
+            };
+        });
 
         await Channel.findOneAndUpdate(
             { userId: user._id },
