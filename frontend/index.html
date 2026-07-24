@@ -1712,23 +1712,16 @@ function playChannel(index) {
     let url = channel.url;
     const user = getUser();
 
-    // إذا كانت القناة من Xtream ولديها stream_id
     if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
         const { server, username, password } = user.xtream;
         let streamId = String(channel.stream_id);
-        
-        // إزالة أي تكرار لـ "live/username/password/" من stream_id
-        // المزود يرسل stream_id بالصيغة: live/username/password/streamID
-        // لذا نستخرج الجزء الأخير فقط (streamID)
-        let parts = streamId.split('/');
-        // نأخذ آخر جزء كمعرف القناة
-        let id = parts[parts.length - 1];
-        
-        // بناء الرابط بالصيغة الصحيحة
-        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${id}.m3u8`;
+
+        // إذا كان stream_id يحتوي على "/" نستخرج الرقم الأخير، وإلا نستخدمه كما هو
+        let realId = streamId.includes('/') ? streamId.split('/').pop() : streamId;
+
+        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${realId}.m3u8`;
     }
 
-    // إذا لم يكن هناك رابط صالح
     if (!url || url === '#' || url === '') {
         alert(getTranslation('invalidUrl'));
         return;
