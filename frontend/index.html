@@ -2,12 +2,10 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
-    <!-- ===== Chart.js ===== -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== RESET & BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,7 +31,7 @@
             --transition: 0.3s;
             --scrollbar-track: #0c1017;
             --scrollbar-thumb: #2a3344;
-            --sidebar-width: 260px;
+            --header-height: 70px;
         }
 
         [data-theme="light"] {
@@ -62,14 +60,14 @@
             display: flex;
             flex-direction: column;
             transition: background var(--transition), color var(--transition);
-            overflow-x: hidden;
+            padding-top: var(--header-height);
         }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
         ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
-        /* ===== HEADER ===== */
+        /* ===== HEADER (sticky but hides on scroll down) ===== */
         .header {
             background: var(--bg-secondary);
             padding: 12px 20px;
@@ -79,11 +77,19 @@
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
             gap: 10px;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 999;
-            transition: background var(--transition), border-color var(--transition);
+            height: var(--header-height);
+            transition: transform 0.3s ease, background var(--transition), border-color var(--transition);
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
+        .header.hidden { transform: translateY(-100%); }
+        .header.visible { transform: translateY(0); }
+
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-area h1 { font-size: 20px; color: var(--accent); font-weight: 700; }
         .controls-area {
@@ -92,19 +98,6 @@
             gap: 8px;
             flex-wrap: wrap;
         }
-        /* ===== HAMBURGER BUTTON ===== */
-        .hamburger {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 4px 8px;
-            transition: var(--transition);
-        }
-        .hamburger:hover { color: var(--accent); }
-
         .btn {
             padding: 7px 16px;
             border-radius: 30px;
@@ -139,10 +132,31 @@
             width: 160px;
             outline: 2px solid transparent;
             transition: var(--transition);
-            font-size: 13px;
+            font-size: 16px !important; /* منع تكبير iOS */
         }
         .search-box:focus { outline-color: var(--accent); }
         .search-box::placeholder { color: var(--text-secondary); }
+        .search-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .search-wrapper .search-clear {
+            position: absolute;
+            left: 10px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            padding: 0 4px;
+        }
+        .search-wrapper .search-clear.show { display: block; }
+        .search-wrapper .search-box {
+            padding-right: 36px;
+            width: 160px;
+        }
         .badge-count {
             background: var(--accent);
             color: #fff;
@@ -161,36 +175,22 @@
         }
         .user-info .email { color: var(--accent); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* ===== SIDEBAR (Slide-in on mobile) ===== */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-        .sidebar-overlay.active { display: block; }
-
+        /* ===== LAYOUT ===== */
         .app-container {
             display: flex;
             flex: 1;
-            height: calc(100vh - 70px);
+            height: calc(100vh - var(--header-height));
             overflow: hidden;
-            position: relative;
+            margin-top: 0;
         }
         .sidebar {
-            width: var(--sidebar-width);
+            width: 220px;
             background: var(--bg-sidebar);
             overflow-y: auto;
             padding: 10px 0;
             border-left: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: transform var(--transition), background var(--transition), border-color var(--transition);
-            z-index: 1001;
+            transition: transform 0.3s ease, background var(--transition), border-color var(--transition);
         }
         .sidebar::-webkit-scrollbar { width: 5px; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
@@ -231,53 +231,37 @@
         .sidebar .cat-item .cat-fav-btn:hover { color: var(--warning); }
         .sidebar .cat-item .cat-fav-btn.active { color: var(--warning); }
 
-        /* ===== HISTORY SECTION IN SIDEBAR ===== */
-        .sidebar .history-section {
-            margin-top: 16px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-        }
-        .sidebar .history-title {
-            padding: 0 16px 8px 16px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .sidebar .history-title button {
-            background: transparent;
+        /* ===== زر فتح القائمة (هامبورجر) ===== */
+        .menu-toggle {
+            background: var(--bg-input);
             border: none;
-            color: var(--danger);
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .sidebar .history-item {
-            padding: 6px 16px;
-            font-size: 13px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
             color: var(--text-primary);
             cursor: pointer;
             transition: var(--transition);
-            display: flex;
+            display: none;
             align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            justify-content: center;
         }
-        .sidebar .history-item:hover { background: var(--bg-input); color: var(--accent); }
-        .sidebar .history-item .time {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-left: auto;
-            flex-shrink: 0;
+        .menu-toggle:hover { background: var(--border-light); }
+        .menu-toggle.active { background: var(--accent); color: #fff; }
+
+        /* ===== Overlay للقائمة على الموبايل ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        .sidebar .history-empty {
-            padding: 8px 16px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            text-align: center;
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
         }
 
         .main-content {
@@ -445,7 +429,7 @@
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 16px;
             outline: none;
             transition: var(--transition);
         }
@@ -527,43 +511,6 @@
         .admin-panel .btn-icon.danger:hover { color: var(--danger); }
         .admin-panel .btn-icon.success:hover { color: var(--success); }
         .admin-panel .btn-icon.warning:hover { color: var(--warning); }
-
-        /* ===== Admin Stats Cards ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
-            transition: var(--transition);
-        }
-        .stat-card:hover { border-color: var(--accent); }
-        .stat-card .stat-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        .stat-card .stat-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-        .stat-card .stat-icon {
-            font-size: 24px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-        .chart-container {
-            max-width: 100%;
-            height: 200px;
-            margin-top: 10px;
-        }
 
         /* ===== SCROLL TO TOP ===== */
         #scrollTopBtn {
@@ -684,35 +631,47 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .hamburger { display: block; }
-            .app-container { height: auto; flex-direction: column; }
+            :root { --header-height: 60px; }
+            body { padding-top: var(--header-height); }
+            .header { padding: 8px 12px; }
+            .app-container { flex-direction: column; height: auto; }
             .sidebar {
                 position: fixed;
                 top: 0;
-                right: 0;
+                right: -280px;
+                width: 280px;
                 height: 100%;
-                width: 80%;
-                max-width: 300px;
-                transform: translateX(100%);
+                z-index: 999;
                 border-left: none;
                 border-right: 1px solid var(--border-color);
-                z-index: 1001;
+                transition: right 0.3s ease;
                 padding-top: 60px;
+                background: var(--bg-secondary);
+                box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+                overflow-y: auto;
             }
-            .sidebar.open { transform: translateX(0); }
+            .sidebar.open {
+                right: 0;
+            }
             .sidebar .cat-item {
-                white-space: nowrap;
+                padding: 10px 20px;
                 border-right: none;
-                border-bottom: 3px solid transparent;
-                padding: 10px 16px;
+                border-bottom: 1px solid var(--border-color);
             }
-            .sidebar .cat-item.active { border-bottom-color: var(--accent); }
-            .sidebar .cat-item .count { display: inline; }
-            .sidebar .cat-item .cat-fav-btn { display: inline-block; }
-
-            .header { flex-direction: column; align-items: stretch; }
+            .sidebar .cat-item.active {
+                border-right: none;
+                border-bottom-color: var(--accent);
+            }
+            .sidebar .cat-item .count { display: none; }
+            .sidebar .cat-item .cat-fav-btn { display: none; }
+            .menu-toggle {
+                display: flex;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
             .controls-area { justify-content: center; gap: 6px; flex-wrap: wrap; }
-            .search-box { width: 100%; }
+            .search-wrapper .search-box { width: 120px; font-size: 16px !important; }
             .channels-grid { grid-template-columns: 1fr; }
             .modal-box { padding: 18px; }
             .admin-panel table { font-size: 11px; }
@@ -720,15 +679,6 @@
             .user-info .email { max-width: 80px; }
             .notif-dropdown { width: 290px; right: -20px; }
             #scrollTopBtn { width: 40px; height: 40px; font-size: 18px; bottom: 20px; right: 20px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .stat-card .stat-number { font-size: 22px; }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .controls-area .btn { font-size: 11px; padding: 4px 10px; }
-            .controls-area .btn-sm { font-size: 10px; padding: 3px 8px; }
-            .search-box { font-size: 12px; }
         }
 
         .lang-btn {
@@ -774,37 +724,48 @@
         .modal-box .contact-item span {
             color: var(--text-primary);
         }
+
+        /* ===== إحصائيات المدير ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
 
     <header class="header" id="mainHeader">
         <div class="logo-area">
-            <!-- ===== Hamburger Button (mobile) ===== -->
-            <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="فتح القائمة">
-                <i class="fas fa-bars"></i>
-            </button>
             <h1><i class="fas fa-satellite-dish" style="color:var(--accent);"></i> HACENE TV</h1>
         </div>
         <div class="controls-area" id="headerControls"></div>
     </header>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <div class="app-container">
-        <!-- ===== SIDEBAR OVERLAY (mobile) ===== -->
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
         <aside class="sidebar" id="sidebar">
-            <!-- القنوات والمفضلة ستظهر هنا -->
-            <!-- ===== HISTORY SECTION ===== -->
-            <div class="history-section" id="historySection">
-                <div class="history-title">
-                    <span><i class="fas fa-history"></i> سجل المشاهدة</span>
-                    <button onclick="clearHistory()" title="حذف السجل"><i class="fas fa-trash"></i></button>
-                </div>
-                <div id="historyList"></div>
-            </div>
+            <!-- سيتم ملؤها بواسطة JavaScript -->
         </aside>
-
         <main class="main-content" id="mainContent">
             <div id="channelsContainer"></div>
             <div id="scrollTrigger" style="height:1px; visibility:hidden;"></div>
@@ -883,38 +844,28 @@
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
             <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:var(--warning);"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
-                <!-- ===== STATS SECTION ===== -->
+                <!-- إحصائيات -->
                 <div class="admin-panel">
-                    <h3 id="adminStatsTitle"><i class="fas fa-chart-line"></i> إحصائيات المنصة</h3>
+                    <h3 id="adminStatsTitle"><i class="fas fa-chart-bar"></i> إحصائيات المنصة</h3>
                     <div class="stats-grid" id="statsGrid">
                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-tv"></i></div>
+                            <div class="stat-number" id="statUsers">0</div>
+                            <div class="stat-label">إجمالي المستخدمين</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="statActive">0</div>
+                            <div class="stat-label">نشطاء اليوم</div>
+                        </div>
+                        <div class="stat-card">
                             <div class="stat-number" id="statChannels">0</div>
                             <div class="stat-label">إجمالي القنوات</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-users"></i></div>
-                            <div class="stat-number" id="statUsers">0</div>
-                            <div class="stat-label">المستخدمين المسجلين</div>
+                            <div class="stat-number" id="statViews">0</div>
+                            <div class="stat-label">عدد المشاهدات</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
-                            <div class="stat-number" id="statActiveUsers">0</div>
-                            <div class="stat-label">نشطاء اليوم</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon"><i class="fas fa-star"></i></div>
-                            <div class="stat-number" id="statFavorites">0</div>
-                            <div class="stat-label">إجمالي المفضلات</div>
-                        </div>
-                    </div>
-                    <!-- ===== Chart ===== -->
-                    <div style="margin-top: 16px;">
-                        <canvas id="categoryChart" width="400" height="200"></canvas>
                     </div>
                 </div>
-
-                <!-- ===== Users Table ===== -->
                 <div class="admin-panel">
                     <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
@@ -931,8 +882,6 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- ===== Notifications ===== -->
                 <div class="admin-panel">
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
@@ -2088,13 +2037,7 @@
                 "telegram": "تيليجرام",
                 "fetchChannels": "جلب القنوات",
                 "history": "سجل المشاهدة",
-                "clearHistory": "حذف السجل",
-                "noHistory": "لا توجد قنوات في السجل",
-                "adminStats": "إحصائيات المنصة",
-                "totalChannels": "إجمالي القنوات",
-                "totalUsers": "المستخدمين المسجلين",
-                "activeToday": "نشطاء اليوم",
-                "totalFavorites": "إجمالي المفضلات"
+                "clearHistory": "مسح السجل"
             },
             fr: {
                 "live": "En direct",
@@ -2198,13 +2141,7 @@
                 "telegram": "Telegram",
                 "fetchChannels": "Récupérer les chaînes",
                 "history": "Historique",
-                "clearHistory": "Effacer l'historique",
-                "noHistory": "Aucune chaîne dans l'historique",
-                "adminStats": "Statistiques de la plateforme",
-                "totalChannels": "Chaînes totales",
-                "totalUsers": "Utilisateurs enregistrés",
-                "activeToday": "Actifs aujourd'hui",
-                "totalFavorites": "Favoris totaux"
+                "clearHistory": "Effacer l'historique"
             }
         };
 
@@ -2226,9 +2163,8 @@
         let allChannelsFiltered = [];
         let notifications = [];
         let unreadCount = 0;
-        let history = [];
-        const MAX_HISTORY = 20;
-        let categoryChart = null;
+        let lastScrollY = 0;
+        let headerVisible = true;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2268,11 +2204,11 @@
         }
 
         function updateAllTexts() {
-            // سيتم تحديث النصوص عند فتح النوافذ
+            // يتم التحديث عند فتح النوافذ
         }
 
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي
+        // 3.  إدارة التوكن والمستخدمين
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2280,8 +2216,6 @@
         function setUser(u) { currentUser = u; if (u) localStorage.setItem('hacene_user', JSON.stringify(u)); else localStorage.removeItem('hacene_user'); }
         function getFavorites() { const stored = localStorage.getItem('hacene_favorites'); if (stored) { try { return JSON.parse(stored); } catch (e) { return []; } } return []; }
         function setFavorites(f) { favorites = f; localStorage.setItem('hacene_favorites', JSON.stringify(f)); }
-        function getHistory() { const stored = localStorage.getItem('hacene_history'); if (stored) { try { return JSON.parse(stored); } catch (e) { return []; } } return []; }
-        function setHistory(h) { history = h; localStorage.setItem('hacene_history', JSON.stringify(h)); }
 
         // ================================================================
         // 4.  API
@@ -2303,77 +2237,8 @@
         }
 
         // ================================================================
-        // 5.  دوال العرض والهيكل
+        // 5.  دوال العرض
         // ================================================================
-        // ----- Hamburger Sidebar -----
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-
-        // ----- History -----
-        function addToHistory(channel) {
-            if (!channel) return;
-            const entry = {
-                id: getChannelId(channel),
-                name: channel.name,
-                category: channel.category || 'عام',
-                icon: channel.icon || '',
-                stream_id: channel.stream_id,
-                timestamp: Date.now()
-            };
-            // إزالة المكرر
-            let hist = getHistory();
-            hist = hist.filter(item => item.id !== entry.id);
-            hist.unshift(entry);
-            if (hist.length > MAX_HISTORY) hist = hist.slice(0, MAX_HISTORY);
-            setHistory(hist);
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('historyList');
-            const hist = getHistory();
-            if (!container) return;
-            if (hist.length === 0) {
-                container.innerHTML = `<div class="history-empty">${getTranslation('noHistory')}</div>`;
-                return;
-            }
-            container.innerHTML = hist.map(item => `
-                <div class="history-item" onclick="playHistoryItem('${item.id}')" title="${item.name}">
-                    <i class="fas fa-play-circle" style="color:var(--accent);"></i>
-                    <span>${item.name}</span>
-                    <span class="time">${new Date(item.timestamp).toLocaleTimeString()}</span>
-                </div>
-            `).join('');
-        }
-
-        function playHistoryItem(id) {
-            const index = allChannels.findIndex(ch => getChannelId(ch) === id);
-            if (index !== -1) {
-                playChannel(index);
-            } else {
-                alert(getTranslation('channelNotFound'));
-            }
-        }
-
-        function clearHistory() {
-            if (confirm(getTranslation('confirmClearHistory') || 'هل أنت متأكد من حذف سجل المشاهدة؟')) {
-                setHistory([]);
-                renderHistory();
-            }
-        }
-
-        // ----- Render Header, Sidebar, Filters -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -2401,6 +2266,13 @@
                 </button>
             `;
 
+            // زر هامبورجر (للموبايل)
+            const menuToggle = `
+                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="فتح القائمة">
+                    <i class="fas fa-bars"></i>
+                </button>
+            `;
+
             let notifBtn = '';
             if (user) {
                 notifBtn = `
@@ -2417,6 +2289,7 @@
                 container.innerHTML = `
                     ${langButtons}
                     ${themeToggle}
+                    ${menuToggle}
                     ${aboutBtn}
                     ${contactBtn}
                     <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
@@ -2443,6 +2316,7 @@
             container.innerHTML = `
                 ${langButtons}
                 ${themeToggle}
+                ${menuToggle}
                 ${aboutBtn}
                 ${contactBtn}
                 ${notifBtn}
@@ -2463,12 +2337,128 @@
                 <button class="btn btn-danger btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> ${getTranslation('logout')}
                 </button>
-                <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="applyFilters(true)" />
+                <div class="search-wrapper">
+                    <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="handleSearchInput()" onfocus="handleSearchFocus()" onblur="handleSearchBlur()" />
+                    <button class="search-clear" id="searchClear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+                </div>
                 <span class="channel-counter" id="channelCount">0</span>
             `;
             updateNotifBadge();
-            // إعادة بناء السجل بعد تغيير اللغة
-            renderHistory();
+        }
+
+        // ===== دوال البحث المحسنة =====
+        function handleSearchInput() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClear');
+            if (input.value.length > 0) {
+                clearBtn.classList.add('show');
+            } else {
+                clearBtn.classList.remove('show');
+            }
+            applyFilters(true);
+        }
+
+        function handleSearchFocus() {
+            // منع التكبير التلقائي على iOS (تم بالفعل عبر font-size: 16px)
+            // لا نقوم بأي إجراء إضافي
+        }
+
+        function handleSearchBlur() {
+            // بعد الانتهاء من البحث، إلغاء التكبير إذا حدث (بعض المتصفحات)
+            // نعيد ضبط viewport بشكل آمن
+            if (window.visualViewport && window.visualViewport.scale > 1) {
+                // بعض المتصفحات تدعم إعادة الضبط
+                document.documentElement.style.zoom = '1';
+                setTimeout(() => { document.documentElement.style.zoom = ''; }, 100);
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            document.getElementById('searchClear').classList.remove('show');
+            applyFilters(true);
+            input.focus();
+        }
+
+        // ===== التحكم في ظهور/اختفاء الهيدر =====
+        function handleHeaderScroll() {
+            const currentScrollY = window.scrollY;
+            const header = document.getElementById('mainHeader');
+            if (currentScrollY > 80) {
+                if (currentScrollY > lastScrollY) {
+                    // التمرير للأسفل → إخفاء الهيدر
+                    header.classList.remove('visible');
+                    header.classList.add('hidden');
+                } else {
+                    // التمرير للأعلى → إظهار الهيدر
+                    header.classList.remove('hidden');
+                    header.classList.add('visible');
+                }
+            } else {
+                // في الأعلى → إظهار الهيدر
+                header.classList.remove('hidden');
+                header.classList.add('visible');
+            }
+            lastScrollY = currentScrollY;
+        }
+
+        // ===== التحكم في القائمة الجانبية (هامبورجر) =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('menuToggle');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            toggleBtn.classList.toggle('active');
+            if (sidebar.classList.contains('open')) {
+                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('menuToggle');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            toggleBtn.classList.remove('active');
+            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+
+        // ===== سجل المشاهدة =====
+        function addToHistory(channelId, channelName) {
+            if (!getUser()) return;
+            try {
+                apiCall('POST', '/user/history', { channelId, channelName })
+                    .then(() => { /* تم التحديث */ })
+                    .catch(() => { /* تجاهل */ });
+            } catch (e) { /* تجاهل */ }
+        }
+
+        // ===== إحصائيات المدير =====
+        async function loadAdminStats() {
+            try {
+                const stats = await apiCall('GET', '/admin/stats');
+                document.getElementById('statUsers').textContent = stats.totalUsers || 0;
+                document.getElementById('statActive').textContent = stats.activeUsersToday || 0;
+                document.getElementById('statChannels').textContent = stats.totalChannels || 0;
+                document.getElementById('statViews').textContent = stats.totalViews || 0;
+            } catch (e) {
+                console.warn('Failed to load stats:', e);
+            }
+        }
+
+        // ===== سجل المشاهدة في الشريط الجانبي =====
+        async function loadHistory() {
+            try {
+                const data = await apiCall('GET', '/user/history');
+                return data.history || [];
+            } catch (e) {
+                return [];
+            }
         }
 
         function getThemeIcon() {
@@ -2491,20 +2481,35 @@
 
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
-            if (!allChannels || allChannels.length === 0) {
-                sidebar.innerHTML = `
-                    <div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>
-                    <div class="history-section">
-                        <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
-                        <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
+            const user = getUser();
+            let itemsHtml = '';
+
+            if (!user) {
+                sidebar.innerHTML = `<div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('pleaseLogin')}</div>`;
+                return;
+            }
+
+            // إضافة سجل المشاهدة إذا كان موجوداً
+            if (user.history && user.history.length > 0) {
+                const historyCat = 'سجل المشاهدة';
+                const isHistoryActive = currentCategory === historyCat;
+                itemsHtml += `
+                    <div class="cat-item ${isHistoryActive ? 'active' : ''}" data-cat="${historyCat}" onclick="selectCategory('${historyCat}')">
+                        <span><i class="fas fa-clock" style="color:var(--accent);margin-left:6px;"></i> ${getTranslation('history')}</span>
+                        <span class="count">${user.history.length}</span>
                     </div>
                 `;
+            }
+
+            // التصنيفات العادية
+            if (!allChannels || allChannels.length === 0) {
+                sidebar.innerHTML = `<div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>`;
                 return;
             }
             const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
             const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
 
-            let html = sorted.map(cat => {
+            let catItems = sorted.map(cat => {
                 let count = 0;
                 if (cat === 'الكل') count = allChannels.length;
                 else if (cat === 'المفضلة') count = favorites.length;
@@ -2512,25 +2517,28 @@
                 const active = cat === currentCategory ? 'active' : '';
                 const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
                 const displayName = translateCategory(cat);
+                let favBtn = '';
+                if (cat !== 'الكل' && cat !== 'المفضلة') {
+                    favBtn = `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>`;
+                }
                 return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
                             <span>${displayName}</span>
                             <span class="count">${count}</span>
-                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
+                            ${favBtn}
                         </div>`;
             }).join('');
 
-            // إضافة قسم السجل
-            html += `
-                <div class="history-section">
-                    <div class="history-title">
-                        <span><i class="fas fa-history"></i> ${getTranslation('history')}</span>
-                        <button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button>
+            // إضافة زر مسح السجل إذا كان موجوداً
+            let clearHistoryBtn = '';
+            if (user.history && user.history.length > 0) {
+                clearHistoryBtn = `
+                    <div class="cat-item" style="border-right:none; justify-content:center; color:var(--danger); cursor:pointer;" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i> ${getTranslation('clearHistory')}
                     </div>
-                    <div id="historyList"></div>
-                </div>
-            `;
-            sidebar.innerHTML = html;
-            renderHistory();
+                `;
+            }
+
+            sidebar.innerHTML = itemsHtml + catItems + clearHistoryBtn;
         }
 
         function isCategoryFavorite(category) {
@@ -2580,9 +2588,20 @@
             const searchVal = search ? search.value.trim().toLowerCase() : '';
             let filtered = allChannels;
 
-            if (currentCategory === 'المفضلة') {
+            // معالجة سجل المشاهدة كتصنيف خاص
+            const user = getUser();
+            if (currentCategory === 'سجل المشاهدة' && user?.history) {
+                const historyIds = user.history.map(h => h.channelId);
+                filtered = allChannels.filter(ch => historyIds.includes(getChannelId(ch)));
+                // ترتيب حسب تاريخ المشاهدة (الأحدث أولاً)
+                filtered.sort((a, b) => {
+                    const idxA = user.history.findIndex(h => h.channelId === getChannelId(a));
+                    const idxB = user.history.findIndex(h => h.channelId === getChannelId(b));
+                    return idxA - idxB;
+                });
+            } else if (currentCategory === 'المفضلة') {
                 filtered = allChannels.filter(ch => favorites.includes(getChannelId(ch)));
-            } else if (currentCategory !== 'الكل') {
+            } else if (currentCategory !== 'الكل' && currentCategory !== 'سجل المشاهدة') {
                 filtered = filtered.filter(ch => (ch.category || 'عام') === currentCategory);
             }
 
@@ -2638,7 +2657,7 @@
                 <div class="channels-grid">
                     ${channelsToShow.map((ch, idx) => {
                         const realIndex = allChannels.indexOf(ch);
-                        const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" loading="lazy" />` : '';
+                        const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" />` : '';
                         const isFav = favorites.includes(getChannelId(ch));
                         const catDisplay = translateCategory(ch.category || 'عام');
                         return `
@@ -2703,8 +2722,10 @@
             displayCount = STEP;
             applyFilters(true);
             setupInfiniteScroll();
-            // إغلاق السايدبار في الموبايل
-            if (window.innerWidth <= 768) closeSidebar();
+            // إغلاق القائمة على الموبايل
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
         }
 
         function toggleFavorite(index) {
@@ -2786,7 +2807,6 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
-        // ===== دالة جلب القنوات (بدون alert) =====
         async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
@@ -2935,7 +2955,6 @@
             setToken(null);
             setUser(null);
             setFavorites([]);
-            setHistory([]);
             allChannels = [];
             currentCategory = 'الكل';
             displayCount = STEP;
@@ -3008,7 +3027,7 @@
         }
 
         // ================================================================
-        // 8.  القنوات (تشغيل مع إضافة للسجل)
+        // 8.  القنوات
         // ================================================================
         function openAddModal() {
             const user = getUser();
@@ -3052,13 +3071,9 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
-        // ===== دالة التشغيل الأساسية مع إضافة للسجل =====
         function playChannel(index) {
             const channel = allChannels[index];
             if (!channel) { alert(getTranslation('channelNotFound')); return; }
-            // إضافة للسجل
-            addToHistory(channel);
-
             let url = channel.url;
             const user = getUser();
             if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
@@ -3066,6 +3081,12 @@
                 url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
             }
             if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
+            // إضافة إلى سجل المشاهدة
+            addToHistory(getChannelId(channel), channel.name);
+            // تحديث الإحصائيات
+            try {
+                apiCall('POST', '/admin/stats/view', {}).catch(() => {});
+            } catch (e) {}
             window.location.href = url;
         }
 
@@ -3079,7 +3100,7 @@
         }
 
         // ================================================================
-        // 9.  Admin (مع الإحصائيات المتقدمة)
+        // 9.  Admin
         // ================================================================
         async function openAdminModal() {
             const user = getUser();
@@ -3088,9 +3109,6 @@
             document.getElementById('adminStatus').textContent = '';
             document.getElementById('adminStatus').className = 'status-msg';
             document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:var(--warning);"></i> ${getTranslation('adminDashboard')}`;
-
-            // تحديث الترجمة
-            document.getElementById('adminStatsTitle').innerHTML = `<i class="fas fa-chart-line"></i> ${getTranslation('adminStats')}`;
             document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
             document.getElementById('adminEmailTh').textContent = getTranslation('email');
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
@@ -3103,54 +3121,11 @@
             document.getElementById('adminNotifTarget').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
-
-            // جلب الإحصائيات والرسم البياني
-            await loadAdminStats();
             await loadAdminUsers();
+            await loadAdminStats();
         }
 
         function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
-
-        async function loadAdminStats() {
-            try {
-                const data = await apiCall('GET', '/admin/stats');
-                document.getElementById('statChannels').textContent = data.totalChannels || 0;
-                document.getElementById('statUsers').textContent = data.totalUsers || 0;
-                document.getElementById('statActiveUsers').textContent = data.activeUsers || 0;
-                document.getElementById('statFavorites').textContent = data.totalFavorites || 0;
-
-                // عرض الرسم البياني
-                const ctx = document.getElementById('categoryChart').getContext('2d');
-                if (categoryChart) categoryChart.destroy();
-                categoryChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: data.categoryLabels || ['عام'],
-                        datasets: [{
-                            data: data.categoryCounts || [1],
-                            backgroundColor: ['#00d4ff', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#e67e22', '#3498db'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#eaeaea' }
-                            }
-                        }
-                    }
-                });
-            } catch (err) {
-                console.error('Failed to load admin stats:', err);
-                document.getElementById('statChannels').textContent = '?';
-                document.getElementById('statUsers').textContent = '?';
-                document.getElementById('statActiveUsers').textContent = '?';
-                document.getElementById('statFavorites').textContent = '?';
-            }
-        }
 
         async function loadAdminUsers() {
             try {
@@ -3236,6 +3211,7 @@
             } catch (err) { alert('❌ ' + err.message); }
         }
 
+        // ===== Admin Notification =====
         async function sendNotification() {
             const message = document.getElementById('adminNotifMessage').value.trim();
             const targetEmail = document.getElementById('adminNotifTarget').value.trim();
@@ -3391,10 +3367,27 @@
             } else {
                 btn.classList.remove('show');
             }
+            handleHeaderScroll();
         }
 
         // ================================================================
-        // 13.  التهيئة
+        // 13.  Clear History
+        // ================================================================
+        async function clearHistory() {
+            if (!confirm('هل أنت متأكد من مسح سجل المشاهدة؟')) return;
+            try {
+                await apiCall('POST', '/user/history', { clear: true });
+                const userData = await apiCall('GET', '/auth/me');
+                setUser(userData.user);
+                buildSidebar();
+                applyFilters(true);
+            } catch (e) {
+                alert('فشل مسح السجل');
+            }
+        }
+
+        // ================================================================
+        // 14.  التهيئة
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -3413,6 +3406,7 @@
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
 
             applyTheme();
+
             appInitialized = true;
 
             const token = getToken();
@@ -3431,7 +3425,9 @@
                         if (user.xtream && user.xtream.server) {
                             try {
                                 await fetchChannelsForUser(true);
-                            } catch (e) { console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message); }
+                            } catch (e) {
+                                console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message);
+                            }
                         } else {
                             allChannels = [];
                         }
@@ -3457,7 +3453,6 @@
 
             currentCategory = 'الكل';
             favorites = getFavorites();
-            history = getHistory();
             displayCount = STEP;
             allChannelsFiltered = allChannels.slice();
 
@@ -3465,7 +3460,6 @@
             buildSidebar();
             applyFilters(true);
             setupInfiniteScroll();
-            renderHistory();
 
             if (getUser()) {
                 setTimeout(() => loadNotifications(), 500);
@@ -3473,7 +3467,7 @@
         }
 
         // ================================================================
-        // 14.  بدء التطبيق
+        // 15.  بدء التطبيق
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
@@ -3492,16 +3486,10 @@
                 if (contactModal.classList.contains('active') && e.target === contactModal) {
                     closeContactModal();
                 }
-                // إغلاق السايدبار عند النقر خارجها في الموبايل
+                // إغلاق القائمة عند النقر خارجها (للموبايل)
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.getElementById('sidebarOverlay');
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
-                    closeSidebar();
-                }
-            });
-            // إغلاق السايدبار عند تغيير حجم النافذة إلى أكبر من 768
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) {
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target.id !== 'menuToggle') {
                     closeSidebar();
                 }
             });
