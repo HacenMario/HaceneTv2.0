@@ -277,11 +277,11 @@ app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
 
         // جلب الأفلام
         const vodUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_vod_streams`;
-        const proxyVodUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(vodUrl)}`;
+        const proxyVodUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(vodUrl)}`;
         const vodResponse = await fetch(proxyVodUrl);
         if (!vodResponse.ok) throw new Error(`HTTP ${vodResponse.status}`);
         const vodData = await vodResponse.json();
-
+        
         let vodItems = [];
         if (Array.isArray(vodData)) {
             vodItems = vodData.map(item => ({
@@ -294,25 +294,28 @@ app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
             }));
         }
 
-        // جلب المسلسلات
-        const seriesUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_series`;
-        const proxySeriesUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(seriesUrl)}`;
-        const seriesResponse = await fetch(proxySeriesUrl);
-        if (seriesResponse.ok) {
-            const seriesData = await seriesResponse.json();
-            if (Array.isArray(seriesData)) {
-                const seriesItems = seriesData.map(item => ({
-                    name: item.name || 'بدون اسم',
-                    category: item.category_name || 'مسلسلات',
-                    stream_id: item.series_id || item.stream_id,
-                    icon: item.stream_icon || item.cover || '',
-                    url: '',
-                    type: 'series'
-                }));
-                vodItems = vodItems.concat(seriesItems);
+        // جلب المسلسلات (اختياري)
+        try {
+            const seriesUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_series`;
+            const proxySeriesUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(seriesUrl)}`;
+            const seriesResponse = await fetch(proxySeriesUrl);
+            if (seriesResponse.ok) {
+                const seriesData = await seriesResponse.json();
+                if (Array.isArray(seriesData)) {
+                    const seriesItems = seriesData.map(item => ({
+                        name: item.name || 'بدون اسم',
+                        category: item.category_name || 'مسلسلات',
+                        stream_id: item.series_id || item.stream_id,
+                        icon: item.stream_icon || item.cover || '',
+                        url: '',
+                        type: 'series'
+                    }));
+                    vodItems = vodItems.concat(seriesItems);
+                }
             }
-        }
+        } catch (e) { /* تجاهل أخطاء المسلسلات */ }
 
+        // حفظ VOD في المستخدم
         user.vod = vodItems;
         await user.save();
 
@@ -347,12 +350,14 @@ app.post('/api/user/vod', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== Notifications =====
+// ===== Notifications Endpoints =====
 app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     try {
+        // إشعارات مؤقتة (للتجربة)
         const user = await User.findById(req.user.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json({ notifications: user.notifications || [] });
+        // يمكنك تخزين الإشعارات في قاعدة بيانات، لكن حالياً نعيد مصفوفة فارغة
+        res.json({ notifications: [] });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -360,12 +365,6 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
 
 app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        const notif = user.notifications.find(n => n._id.toString() === id);
-        if (notif) notif.read = true;
-        await user.save();
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
