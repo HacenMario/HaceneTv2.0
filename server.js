@@ -7,9 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
-// ============================================================
-// 1.  CORS - السماح للواجهة الأمامية بالاتصال
-// ============================================================
+// CORS
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
@@ -17,7 +15,9 @@ app.use(cors({
             'https://hacene-tv2-0.vercel.app',
             'http://localhost:3000',
             'http://localhost:5500',
-            'https://hacenetv2-0.onrender.com'
+            'https://hacenetv2-0.onrender.com',
+            'https://hacenetv2-0-ua0u.onrender.com',
+            'https://hacenetvstalker.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
@@ -33,15 +33,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// ============================================================
-// 2.  خدمة الملفات الثابتة (frontend)
-//     index.html موجود في مجلد frontend
-// ============================================================
-app.use(express.static('frontend'));
-
-// ============================================================
-// 3.  الاتصال بقاعدة البيانات MongoDB
-// ============================================================
+// MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI not defined');
@@ -55,9 +47,7 @@ mongoose.connect(MONGODB_URI)
         process.exit(1);
     });
 
-// ============================================================
-// 4.  تعريف المخططات (Schemas)
-// ============================================================
+// ===== Schemas =====
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
@@ -68,6 +58,8 @@ const UserSchema = new mongoose.Schema({
         username: { type: String, default: '' },
         password: { type: String, default: '' }
     },
+    // ===== سجل المشاهدة =====
+    history: { type: Array, default: [] }, // [{ channelId, channelName, watchedAt }]
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -81,26 +73,20 @@ const ChannelSchema = new mongoose.Schema({
 
 const Channel = mongoose.model('Channel', ChannelSchema);
 
-// ============================================================
-// 5.  الإشعارات (Notifications)
-// ============================================================
-const NotificationSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    message: { type: String, required: true },
-    read: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now }
+// ===== إحصائيات المدير (مخزنة مؤقتاً في الذاكرة أو قاعدة بيانات) =====
+// نستخدم نموذجاً لتخزين الإحصائيات
+const StatsSchema = new mongoose.Schema({
+    totalViews: { type: Number, default: 0 },
+    activeUsersToday: { type: Number, default: 0 },
+    lastUpdated: { type: Date, default: Date.now }
 });
-const Notification = mongoose.model('Notification', NotificationSchema);
+const Stats = mongoose.model('Stats', StatsSchema);
 
-// ============================================================
-// 6.  المساعدات (Helpers) - التوكن والمصادقة
-// ============================================================
-const JWT_SECRET = process.env.JWT_SECRET || 'hacene_tv_secret_key_2025';
-
+// ===== Helpers =====
 function generateToken(userId, email, role) {
     return jwt.sign(
         { userId, email, role },
-        JWT_SECRET,
+        process.env.JWT_SECRET || 'hacene_tv_secret_key_2025',
         { expiresIn: '30d' }
     );
 }
@@ -112,7 +98,7 @@ function authMiddleware(req, res, next) {
     }
     const token = authHeader.split(' ')[1];
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hacene_tv_secret_key_2025');
         req.user = decoded;
         next();
     } catch (err) {
@@ -127,9 +113,7 @@ function adminMiddleware(req, res, next) {
     next();
 }
 
-// ============================================================
-// 7.  نقاط نهاية المصادقة (Auth)
-// ============================================================
+// ===== Auth endpoints =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -148,7 +132,8 @@ app.post('/api/auth/register', async (req, res) => {
             password: hashed,
             role: role,
             isActive: true,
-            xtream: { server: '', username: '', password: '' }
+            xtream: { server: '', username: '', password: '' },
+            history: []
         });
         await user.save();
 
@@ -161,7 +146,8 @@ app.post('/api/auth/register', async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isActive: user.isActive,
-                xtream: user.xtream
+                xtream: user.xtream,
+                history: user.history
             }
         });
     } catch (err) {
@@ -192,7 +178,8 @@ app.post('/api/auth/login', async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isActive: user.isActive,
-                xtream: user.xtream
+                xtream: user.xtream,
+                history: user.history
             }
         });
     } catch (err) {
@@ -211,9 +198,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     }
 });
 
-// ============================================================
-// 8.  نقاط نهاية Xtream (إعدادات وجلب القنوات)
-// ============================================================
+// ===== User Xtream & Channels =====
 app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     try {
         const { server, username, password } = req.body;
@@ -230,7 +215,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== جلب القنوات باستخدام الوكيل =====
+// ===== جلب القنوات باستخدام وكيل cors-anywhere =====
 const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com';
 
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
@@ -289,7 +274,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== الحصول على القنوات المحفوظة =====
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const doc = await Channel.findOne({ userId: req.user.userId });
@@ -299,7 +283,6 @@ app.get('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== حفظ القنوات =====
 app.post('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const { channels } = req.body;
@@ -315,62 +298,94 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ============================================================
-// 9.  نقاط نهاية الإشعارات
-// ============================================================
-app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+// ===== سجل المشاهدة (History) =====
+app.post('/api/user/history', authMiddleware, async (req, res) => {
     try {
-        const { message } = req.body;
-        if (!message) return res.status(400).json({ error: 'Message required' });
-        const users = await User.find({});
-        const notifications = users.map(user => ({
-            userId: user._id,
-            message: message,
-            read: false,
-            createdAt: new Date()
-        }));
-        await Notification.insertMany(notifications);
-        res.json({ success: true, count: notifications.length });
+        const { channelId, channelName } = req.body;
+        if (!channelId || !channelName) {
+            return res.status(400).json({ error: 'channelId and channelName required' });
+        }
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // إزالة أي سجل مكرر لهذه القناة
+        user.history = user.history.filter(item => item.channelId !== channelId);
+        // إضافة القناة إلى البداية
+        user.history.unshift({
+            channelId,
+            channelName,
+            watchedAt: new Date().toISOString()
+        });
+        // الاحتفاظ بآخر 50 مشاهدة فقط
+        if (user.history.length > 50) user.history = user.history.slice(0, 50);
+
+        await user.save();
+        res.json({ success: true, history: user.history });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+app.get('/api/user/history', authMiddleware, async (req, res) => {
     try {
-        const notifications = await Notification.find({ userId: req.user.userId }).sort({ createdAt: -1 });
-        res.json({ notifications });
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ history: user.history || [] });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.delete('/api/user/notifications/:id', authMiddleware, async (req, res) => {
+// ===== إحصائيات المدير =====
+app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
-        if (!notification) return res.status(404).json({ error: 'Notification not found' });
-        await notification.deleteOne();
+        // عدد المستخدمين الكلي
+        const totalUsers = await User.countDocuments();
+        // عدد المستخدمين النشطين اليوم (الذين سجلوا دخول خلال 24 ساعة)
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const activeUsers = await User.countDocuments({ lastLogin: { $gte: oneDayAgo } });
+        // إجمالي القنوات المحفوظة (من جميع المستخدمين)
+        const channelsDocs = await Channel.find({});
+        let totalChannels = 0;
+        channelsDocs.forEach(doc => { totalChannels += doc.channels.length; });
+        // عدد مرات تشغيل القنوات (تقريباً)
+        const stats = await Stats.findOne();
+        const totalViews = stats ? stats.totalViews : 0;
+
+        res.json({
+            totalUsers,
+            activeUsersToday: activeUsers,
+            totalChannels,
+            totalViews,
+            lastUpdated: stats ? stats.lastUpdated : new Date()
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// تحديث الإحصائيات عند تشغيل قناة (يتم استدعاؤها من الواجهة)
+app.post('/api/admin/stats/view', authMiddleware, async (req, res) => {
+    try {
+        let stats = await Stats.findOne();
+        if (!stats) {
+            stats = new Stats({ totalViews: 0, activeUsersToday: 0 });
+        }
+        stats.totalViews += 1;
+        // تحديث وقت آخر تحديث
+        stats.lastUpdated = new Date();
+        await stats.save();
+
+        // تحديث آخر دخول للمستخدم
+        await User.findByIdAndUpdate(req.user.userId, { lastLogin: new Date() });
+
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
-    try {
-        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
-        if (!notification) return res.status(404).json({ error: 'Notification not found' });
-        notification.read = true;
-        await notification.save();
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ============================================================
-// 10. نقاط نهاية الإدارة (Admin)
-// ============================================================
+// ===== Admin endpoints =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -426,9 +441,29 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
-// ============================================================
-// 11. وكيل عام (Proxy) للاستخدامات الأخرى
-// ============================================================
+// ===== Admin Notification (مع دعم البريد المستهدف) =====
+app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { message, targetEmail } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+
+        let users = [];
+        if (targetEmail) {
+            const user = await User.findOne({ email: targetEmail.toLowerCase() });
+            if (!user) return res.status(404).json({ error: 'User not found' });
+            users = [user];
+        } else {
+            users = await User.find({});
+        }
+
+        // هنا يمكن حفظ الإشعارات في قاعدة بيانات، لكن حالياً نعيد العدد
+        res.json({ success: true, count: users.length, message });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ===== Proxy عام (احتياطي) =====
 app.get('/api/proxy', async (req, res) => {
     try {
         const target = req.query.url;
@@ -442,9 +477,7 @@ app.get('/api/proxy', async (req, res) => {
     }
 });
 
-// ============================================================
-// 12. الصحة (Health check)
-// ============================================================
+// ===== Health =====
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -453,9 +486,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// ============================================================
-// 13. تشغيل الخادم
-// ============================================================
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
