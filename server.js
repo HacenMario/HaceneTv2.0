@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
-// CORS
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
@@ -32,7 +31,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI not defined');
@@ -57,7 +55,8 @@ const UserSchema = new mongoose.Schema({
         username: { type: String, default: '' },
         password: { type: String, default: '' }
     },
-    vod: { type: Array, default: [] }, // تخزين قائمة VOD (أفلام ومسلسلات)
+    vod: { type: Array, default: [] },
+    notifications: { type: Array, default: [] },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -102,7 +101,7 @@ function adminMiddleware(req, res, next) {
     next();
 }
 
-// ===== Auth endpoints =====
+// ===== Auth =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -122,7 +121,8 @@ app.post('/api/auth/register', async (req, res) => {
             role: role,
             isActive: true,
             xtream: { server: '', username: '', password: '' },
-            vod: []
+            vod: [],
+            notifications: []
         });
         await user.save();
 
@@ -187,7 +187,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== User Xtream & Channels =====
+// ===== Xtream =====
 app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     try {
         const { server, username, password } = req.body;
@@ -275,13 +275,13 @@ app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // جلب الأفلام (VOD)
+        // جلب الأفلام
         const vodUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_vod_streams`;
         const proxyVodUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(vodUrl)}`;
         const vodResponse = await fetch(proxyVodUrl);
         if (!vodResponse.ok) throw new Error(`HTTP ${vodResponse.status}`);
         const vodData = await vodResponse.json();
-        
+
         let vodItems = [];
         if (Array.isArray(vodData)) {
             vodItems = vodData.map(item => ({
@@ -290,11 +290,11 @@ app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
                 stream_id: item.stream_id,
                 icon: item.stream_icon || '',
                 url: '',
-                type: 'movie' // نوع VOD
+                type: 'movie'
             }));
         }
 
-        // جلب المسلسلات (Series)
+        // جلب المسلسلات
         const seriesUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_series`;
         const proxySeriesUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(seriesUrl)}`;
         const seriesResponse = await fetch(proxySeriesUrl);
@@ -313,7 +313,6 @@ app.get('/api/user/fetch-vod', authMiddleware, async (req, res) => {
             }
         }
 
-        // حفظ VOD في المستخدم
         user.vod = vodItems;
         await user.save();
 
@@ -348,7 +347,64 @@ app.post('/api/user/vod', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== Admin endpoints =====
+// ===== Notifications =====
+app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ notifications: user.notifications || [] });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const notif = user.notifications.find(n => n._id.toString() === id);
+        if (notif) notif.read = true;
+        await user.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const { message, targetEmail } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+
+        let users = [];
+        if (targetEmail) {
+            const user = await User.findOne({ email: targetEmail.toLowerCase() });
+            if (!user) return res.status(404).json({ error: 'User not found' });
+            users = [user];
+        } else {
+            users = await User.find({});
+        }
+
+        const notif = {
+            _id: new mongoose.Types.ObjectId(),
+            message,
+            createdAt: new Date(),
+            read: false
+        };
+
+        for (let u of users) {
+            u.notifications.push(notif);
+            await u.save();
+        }
+
+        res.json({ success: true, count: users.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ===== Admin Users =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -399,30 +455,6 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
         await User.findByIdAndDelete(userId);
         await Channel.findOneAndDelete({ userId });
         res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ===== Admin Notification =====
-app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
-    try {
-        const { message, targetEmail } = req.body;
-        if (!message) return res.status(400).json({ error: 'Message required' });
-
-        let users = [];
-        if (targetEmail) {
-            const user = await User.findOne({ email: targetEmail.toLowerCase() });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            users = [user];
-        } else {
-            users = await User.find({});
-        }
-
-        // هنا يمكن إرسال الإشعارات (حفظها في قاعدة بيانات أو عبر WebSocket)
-        // في هذا الإصدار، سنحفظ الإشعارات في مصفوفة مؤقتة في الذاكرة
-        // لكن للحفاظ على البساطة، سنعيد عدد المستخدمين المستلمين
-        res.json({ success: true, count: users.length, message });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
