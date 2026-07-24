@@ -210,7 +210,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         }
 
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
