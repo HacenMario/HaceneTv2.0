@@ -60,7 +60,7 @@
             display: flex;
             flex-direction: column;
             transition: background var(--transition), color var(--transition);
-            padding-top: var(--header-height);
+            /* تم إزالة padding-top لأننا سنضيفها على .app-container */
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -176,9 +176,10 @@
         .app-container {
             display: flex;
             flex: 1;
-            height: calc(100vh - var(--header-height));
+            min-height: 100vh;
+            padding-top: var(--header-height);
+            box-sizing: border-box;
             overflow: hidden;
-            margin-top: 0;
         }
         .sidebar {
             width: 220px;
@@ -634,9 +635,13 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root { --header-height: 60px; }
-            body { padding-top: var(--header-height); }
+            .app-container {
+                padding-top: var(--header-height);
+                min-height: 100vh;
+                flex-direction: column;
+                height: auto;
+            }
             .header { padding: 8px 12px; }
-            .app-container { flex-direction: column; height: auto; }
             .sidebar {
                 position: fixed;
                 top: 0;
@@ -652,6 +657,7 @@
                 box-shadow: -4px 0 20px rgba(0,0,0,0.3);
                 overflow-y: auto;
                 touch-action: pan-y;
+                border-left: none;
             }
             .sidebar.open {
                 right: 0;
