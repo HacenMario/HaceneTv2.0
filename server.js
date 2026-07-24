@@ -200,7 +200,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-pp.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
+app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
