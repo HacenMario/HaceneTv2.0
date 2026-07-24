@@ -6,6 +6,8 @@
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- ===== Chart.js ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== RESET & BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,6 +33,7 @@
             --transition: 0.3s;
             --scrollbar-track: #0c1017;
             --scrollbar-thumb: #2a3344;
+            --sidebar-width: 260px;
         }
 
         [data-theme="light"] {
@@ -59,6 +62,7 @@
             display: flex;
             flex-direction: column;
             transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -88,6 +92,19 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+        /* ===== HAMBURGER BUTTON ===== */
+        .hamburger {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: var(--transition);
+        }
+        .hamburger:hover { color: var(--accent); }
+
         .btn {
             padding: 7px 16px;
             border-radius: 30px;
@@ -144,21 +161,36 @@
         }
         .user-info .email { color: var(--accent); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* ===== LAYOUT ===== */
+        /* ===== SIDEBAR (Slide-in on mobile) ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active { display: block; }
+
         .app-container {
             display: flex;
             flex: 1;
             height: calc(100vh - 70px);
             overflow: hidden;
+            position: relative;
         }
         .sidebar {
-            width: 220px;
+            width: var(--sidebar-width);
             background: var(--bg-sidebar);
             overflow-y: auto;
             padding: 10px 0;
             border-left: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
+            transition: transform var(--transition), background var(--transition), border-color var(--transition);
+            z-index: 1001;
         }
         .sidebar::-webkit-scrollbar { width: 5px; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
@@ -199,6 +231,55 @@
         .sidebar .cat-item .cat-fav-btn:hover { color: var(--warning); }
         .sidebar .cat-item .cat-fav-btn.active { color: var(--warning); }
 
+        /* ===== HISTORY SECTION IN SIDEBAR ===== */
+        .sidebar .history-section {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+        .sidebar .history-title {
+            padding: 0 16px 8px 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar .history-title button {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .sidebar .history-item {
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar .history-item:hover { background: var(--bg-input); color: var(--accent); }
+        .sidebar .history-item .time {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .sidebar .history-empty {
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-align: center;
+        }
+
         .main-content {
             flex: 1;
             padding: 16px 20px;
@@ -238,7 +319,10 @@
             align-items: center;
             gap: 8px;
             word-break: break-word;
+            cursor: pointer;
+            transition: var(--transition);
         }
+        .channel-card .ch-name:hover { color: var(--accent); }
         .channel-card .ch-name i { color: var(--accent); font-size: 14px; flex-shrink: 0; }
         .channel-card .ch-icon {
             width: 30px;
@@ -444,6 +528,43 @@
         .admin-panel .btn-icon.success:hover { color: var(--success); }
         .admin-panel .btn-icon.warning:hover { color: var(--warning); }
 
+        /* ===== Admin Stats Cards ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .stat-card:hover { border-color: var(--accent); }
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .stat-card .stat-icon {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .chart-container {
+            max-width: 100%;
+            height: 200px;
+            margin-top: 10px;
+        }
+
         /* ===== SCROLL TO TOP ===== */
         #scrollTopBtn {
             position: fixed;
@@ -556,7 +677,6 @@
             text-align: center;
             color: var(--text-secondary);
         }
-
         .notif-wrapper {
             position: relative;
             display: inline-block;
@@ -564,29 +684,34 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .app-container { flex-direction: column; height: auto; }
+            .hamburger { display: block; }
+            .app-container { height: auto; flex-direction: column; }
             .sidebar {
-                width: 100%;
-                max-height: 120px;
-                display: flex;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                padding: 6px 10px;
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: 80%;
+                max-width: 300px;
+                transform: translateX(100%);
                 border-left: none;
-                border-bottom: 1px solid var(--border-color);
+                border-right: 1px solid var(--border-color);
+                z-index: 1001;
+                padding-top: 60px;
             }
+            .sidebar.open { transform: translateX(0); }
             .sidebar .cat-item {
                 white-space: nowrap;
                 border-right: none;
                 border-bottom: 3px solid transparent;
-                padding: 5px 12px;
-                font-size: 13px;
+                padding: 10px 16px;
             }
             .sidebar .cat-item.active { border-bottom-color: var(--accent); }
-            .sidebar .cat-item .count { display: none; }
-            .sidebar .cat-item .cat-fav-btn { display: none; }
+            .sidebar .cat-item .count { display: inline; }
+            .sidebar .cat-item .cat-fav-btn { display: inline-block; }
+
             .header { flex-direction: column; align-items: stretch; }
-            .controls-area { justify-content: center; gap: 6px; }
+            .controls-area { justify-content: center; gap: 6px; flex-wrap: wrap; }
             .search-box { width: 100%; }
             .channels-grid { grid-template-columns: 1fr; }
             .modal-box { padding: 18px; }
@@ -595,6 +720,15 @@
             .user-info .email { max-width: 80px; }
             .notif-dropdown { width: 290px; right: -20px; }
             #scrollTopBtn { width: 40px; height: 40px; font-size: 18px; bottom: 20px; right: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-card .stat-number { font-size: 22px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .controls-area .btn { font-size: 11px; padding: 4px 10px; }
+            .controls-area .btn-sm { font-size: 10px; padding: 3px 8px; }
+            .search-box { font-size: 12px; }
         }
 
         .lang-btn {
@@ -646,13 +780,31 @@
 
     <header class="header" id="mainHeader">
         <div class="logo-area">
+            <!-- ===== Hamburger Button (mobile) ===== -->
+            <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="فتح القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
             <h1><i class="fas fa-satellite-dish" style="color:var(--accent);"></i> HACENE TV</h1>
         </div>
         <div class="controls-area" id="headerControls"></div>
     </header>
 
     <div class="app-container">
-        <aside class="sidebar" id="sidebar"></aside>
+        <!-- ===== SIDEBAR OVERLAY (mobile) ===== -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <!-- القنوات والمفضلة ستظهر هنا -->
+            <!-- ===== HISTORY SECTION ===== -->
+            <div class="history-section" id="historySection">
+                <div class="history-title">
+                    <span><i class="fas fa-history"></i> سجل المشاهدة</span>
+                    <button onclick="clearHistory()" title="حذف السجل"><i class="fas fa-trash"></i></button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </aside>
+
         <main class="main-content" id="mainContent">
             <div id="channelsContainer"></div>
             <div id="scrollTrigger" style="height:1px; visibility:hidden;"></div>
@@ -731,6 +883,38 @@
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
             <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:var(--warning);"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
+                <!-- ===== STATS SECTION ===== -->
+                <div class="admin-panel">
+                    <h3 id="adminStatsTitle"><i class="fas fa-chart-line"></i> إحصائيات المنصة</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-tv"></i></div>
+                            <div class="stat-number" id="statChannels">0</div>
+                            <div class="stat-label">إجمالي القنوات</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-number" id="statUsers">0</div>
+                            <div class="stat-label">المستخدمين المسجلين</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                            <div class="stat-number" id="statActiveUsers">0</div>
+                            <div class="stat-label">نشطاء اليوم</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-star"></i></div>
+                            <div class="stat-number" id="statFavorites">0</div>
+                            <div class="stat-label">إجمالي المفضلات</div>
+                        </div>
+                    </div>
+                    <!-- ===== Chart ===== -->
+                    <div style="margin-top: 16px;">
+                        <canvas id="categoryChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- ===== Users Table ===== -->
                 <div class="admin-panel">
                     <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
@@ -747,10 +931,14 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- ===== Notifications ===== -->
                 <div class="admin-panel">
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
                     <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
+                    <label id="adminNotifTargetLabel">البريد الإلكتروني المستهدف (اختياري)</label>
+                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
                     <button class="btn-save" onclick="sendNotification()" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> إرسال الإشعار</button>
                     <div id="adminNotifStatus" class="status-msg"></div>
                 </div>
@@ -1877,6 +2065,7 @@
                 "notificationMessage": "نص الإشعار",
                 "send": "إرسال",
                 "notificationSent": "✅ تم إرسال الإشعار إلى {count} مستخدم",
+                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "theme": "المظهر",
                 "scrollToTop": "الرجوع للأعلى",
                 "loadingMore": "جاري تحميل المزيد...",
@@ -1897,7 +2086,15 @@
                 "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
                 "telegram": "تيليجرام",
-                "fetchChannels": "جلب القنوات"
+                "fetchChannels": "جلب القنوات",
+                "history": "سجل المشاهدة",
+                "clearHistory": "حذف السجل",
+                "noHistory": "لا توجد قنوات في السجل",
+                "adminStats": "إحصائيات المنصة",
+                "totalChannels": "إجمالي القنوات",
+                "totalUsers": "المستخدمين المسجلين",
+                "activeToday": "نشطاء اليوم",
+                "totalFavorites": "إجمالي المفضلات"
             },
             fr: {
                 "live": "En direct",
@@ -1978,6 +2175,7 @@
                 "notificationMessage": "Message de la notification",
                 "send": "Envoyer",
                 "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
+                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "theme": "Thème",
                 "scrollToTop": "Retour en haut",
                 "loadingMore": "Chargement...",
@@ -1998,7 +2196,15 @@
                 "contactPhone": "Téléphone",
                 "contactWaiting": "Nous attendons vos questions et suggestions.",
                 "telegram": "Telegram",
-                "fetchChannels": "Récupérer les chaînes"
+                "fetchChannels": "Récupérer les chaînes",
+                "history": "Historique",
+                "clearHistory": "Effacer l'historique",
+                "noHistory": "Aucune chaîne dans l'historique",
+                "adminStats": "Statistiques de la plateforme",
+                "totalChannels": "Chaînes totales",
+                "totalUsers": "Utilisateurs enregistrés",
+                "activeToday": "Actifs aujourd'hui",
+                "totalFavorites": "Favoris totaux"
             }
         };
 
@@ -2020,6 +2226,9 @@
         let allChannelsFiltered = [];
         let notifications = [];
         let unreadCount = 0;
+        let history = [];
+        const MAX_HISTORY = 20;
+        let categoryChart = null;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2059,11 +2268,11 @@
         }
 
         function updateAllTexts() {
-            // يتم التحديث عند فتح النوافذ
+            // سيتم تحديث النصوص عند فتح النوافذ
         }
 
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين
+        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2071,6 +2280,8 @@
         function setUser(u) { currentUser = u; if (u) localStorage.setItem('hacene_user', JSON.stringify(u)); else localStorage.removeItem('hacene_user'); }
         function getFavorites() { const stored = localStorage.getItem('hacene_favorites'); if (stored) { try { return JSON.parse(stored); } catch (e) { return []; } } return []; }
         function setFavorites(f) { favorites = f; localStorage.setItem('hacene_favorites', JSON.stringify(f)); }
+        function getHistory() { const stored = localStorage.getItem('hacene_history'); if (stored) { try { return JSON.parse(stored); } catch (e) { return []; } } return []; }
+        function setHistory(h) { history = h; localStorage.setItem('hacene_history', JSON.stringify(h)); }
 
         // ================================================================
         // 4.  API
@@ -2092,8 +2303,77 @@
         }
 
         // ================================================================
-        // 5.  دوال العرض
+        // 5.  دوال العرض والهيكل
         // ================================================================
+        // ----- Hamburger Sidebar -----
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        // ----- History -----
+        function addToHistory(channel) {
+            if (!channel) return;
+            const entry = {
+                id: getChannelId(channel),
+                name: channel.name,
+                category: channel.category || 'عام',
+                icon: channel.icon || '',
+                stream_id: channel.stream_id,
+                timestamp: Date.now()
+            };
+            // إزالة المكرر
+            let hist = getHistory();
+            hist = hist.filter(item => item.id !== entry.id);
+            hist.unshift(entry);
+            if (hist.length > MAX_HISTORY) hist = hist.slice(0, MAX_HISTORY);
+            setHistory(hist);
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            const hist = getHistory();
+            if (!container) return;
+            if (hist.length === 0) {
+                container.innerHTML = `<div class="history-empty">${getTranslation('noHistory')}</div>`;
+                return;
+            }
+            container.innerHTML = hist.map(item => `
+                <div class="history-item" onclick="playHistoryItem('${item.id}')" title="${item.name}">
+                    <i class="fas fa-play-circle" style="color:var(--accent);"></i>
+                    <span>${item.name}</span>
+                    <span class="time">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                </div>
+            `).join('');
+        }
+
+        function playHistoryItem(id) {
+            const index = allChannels.findIndex(ch => getChannelId(ch) === id);
+            if (index !== -1) {
+                playChannel(index);
+            } else {
+                alert(getTranslation('channelNotFound'));
+            }
+        }
+
+        function clearHistory() {
+            if (confirm(getTranslation('confirmClearHistory') || 'هل أنت متأكد من حذف سجل المشاهدة؟')) {
+                setHistory([]);
+                renderHistory();
+            }
+        }
+
+        // ----- Render Header, Sidebar, Filters -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -2177,7 +2457,6 @@
                 <button class="btn btn-primary btn-sm" onclick="openAddModal()">
                     <i class="fas fa-plus"></i> ${getTranslation('add')}
                 </button>
-                <!-- ===== زر جلب القنوات (لجميع المستخدمين) ===== -->
                 <button class="btn btn-success btn-sm" onclick="fetchChannelsForUser()">
                     <i class="fas fa-cloud-download-alt"></i> ${getTranslation('fetchChannels')}
                 </button>
@@ -2188,6 +2467,8 @@
                 <span class="channel-counter" id="channelCount">0</span>
             `;
             updateNotifBadge();
+            // إعادة بناء السجل بعد تغيير اللغة
+            renderHistory();
         }
 
         function getThemeIcon() {
@@ -2211,13 +2492,19 @@
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
             if (!allChannels || allChannels.length === 0) {
-                sidebar.innerHTML = `<div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>`;
+                sidebar.innerHTML = `
+                    <div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>
+                    <div class="history-section">
+                        <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
+                        <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
+                    </div>
+                `;
                 return;
             }
             const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
             const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
 
-            sidebar.innerHTML = sorted.map(cat => {
+            let html = sorted.map(cat => {
                 let count = 0;
                 if (cat === 'الكل') count = allChannels.length;
                 else if (cat === 'المفضلة') count = favorites.length;
@@ -2231,6 +2518,19 @@
                             ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
                         </div>`;
             }).join('');
+
+            // إضافة قسم السجل
+            html += `
+                <div class="history-section">
+                    <div class="history-title">
+                        <span><i class="fas fa-history"></i> ${getTranslation('history')}</span>
+                        <button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div id="historyList"></div>
+                </div>
+            `;
+            sidebar.innerHTML = html;
+            renderHistory();
         }
 
         function isCategoryFavorite(category) {
@@ -2338,12 +2638,12 @@
                 <div class="channels-grid">
                     ${channelsToShow.map((ch, idx) => {
                         const realIndex = allChannels.indexOf(ch);
-                        const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" />` : '';
+                        const iconHtml = ch.icon ? `<img class="ch-icon" src="${ch.icon}" alt="" onerror="this.style.display='none'" loading="lazy" />` : '';
                         const isFav = favorites.includes(getChannelId(ch));
                         const catDisplay = translateCategory(ch.category || 'عام');
                         return `
                             <div class="channel-card">
-                                <div class="ch-name">
+                                <div class="ch-name" onclick="playChannel(${realIndex})">
                                     ${iconHtml}
                                     <i class="fas fa-broadcast-tower"></i> ${ch.name || 'بدون اسم'}
                                 </div>
@@ -2403,6 +2703,8 @@
             displayCount = STEP;
             applyFilters(true);
             setupInfiniteScroll();
+            // إغلاق السايدبار في الموبايل
+            if (window.innerWidth <= 768) closeSidebar();
         }
 
         function toggleFavorite(index) {
@@ -2484,28 +2786,38 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
-        // ===== دالة جلب القنوات للمستخدم الحالي (للمستخدم العادي) =====
-        async function fetchChannelsForUser() {
+        // ===== دالة جلب القنوات (بدون alert) =====
+        async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
-                alert(getTranslation('loginFirst'));
-                return;
-            }
-
-            // التحقق من وجود إعدادات Xtream
-            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
-                if (user.role !== 'admin') {
-                    alert('⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.');
-                } else {
-                    alert('⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.');
+                const statusEl = document.getElementById('xtreamStatus');
+                if (statusEl) {
+                    statusEl.textContent = '⚠️ ' + getTranslation('loginFirst');
+                    statusEl.className = 'status-msg error';
+                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
                 }
-                return;
+                return false;
+            }
+            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
+                const statusEl = document.getElementById('xtreamStatus');
+                if (user.role !== 'admin') {
+                    if (statusEl) {
+                        statusEl.textContent = '⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.';
+                        statusEl.className = 'status-msg error';
+                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.textContent = '⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.';
+                        statusEl.className = 'status-msg error';
+                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
+                    }
+                }
+                return false;
             }
 
-            const statusEl = document.getElementById('xtreamStatus');
-            if (statusEl) {
-                statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
-                statusEl.className = 'status-msg';
+            if (showLoading) {
+                showLoadingModal();
             }
 
             try {
@@ -2514,7 +2826,6 @@
                 applyCategoryMap();
                 localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
 
-                // تحديث بيانات المستخدم المحلية
                 const currentUser = getUser();
                 if (currentUser) {
                     const userData = await apiCall('GET', '/auth/me');
@@ -2527,6 +2838,11 @@
                 applyFilters(true);
                 setupInfiniteScroll();
 
+                if (showLoading) {
+                    hideLoadingModal();
+                }
+
+                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
                     statusEl.className = 'status-msg success';
@@ -2534,9 +2850,14 @@
                 }
                 return true;
             } catch (err) {
+                if (showLoading) {
+                    hideLoadingModal();
+                }
+                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = '❌ ' + err.message;
                     statusEl.className = 'status-msg error';
+                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
                 }
                 return false;
             }
@@ -2558,17 +2879,15 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                showLoadingModal();
+
                 await initializeApp(true);
                 await loadNotifications();
 
-                // ===== جلب القنوات تلقائياً بعد تسجيل الدخول =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser();
+                    await fetchChannelsForUser(true);
                 }
 
-                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2596,17 +2915,15 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-                showLoadingModal();
+
                 await initializeApp(true);
                 await loadNotifications();
 
-                // ===== جلب القنوات تلقائياً بعد التسجيل =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser();
+                    await fetchChannelsForUser(true);
                 }
 
-                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2618,6 +2935,7 @@
             setToken(null);
             setUser(null);
             setFavorites([]);
+            setHistory([]);
             allChannels = [];
             currentCategory = 'الكل';
             displayCount = STEP;
@@ -2690,7 +3008,7 @@
         }
 
         // ================================================================
-        // 8.  القنوات
+        // 8.  القنوات (تشغيل مع إضافة للسجل)
         // ================================================================
         function openAddModal() {
             const user = getUser();
@@ -2734,9 +3052,13 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
+        // ===== دالة التشغيل الأساسية مع إضافة للسجل =====
         function playChannel(index) {
             const channel = allChannels[index];
             if (!channel) { alert(getTranslation('channelNotFound')); return; }
+            // إضافة للسجل
+            addToHistory(channel);
+
             let url = channel.url;
             const user = getUser();
             if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
@@ -2757,7 +3079,7 @@
         }
 
         // ================================================================
-        // 9.  Admin
+        // 9.  Admin (مع الإحصائيات المتقدمة)
         // ================================================================
         async function openAdminModal() {
             const user = getUser();
@@ -2766,6 +3088,9 @@
             document.getElementById('adminStatus').textContent = '';
             document.getElementById('adminStatus').className = 'status-msg';
             document.getElementById('adminModalTitle').innerHTML = `<i class="fas fa-users-cog" style="color:var(--warning);"></i> ${getTranslation('adminDashboard')}`;
+
+            // تحديث الترجمة
+            document.getElementById('adminStatsTitle').innerHTML = `<i class="fas fa-chart-line"></i> ${getTranslation('adminStats')}`;
             document.getElementById('adminUsersTitle').textContent = getTranslation('userManagement');
             document.getElementById('adminEmailTh').textContent = getTranslation('email');
             document.getElementById('adminStatusTh').textContent = getTranslation('status');
@@ -2773,13 +3098,59 @@
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
             document.getElementById('adminNotifTitle').innerHTML = `<i class="fas fa-bell"></i> ${getTranslation('sendNotification')}`;
             document.getElementById('adminNotifLabel').textContent = getTranslation('notificationMessage');
+            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
             document.getElementById('adminNotifMessage').value = '';
+            document.getElementById('adminNotifTarget').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
+
+            // جلب الإحصائيات والرسم البياني
+            await loadAdminStats();
             await loadAdminUsers();
         }
 
         function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
+
+        async function loadAdminStats() {
+            try {
+                const data = await apiCall('GET', '/admin/stats');
+                document.getElementById('statChannels').textContent = data.totalChannels || 0;
+                document.getElementById('statUsers').textContent = data.totalUsers || 0;
+                document.getElementById('statActiveUsers').textContent = data.activeUsers || 0;
+                document.getElementById('statFavorites').textContent = data.totalFavorites || 0;
+
+                // عرض الرسم البياني
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                if (categoryChart) categoryChart.destroy();
+                categoryChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categoryLabels || ['عام'],
+                        datasets: [{
+                            data: data.categoryCounts || [1],
+                            backgroundColor: ['#00d4ff', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c', '#e67e22', '#3498db'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#eaeaea' }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Failed to load admin stats:', err);
+                document.getElementById('statChannels').textContent = '?';
+                document.getElementById('statUsers').textContent = '?';
+                document.getElementById('statActiveUsers').textContent = '?';
+                document.getElementById('statFavorites').textContent = '?';
+            }
+        }
 
         async function loadAdminUsers() {
             try {
@@ -2865,9 +3236,9 @@
             } catch (err) { alert('❌ ' + err.message); }
         }
 
-        // ===== Admin Notification =====
         async function sendNotification() {
             const message = document.getElementById('adminNotifMessage').value.trim();
+            const targetEmail = document.getElementById('adminNotifTarget').value.trim();
             const statusEl = document.getElementById('adminNotifStatus');
             if (!message) {
                 statusEl.textContent = getTranslation('fillAllFields');
@@ -2877,10 +3248,15 @@
             statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
             statusEl.className = 'status-msg';
             try {
-                const result = await apiCall('POST', '/admin/notifications', { message });
-                statusEl.textContent = getTranslation('notificationSent', { count: result.count });
+                const body = { message };
+                if (targetEmail) body.targetEmail = targetEmail;
+                const result = await apiCall('POST', '/admin/notifications', body);
+                const count = result.count || 0;
+                const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
+                statusEl.textContent = msg;
                 statusEl.className = 'status-msg success';
                 document.getElementById('adminNotifMessage').value = '';
+                document.getElementById('adminNotifTarget').value = '';
                 if (currentUser) await loadNotifications();
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -2979,23 +3355,23 @@
             document.getElementById('aboutModal').classList.remove('active');
         }
 
-function openContactModal() {
-    const modal = document.getElementById('contactModal');
-    modal.classList.add('active');
-    document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
-    document.getElementById('contactContent').innerHTML = `
-        <p>${getTranslation('contactInfo')}</p>
-        <div class="contact-item">
-            <i class="fas fa-envelope"></i>
-            <a href="mailto:stevenhacen@gmail.com" style="color:var(--accent); text-decoration:none;">stevenhacen@gmail.com</a>
-        </div>
-        <div class="contact-item">
-            <i class="fas fa-phone-alt"></i>
-            <a href="tel:0542163526" style="color:var(--accent); text-decoration:none;">0542163526</a>
-        </div>
-        <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
-    `;
-}
+        function openContactModal() {
+            const modal = document.getElementById('contactModal');
+            modal.classList.add('active');
+            document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
+            document.getElementById('contactContent').innerHTML = `
+                <p>${getTranslation('contactInfo')}</p>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:stevenhacen@gmail.com" style="color:var(--accent); text-decoration:none;">stevenhacen@gmail.com</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:0542163526" style="color:var(--accent); text-decoration:none;">0542163526</a>
+                </div>
+                <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
+            `;
+        }
 
         function closeContactModal() {
             document.getElementById('contactModal').classList.remove('active');
@@ -3037,7 +3413,6 @@ function openContactModal() {
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
 
             applyTheme();
-
             appInitialized = true;
 
             const token = getToken();
@@ -3053,13 +3428,10 @@ function openContactModal() {
                         applyCategoryMap();
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                     } else {
-                        // إذا لم تكن هناك قنوات محفوظة، نحاول جلبها تلقائياً
                         if (user.xtream && user.xtream.server) {
                             try {
-                                await fetchChannelsForUser();
-                            } catch (e) {
-                                console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message);
-                            }
+                                await fetchChannelsForUser(true);
+                            } catch (e) { console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message); }
                         } else {
                             allChannels = [];
                         }
@@ -3085,6 +3457,7 @@ function openContactModal() {
 
             currentCategory = 'الكل';
             favorites = getFavorites();
+            history = getHistory();
             displayCount = STEP;
             allChannelsFiltered = allChannels.slice();
 
@@ -3092,6 +3465,7 @@ function openContactModal() {
             buildSidebar();
             applyFilters(true);
             setupInfiniteScroll();
+            renderHistory();
 
             if (getUser()) {
                 setTimeout(() => loadNotifications(), 500);
@@ -3118,6 +3492,18 @@ function openContactModal() {
                 if (contactModal.classList.contains('active') && e.target === contactModal) {
                     closeContactModal();
                 }
+                // إغلاق السايدبار عند النقر خارجها في الموبايل
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
+                    closeSidebar();
+                }
+            });
+            // إغلاق السايدبار عند تغيير حجم النافذة إلى أكبر من 768
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
             });
         });
 
@@ -3136,6 +3522,7 @@ function openContactModal() {
                 closeAboutModal();
                 closeContactModal();
                 document.getElementById('notifDropdown')?.classList.remove('active');
+                closeSidebar();
             }
         });
     </script>
