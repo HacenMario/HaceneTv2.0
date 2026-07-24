@@ -2668,23 +2668,16 @@ function playChannel(index) {
     let url = channel.url;
     const user = getUser();
 
-    // بناء الرابط إذا كانت القناة من Xtream
-    if (channel.stream_id && user?.xtream?.server) {
-        const { server } = user.xtream;
-        let streamId = String(channel.stream_id);
-        
-        // إذا كان stream_id يبدأ بـ "live/" (المسار كامل من المزود)
-        if (streamId.startsWith('live/')) {
-            // إضافة .m3u8 إذا لم يكن موجوداً
-            if (!streamId.endsWith('.m3u8') && !streamId.endsWith('.ts')) {
-                streamId = streamId + '.m3u8';
-            }
-            url = `${server}/${streamId}`;
-        } else {
-            // الصيغة القديمة: stream_id هو رقم فقط
-            const { username, password } = user.xtream;
-            url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
+    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+        const { server, username, password } = user.xtream;
+        let streamId = String(channel.stream_id).trim();
+        // ✅ تنظيف stream_id: استخراج الرقم الأخير إذا كان يحتوي على "/"
+        if (streamId.includes('/')) {
+            let parts = streamId.split('/');
+            streamId = parts[parts.length - 1];
         }
+        // ✅ بناء الرابط بالصيغة القياسية
+        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
     }
 
     if (!url || url === '#' || url === '') {
@@ -2692,7 +2685,7 @@ function playChannel(index) {
         return;
     }
 
-    // ✅ الحل: فتح الرابط في نافذة/تبويب جديد
+    // ✅ فتح الرابط في نافذة جديدة لتجنب إغلاق الصفحة
     window.open(url, '_blank');
 }
         function applyCategoryMap() {
