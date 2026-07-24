@@ -203,6 +203,8 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
 // ===== جلب القنوات باستخدام الوكيل المخصص =====
 const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com'; // استخدم متغير البيئة أو الرابط الثابت
 
+const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com';
+
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
@@ -212,15 +214,18 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // رابط API الأصلي
+        // بناء رابط API الأصلي
         const targetUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
         
-        // استخدام الوكيل المخصص لتجاوز الحظر
+        // رابط الوكيل
         const proxyUrl = `${PROXY_URL}/${targetUrl}`;
 
+        // ✅ إضافة الرؤوس المطلوبة من قبل الوكيل
         const response = await fetch(proxyUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Origin': 'https://hacenetv2-0-ua0u.onrender.com', // رابط موقعك
+                'X-Requested-With': 'XMLHttpRequest', // 🔑 الرأس المطلوب
                 'Accept': 'application/json'
             }
         });
@@ -257,30 +262,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     } catch (err) {
         console.error('Fetch channels error:', err);
         res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/api/user/channels', authMiddleware, async (req, res) => {
-    try {
-        const doc = await Channel.findOne({ userId: req.user.userId });
-        res.json({ channels: doc ? doc.channels : [] });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-app.post('/api/user/channels', authMiddleware, async (req, res) => {
-    try {
-        const { channels } = req.body;
-        if (!Array.isArray(channels)) return res.status(400).json({ error: 'Channels must be array' });
-        await Channel.findOneAndUpdate(
-            { userId: req.user.userId },
-            { userId: req.user.userId, channels, updatedAt: Date.now() },
-            { upsert: true, new: true }
-        );
-        res.json({ success: true, channels });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
     }
 });
 
