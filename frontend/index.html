@@ -1702,33 +1702,19 @@
         }
 
         // ===== دالة التشغيل المعدلة =====
-function playChannel(index) {
-    const channel = allChannels[index];
-    if (!channel) {
-        alert(getTranslation('channelNotFound'));
-        return;
-    }
+        function playChannel(index) {
+            const channel = allChannels[index];
+            if (!channel) { alert(getTranslation('channelNotFound')); return; }
+            let url = channel.url;
+            const user = getUser();
+            if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+                const { server, username, password } = user.xtream;
+                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
+            }
+            if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
+            window.location.href = url;
+        }
 
-    let url = channel.url;
-    const user = getUser();
-
-    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
-        const { server, username, password } = user.xtream;
-        let streamId = String(channel.stream_id);
-
-        // إذا كان stream_id يحتوي على "/" نستخرج الرقم الأخير، وإلا نستخدمه كما هو
-        let realId = streamId.includes('/') ? streamId.split('/').pop() : streamId;
-
-        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${realId}.m3u8`;
-    }
-
-    if (!url || url === '#' || url === '') {
-        alert(getTranslation('invalidUrl'));
-        return;
-    }
-
-    window.location.href = url;
-}
         function applyCategoryMap() {
             allChannels = allChannels.map(ch => {
                 const newCat = CHANNEL_CATEGORY_MAP[ch.name];
