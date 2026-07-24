@@ -69,15 +69,6 @@ const ChannelSchema = new mongoose.Schema({
 
 const Channel = mongoose.model('Channel', ChannelSchema);
 
-// ===== Notification Schema =====
-const NotificationSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    message: { type: String, required: true },
-    read: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now }
-});
-const Notification = mongoose.model('Notification', NotificationSchema);
-
 // ===== Helpers =====
 function generateToken(userId, email, role) {
     return jwt.sign(
@@ -120,6 +111,7 @@ app.post('/api/auth/register', async (req, res) => {
         if (existing) return res.status(400).json({ error: 'Email already registered' });
 
         const hashed = await bcrypt.hash(password, 10);
+        // أول مستخدم يسجل يصبح Admin
         const count = await User.countDocuments();
         const role = count === 0 ? 'admin' : 'user';
 
@@ -218,27 +210,19 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         }
 
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Invalid response');
 
-        const channels = data.map(item => {
-            let streamId = item.stream_id;
-            // استخراج الرقم الأخير إذا كان المسار يحتوي على "/"
-            if (streamId && String(streamId).includes('/')) {
-                const parts = String(streamId).split('/');
-                streamId = parts[parts.length - 1];
-            }
-            return {
-                name: item.name || 'بدون اسم',
-                category: item.category_name || 'عام',
-                stream_id: streamId,  // الآن مجرد معرف رقمي
-                icon: item.stream_icon || '',
-                url: ''
-            };
-        });
+        const channels = data.map(item => ({
+            name: item.name || 'بدون اسم',
+            category: item.category_name || 'عام',
+            stream_id: item.stream_id,
+            icon: item.stream_icon || '',
+            url: ''
+        }));
 
         await Channel.findOneAndUpdate(
             { userId: user._id },
@@ -333,21 +317,36 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
-// ===== Admin Notifications =====
+// ===== Proxy =====
+app.get('/api/proxy', async (req, res) => {
+    try {
+        const target = req.query.url;
+        if (!target) return res.status(400).json({ error: 'Missing url' });
+        const response = await fetch(target);
+        if (!response.ok) return res.status(response.status).json({ error: 'Fetch failed' });
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: 'Proxy error: ' + err.message });
+    }
+});
+
+// إضافة نموذج Notification
+const NotificationSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', NotificationSchema);
+
+// إضافة endpoints
 app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        const { message, targetEmail } = req.body;
-        if (!message) return res.status(400).json({ error: 'Message is required' });
-
-        let users = [];
-        if (targetEmail) {
-            const user = await User.findOne({ email: targetEmail.toLowerCase() });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            users = [user];
-        } else {
-            users = await User.find({ isActive: true });
-        }
-
+        const { message } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+        // إرسال الإشعار لجميع المستخدمين
+        const users = await User.find({});
         const notifications = users.map(user => ({
             userId: user._id,
             message: message,
@@ -355,19 +354,27 @@ app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req
             createdAt: new Date()
         }));
         await Notification.insertMany(notifications);
-
-        res.json({ success: true, count: users.length });
+        res.json({ success: true, count: notifications.length });
     } catch (err) {
-        console.error('Error sending notification:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// ===== User Notifications =====
 app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     try {
         const notifications = await Notification.find({ userId: req.user.userId }).sort({ createdAt: -1 });
         res.json({ notifications });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/user/notifications/:id', authMiddleware, async (req, res) => {
+    try {
+        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
+        if (!notification) return res.status(404).json({ error: 'Notification not found' });
+        await notification.deleteOne();
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -382,20 +389,6 @@ app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => 
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ===== Proxy =====
-app.get('/api/proxy', async (req, res) => {
-    try {
-        const target = req.query.url;
-        if (!target) return res.status(400).json({ error: 'Missing url' });
-        const response = await fetch(target);
-        if (!response.ok) return res.status(response.status).json({ error: 'Fetch failed' });
-        const data = await response.json();
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: 'Proxy error: ' + err.message });
     }
 });
 
