@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HACENE TV - IPTV</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
@@ -31,7 +31,6 @@
             --transition: 0.3s;
             --scrollbar-track: #0c1017;
             --scrollbar-thumb: #2a3344;
-            --header-height: 70px;
         }
 
         [data-theme="light"] {
@@ -60,14 +59,13 @@
             display: flex;
             flex-direction: column;
             transition: background var(--transition), color var(--transition);
-            /* تم إزالة padding-top لأننا سنضيفها على .app-container */
         }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
         ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
-        /* ===== HEADER (ثابت) ===== */
+        /* ===== HEADER ===== */
         .header {
             background: var(--bg-secondary);
             padding: 12px 20px;
@@ -77,16 +75,11 @@
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
             gap: 10px;
-            position: fixed;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
             z-index: 999;
-            height: var(--header-height);
             transition: background var(--transition), border-color var(--transition);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-area h1 { font-size: 20px; color: var(--accent); font-weight: 700; }
         .controls-area {
@@ -129,31 +122,10 @@
             width: 160px;
             outline: 2px solid transparent;
             transition: var(--transition);
-            font-size: 16px !important; /* منع تكبير iOS */
+            font-size: 13px;
         }
         .search-box:focus { outline-color: var(--accent); }
         .search-box::placeholder { color: var(--text-secondary); }
-        .search-wrapper {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-        }
-        .search-wrapper .search-clear {
-            position: absolute;
-            left: 10px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-            display: none;
-            padding: 0 4px;
-        }
-        .search-wrapper .search-clear.show { display: block; }
-        .search-wrapper .search-box {
-            padding-right: 36px;
-            width: 160px;
-        }
         .badge-count {
             background: var(--accent);
             color: #fff;
@@ -176,9 +148,7 @@
         .app-container {
             display: flex;
             flex: 1;
-            min-height: 100vh;
-            padding-top: var(--header-height);
-            box-sizing: border-box;
+            height: calc(100vh - 70px);
             overflow: hidden;
         }
         .sidebar {
@@ -188,7 +158,7 @@
             padding: 10px 0;
             border-left: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: transform 0.3s ease, background var(--transition), border-color var(--transition);
+            transition: background var(--transition), border-color var(--transition);
         }
         .sidebar::-webkit-scrollbar { width: 5px; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
@@ -229,44 +199,6 @@
         .sidebar .cat-item .cat-fav-btn:hover { color: var(--warning); }
         .sidebar .cat-item .cat-fav-btn.active { color: var(--warning); }
 
-        /* ===== زر فتح القائمة (هامبورجر) محسّن ===== */
-        .menu-toggle {
-            background: var(--bg-input);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .menu-toggle:hover { background: var(--border-light); }
-        .menu-toggle.active { background: var(--accent); color: #fff; }
-        .menu-toggle:active { transform: scale(0.92); }
-
-        /* ===== Overlay للقائمة على الموبايل ===== */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 998;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            touch-action: none;
-        }
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-
         .main-content {
             flex: 1;
             padding: 16px 20px;
@@ -306,10 +238,7 @@
             align-items: center;
             gap: 8px;
             word-break: break-word;
-            cursor: pointer;
-            transition: var(--transition);
         }
-        .channel-card .ch-name:hover { color: var(--accent); }
         .channel-card .ch-name i { color: var(--accent); font-size: 14px; flex-shrink: 0; }
         .channel-card .ch-icon {
             width: 30px;
@@ -432,7 +361,7 @@
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 14px;
             outline: none;
             transition: var(--transition);
         }
@@ -627,6 +556,7 @@
             text-align: center;
             color: var(--text-secondary);
         }
+
         .notif-wrapper {
             position: relative;
             display: inline-block;
@@ -634,56 +564,30 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            :root { --header-height: 60px; }
-            .app-container {
-                padding-top: var(--header-height);
-                min-height: 100vh;
-                flex-direction: column;
-                height: auto;
-            }
-            .header { padding: 8px 12px; }
+            .app-container { flex-direction: column; height: auto; }
             .sidebar {
-                position: fixed;
-                top: 0;
-                right: -300px;
-                width: 280px;
-                height: 100%;
-                z-index: 999;
+                width: 100%;
+                max-height: 120px;
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 6px 10px;
                 border-left: none;
-                border-right: 1px solid var(--border-color);
-                transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-                padding-top: 60px;
-                background: var(--bg-secondary);
-                box-shadow: -4px 0 20px rgba(0,0,0,0.3);
-                overflow-y: auto;
-                touch-action: pan-y;
-                border-left: none;
-            }
-            .sidebar.open {
-                right: 0;
+                border-bottom: 1px solid var(--border-color);
             }
             .sidebar .cat-item {
-                padding: 12px 20px;
+                white-space: nowrap;
                 border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                font-size: 15px;
-                touch-action: manipulation;
+                border-bottom: 3px solid transparent;
+                padding: 5px 12px;
+                font-size: 13px;
             }
-            .sidebar .cat-item.active {
-                border-right: none;
-                border-bottom-color: var(--accent);
-            }
+            .sidebar .cat-item.active { border-bottom-color: var(--accent); }
             .sidebar .cat-item .count { display: none; }
             .sidebar .cat-item .cat-fav-btn { display: none; }
-            .menu-toggle {
-                display: flex;
-                touch-action: manipulation;
-            }
-            .sidebar-overlay.active {
-                display: block;
-            }
-            .controls-area { justify-content: center; gap: 6px; flex-wrap: wrap; }
-            .search-wrapper .search-box { width: 120px; font-size: 16px !important; }
+            .header { flex-direction: column; align-items: stretch; }
+            .controls-area { justify-content: center; gap: 6px; }
+            .search-box { width: 100%; }
             .channels-grid { grid-template-columns: 1fr; }
             .modal-box { padding: 18px; }
             .admin-panel table { font-size: 11px; }
@@ -736,31 +640,6 @@
         .modal-box .contact-item span {
             color: var(--text-primary);
         }
-
-        /* ===== إحصائيات المدير ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .stat-card {
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 14px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-        .stat-card .stat-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        .stat-card .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
     </style>
 </head>
 <body>
@@ -772,12 +651,8 @@
         <div class="controls-area" id="headerControls"></div>
     </header>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
     <div class="app-container">
-        <aside class="sidebar" id="sidebar">
-            <!-- سيتم ملؤها بواسطة JavaScript -->
-        </aside>
+        <aside class="sidebar" id="sidebar"></aside>
         <main class="main-content" id="mainContent">
             <div id="channelsContainer"></div>
             <div id="scrollTrigger" style="height:1px; visibility:hidden;"></div>
@@ -856,28 +731,6 @@
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
             <h2 id="adminModalTitle"><i class="fas fa-users-cog" style="color:var(--warning);"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
-                <!-- إحصائيات -->
-                <div class="admin-panel">
-                    <h3 id="adminStatsTitle"><i class="fas fa-chart-bar"></i> إحصائيات المنصة</h3>
-                    <div class="stats-grid" id="statsGrid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="statUsers">0</div>
-                            <div class="stat-label">إجمالي المستخدمين</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="statActive">0</div>
-                            <div class="stat-label">نشطاء اليوم</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="statChannels">0</div>
-                            <div class="stat-label">إجمالي القنوات</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="statViews">0</div>
-                            <div class="stat-label">عدد المشاهدات</div>
-                        </div>
-                    </div>
-                </div>
                 <div class="admin-panel">
                     <h3 id="adminUsersTitle">إدارة المستخدمين</h3>
                     <div id="adminUsersTable" style="overflow-x:auto;">
@@ -898,8 +751,6 @@
                     <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
                     <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
-                    <label id="adminNotifTargetLabel">البريد الإلكتروني المستهدف (اختياري)</label>
-                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
                     <button class="btn-save" onclick="sendNotification()" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> إرسال الإشعار</button>
                     <div id="adminNotifStatus" class="status-msg"></div>
                 </div>
@@ -2026,7 +1877,6 @@
                 "notificationMessage": "نص الإشعار",
                 "send": "إرسال",
                 "notificationSent": "✅ تم إرسال الإشعار إلى {count} مستخدم",
-                "adminNotifTargetLabel": "البريد الإلكتروني المستهدف (اختياري)",
                 "theme": "المظهر",
                 "scrollToTop": "الرجوع للأعلى",
                 "loadingMore": "جاري تحميل المزيد...",
@@ -2047,9 +1897,7 @@
                 "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
                 "telegram": "تيليجرام",
-                "fetchChannels": "جلب القنوات",
-                "history": "سجل المشاهدة",
-                "clearHistory": "مسح السجل"
+                "fetchChannels": "جلب القنوات"
             },
             fr: {
                 "live": "En direct",
@@ -2130,7 +1978,6 @@
                 "notificationMessage": "Message de la notification",
                 "send": "Envoyer",
                 "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
-                "adminNotifTargetLabel": "Email ciblé (optionnel)",
                 "theme": "Thème",
                 "scrollToTop": "Retour en haut",
                 "loadingMore": "Chargement...",
@@ -2151,9 +1998,7 @@
                 "contactPhone": "Téléphone",
                 "contactWaiting": "Nous attendons vos questions et suggestions.",
                 "telegram": "Telegram",
-                "fetchChannels": "Récupérer les chaînes",
-                "history": "Historique",
-                "clearHistory": "Effacer l'historique"
+                "fetchChannels": "Récupérer les chaînes"
             }
         };
 
@@ -2276,13 +2121,6 @@
                 </button>
             `;
 
-            // زر هامبورجر (للموبايل) - محسّن
-            const menuToggle = `
-                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar(event)" aria-label="فتح القائمة">
-                    <i class="fas fa-bars"></i>
-                </button>
-            `;
-
             let notifBtn = '';
             if (user) {
                 notifBtn = `
@@ -2299,7 +2137,6 @@
                 container.innerHTML = `
                     ${langButtons}
                     ${themeToggle}
-                    ${menuToggle}
                     ${aboutBtn}
                     ${contactBtn}
                     <span class="badge-count"><i class="fas fa-play"></i> ${getTranslation('live')}</span>
@@ -2326,7 +2163,6 @@
             container.innerHTML = `
                 ${langButtons}
                 ${themeToggle}
-                ${menuToggle}
                 ${aboutBtn}
                 ${contactBtn}
                 ${notifBtn}
@@ -2341,117 +2177,17 @@
                 <button class="btn btn-primary btn-sm" onclick="openAddModal()">
                     <i class="fas fa-plus"></i> ${getTranslation('add')}
                 </button>
+                <!-- ===== زر جلب القنوات (لجميع المستخدمين) ===== -->
                 <button class="btn btn-success btn-sm" onclick="fetchChannelsForUser()">
                     <i class="fas fa-cloud-download-alt"></i> ${getTranslation('fetchChannels')}
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> ${getTranslation('logout')}
                 </button>
-                <div class="search-wrapper">
-                    <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="handleSearchInput()" onfocus="handleSearchFocus()" onblur="handleSearchBlur()" />
-                    <button class="search-clear" id="searchClear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
-                </div>
+                <input type="text" class="search-box" id="searchInput" placeholder="${getTranslation('search')}..." oninput="applyFilters(true)" />
                 <span class="channel-counter" id="channelCount">0</span>
             `;
             updateNotifBadge();
-        }
-
-        // ===== دوال البحث المحسنة =====
-        function handleSearchInput() {
-            const input = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('searchClear');
-            if (input.value.length > 0) {
-                clearBtn.classList.add('show');
-            } else {
-                clearBtn.classList.remove('show');
-            }
-            applyFilters(true);
-        }
-
-        function handleSearchFocus() {
-            // منع التكبير التلقائي على iOS (تم بالفعل عبر font-size: 16px)
-        }
-
-        function handleSearchBlur() {
-            if (window.visualViewport && window.visualViewport.scale > 1) {
-                document.documentElement.style.zoom = '1';
-                setTimeout(() => { document.documentElement.style.zoom = ''; }, 100);
-            }
-        }
-
-        function clearSearch() {
-            const input = document.getElementById('searchInput');
-            input.value = '';
-            document.getElementById('searchClear').classList.remove('show');
-            applyFilters(true);
-            input.focus();
-        }
-
-        // ===== التحكم في القائمة الجانبية (هامبورجر) - محسّن =====
-        function toggleSidebar(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const toggleBtn = document.getElementById('menuToggle');
-            const isOpen = sidebar.classList.contains('open');
-            
-            if (isOpen) {
-                closeSidebar();
-            } else {
-                sidebar.classList.add('open');
-                overlay.classList.add('active');
-                toggleBtn.classList.add('active');
-                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
-                // منع التمرير في الخلفية
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const toggleBtn = document.getElementById('menuToggle');
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            toggleBtn.classList.remove('active');
-            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-            document.body.style.overflow = '';
-        }
-
-        // ===== سجل المشاهدة =====
-        function addToHistory(channelId, channelName) {
-            if (!getUser()) return;
-            try {
-                apiCall('POST', '/user/history', { channelId, channelName })
-                    .then(() => { /* تم التحديث */ })
-                    .catch(() => { /* تجاهل */ });
-            } catch (e) { /* تجاهل */ }
-        }
-
-        // ===== إحصائيات المدير =====
-        async function loadAdminStats() {
-            try {
-                const stats = await apiCall('GET', '/admin/stats');
-                document.getElementById('statUsers').textContent = stats.totalUsers || 0;
-                document.getElementById('statActive').textContent = stats.activeUsersToday || 0;
-                document.getElementById('statChannels').textContent = stats.totalChannels || 0;
-                document.getElementById('statViews').textContent = stats.totalViews || 0;
-            } catch (e) {
-                console.warn('Failed to load stats:', e);
-            }
-        }
-
-        // ===== سجل المشاهدة في الشريط الجانبي =====
-        async function loadHistory() {
-            try {
-                const data = await apiCall('GET', '/user/history');
-                return data.history || [];
-            } catch (e) {
-                return [];
-            }
         }
 
         function getThemeIcon() {
@@ -2474,27 +2210,6 @@
 
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const user = getUser();
-            let itemsHtml = '';
-
-            if (!user) {
-                sidebar.innerHTML = `<div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('pleaseLogin')}</div>`;
-                return;
-            }
-
-            // إضافة سجل المشاهدة إذا كان موجوداً
-            if (user.history && user.history.length > 0) {
-                const historyCat = 'سجل المشاهدة';
-                const isHistoryActive = currentCategory === historyCat;
-                itemsHtml += `
-                    <div class="cat-item ${isHistoryActive ? 'active' : ''}" data-cat="${historyCat}" onclick="selectCategory('${historyCat}')">
-                        <span><i class="fas fa-clock" style="color:var(--accent);margin-left:6px;"></i> ${getTranslation('history')}</span>
-                        <span class="count">${user.history.length}</span>
-                    </div>
-                `;
-            }
-
-            // التصنيفات العادية
             if (!allChannels || allChannels.length === 0) {
                 sidebar.innerHTML = `<div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>`;
                 return;
@@ -2502,7 +2217,7 @@
             const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
             const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
 
-            let catItems = sorted.map(cat => {
+            sidebar.innerHTML = sorted.map(cat => {
                 let count = 0;
                 if (cat === 'الكل') count = allChannels.length;
                 else if (cat === 'المفضلة') count = favorites.length;
@@ -2510,28 +2225,12 @@
                 const active = cat === currentCategory ? 'active' : '';
                 const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
                 const displayName = translateCategory(cat);
-                let favBtn = '';
-                if (cat !== 'الكل' && cat !== 'المفضلة') {
-                    favBtn = `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>`;
-                }
                 return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
                             <span>${displayName}</span>
                             <span class="count">${count}</span>
-                            ${favBtn}
+                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
                         </div>`;
             }).join('');
-
-            // إضافة زر مسح السجل إذا كان موجوداً
-            let clearHistoryBtn = '';
-            if (user.history && user.history.length > 0) {
-                clearHistoryBtn = `
-                    <div class="cat-item" style="border-right:none; justify-content:center; color:var(--danger); cursor:pointer;" onclick="clearHistory()">
-                        <i class="fas fa-trash"></i> ${getTranslation('clearHistory')}
-                    </div>
-                `;
-            }
-
-            sidebar.innerHTML = itemsHtml + catItems + clearHistoryBtn;
         }
 
         function isCategoryFavorite(category) {
@@ -2581,20 +2280,9 @@
             const searchVal = search ? search.value.trim().toLowerCase() : '';
             let filtered = allChannels;
 
-            // معالجة سجل المشاهدة كتصنيف خاص
-            const user = getUser();
-            if (currentCategory === 'سجل المشاهدة' && user?.history) {
-                const historyIds = user.history.map(h => h.channelId);
-                filtered = allChannels.filter(ch => historyIds.includes(getChannelId(ch)));
-                // ترتيب حسب تاريخ المشاهدة (الأحدث أولاً)
-                filtered.sort((a, b) => {
-                    const idxA = user.history.findIndex(h => h.channelId === getChannelId(a));
-                    const idxB = user.history.findIndex(h => h.channelId === getChannelId(b));
-                    return idxA - idxB;
-                });
-            } else if (currentCategory === 'المفضلة') {
+            if (currentCategory === 'المفضلة') {
                 filtered = allChannels.filter(ch => favorites.includes(getChannelId(ch)));
-            } else if (currentCategory !== 'الكل' && currentCategory !== 'سجل المشاهدة') {
+            } else if (currentCategory !== 'الكل') {
                 filtered = filtered.filter(ch => (ch.category || 'عام') === currentCategory);
             }
 
@@ -2655,7 +2343,7 @@
                         const catDisplay = translateCategory(ch.category || 'عام');
                         return `
                             <div class="channel-card">
-                                <div class="ch-name" onclick="playChannel(${realIndex})">
+                                <div class="ch-name">
                                     ${iconHtml}
                                     <i class="fas fa-broadcast-tower"></i> ${ch.name || 'بدون اسم'}
                                 </div>
@@ -2715,10 +2403,6 @@
             displayCount = STEP;
             applyFilters(true);
             setupInfiniteScroll();
-            // إغلاق القائمة على الموبايل
-            if (window.innerWidth <= 768) {
-                closeSidebar();
-            }
         }
 
         function toggleFavorite(index) {
@@ -2800,37 +2484,28 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
-        async function fetchChannelsForUser(showLoading = true) {
+        // ===== دالة جلب القنوات للمستخدم الحالي (للمستخدم العادي) =====
+        async function fetchChannelsForUser() {
             const user = getUser();
             if (!user) {
-                const statusEl = document.getElementById('xtreamStatus');
-                if (statusEl) {
-                    statusEl.textContent = '⚠️ ' + getTranslation('loginFirst');
-                    statusEl.className = 'status-msg error';
-                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 3000);
-                }
-                return false;
-            }
-            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
-                const statusEl = document.getElementById('xtreamStatus');
-                if (user.role !== 'admin') {
-                    if (statusEl) {
-                        statusEl.textContent = '⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.';
-                        statusEl.className = 'status-msg error';
-                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
-                    }
-                } else {
-                    if (statusEl) {
-                        statusEl.textContent = '⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.';
-                        statusEl.className = 'status-msg error';
-                        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
-                    }
-                }
-                return false;
+                alert(getTranslation('loginFirst'));
+                return;
             }
 
-            if (showLoading) {
-                showLoadingModal();
+            // التحقق من وجود إعدادات Xtream
+            if (!user.xtream || !user.xtream.server || !user.xtream.username || !user.xtream.password) {
+                if (user.role !== 'admin') {
+                    alert('⚠️ يرجى التواصل مع المدير لإعداد حساب Xtream الخاص بك.');
+                } else {
+                    alert('⚠️ يرجى إعداد إعدادات Xtream أولاً من خلال زر "Xtream" في الشريط العلوي.');
+                }
+                return;
+            }
+
+            const statusEl = document.getElementById('xtreamStatus');
+            if (statusEl) {
+                statusEl.textContent = '⏳ ' + getTranslation('saveAndFetch') + '...';
+                statusEl.className = 'status-msg';
             }
 
             try {
@@ -2839,6 +2514,7 @@
                 applyCategoryMap();
                 localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
 
+                // تحديث بيانات المستخدم المحلية
                 const currentUser = getUser();
                 if (currentUser) {
                     const userData = await apiCall('GET', '/auth/me');
@@ -2851,11 +2527,6 @@
                 applyFilters(true);
                 setupInfiniteScroll();
 
-                if (showLoading) {
-                    hideLoadingModal();
-                }
-
-                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = getTranslation('fetchSuccess', { count: allChannels.length });
                     statusEl.className = 'status-msg success';
@@ -2863,14 +2534,9 @@
                 }
                 return true;
             } catch (err) {
-                if (showLoading) {
-                    hideLoadingModal();
-                }
-                const statusEl = document.getElementById('xtreamStatus');
                 if (statusEl) {
                     statusEl.textContent = '❌ ' + err.message;
                     statusEl.className = 'status-msg error';
-                    setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 4000);
                 }
                 return false;
             }
@@ -2892,15 +2558,17 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-
+                showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
 
+                // ===== جلب القنوات تلقائياً بعد تسجيل الدخول =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser(true);
+                    await fetchChannelsForUser();
                 }
 
+                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -2928,15 +2596,17 @@
                 setToken(data.token);
                 setUser(data.user);
                 closeLoginModal();
-
+                showLoadingModal();
                 await initializeApp(true);
                 await loadNotifications();
 
+                // ===== جلب القنوات تلقائياً بعد التسجيل =====
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
-                    await fetchChannelsForUser(true);
+                    await fetchChannelsForUser();
                 }
 
+                setTimeout(hideLoadingModal, 750);
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
                 statusEl.className = 'status-msg error';
@@ -3074,12 +2744,6 @@
                 url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
             }
             if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
-            // إضافة إلى سجل المشاهدة
-            addToHistory(getChannelId(channel), channel.name);
-            // تحديث الإحصائيات
-            try {
-                apiCall('POST', '/admin/stats/view', {}).catch(() => {});
-            } catch (e) {}
             window.location.href = url;
         }
 
@@ -3109,13 +2773,10 @@
             document.getElementById('adminActionsTh').textContent = getTranslation('actions');
             document.getElementById('adminNotifTitle').innerHTML = `<i class="fas fa-bell"></i> ${getTranslation('sendNotification')}`;
             document.getElementById('adminNotifLabel').textContent = getTranslation('notificationMessage');
-            document.getElementById('adminNotifTargetLabel').textContent = getTranslation('adminNotifTargetLabel');
             document.getElementById('adminNotifMessage').value = '';
-            document.getElementById('adminNotifTarget').value = '';
             document.getElementById('adminNotifStatus').textContent = '';
             document.getElementById('adminNotifStatus').className = 'status-msg';
             await loadAdminUsers();
-            await loadAdminStats();
         }
 
         function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
@@ -3207,7 +2868,6 @@
         // ===== Admin Notification =====
         async function sendNotification() {
             const message = document.getElementById('adminNotifMessage').value.trim();
-            const targetEmail = document.getElementById('adminNotifTarget').value.trim();
             const statusEl = document.getElementById('adminNotifStatus');
             if (!message) {
                 statusEl.textContent = getTranslation('fillAllFields');
@@ -3217,15 +2877,10 @@
             statusEl.textContent = '⏳ ' + getTranslation('send') + '...';
             statusEl.className = 'status-msg';
             try {
-                const body = { message };
-                if (targetEmail) body.targetEmail = targetEmail;
-                const result = await apiCall('POST', '/admin/notifications', body);
-                const count = result.count || 0;
-                const msg = targetEmail ? `✅ تم إرسال الإشعار إلى المستخدم "${targetEmail}"` : getTranslation('notificationSent', { count });
-                statusEl.textContent = msg;
+                const result = await apiCall('POST', '/admin/notifications', { message });
+                statusEl.textContent = getTranslation('notificationSent', { count: result.count });
                 statusEl.className = 'status-msg success';
                 document.getElementById('adminNotifMessage').value = '';
-                document.getElementById('adminNotifTarget').value = '';
                 if (currentUser) await loadNotifications();
             } catch (err) {
                 statusEl.textContent = '❌ ' + err.message;
@@ -3324,23 +2979,23 @@
             document.getElementById('aboutModal').classList.remove('active');
         }
 
-        function openContactModal() {
-            const modal = document.getElementById('contactModal');
-            modal.classList.add('active');
-            document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
-            document.getElementById('contactContent').innerHTML = `
-                <p>${getTranslation('contactInfo')}</p>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <a href="mailto:stevenhacen@gmail.com" style="color:var(--accent); text-decoration:none;">stevenhacen@gmail.com</a>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone-alt"></i>
-                    <a href="tel:0542163526" style="color:var(--accent); text-decoration:none;">0542163526</a>
-                </div>
-                <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
-            `;
-        }
+function openContactModal() {
+    const modal = document.getElementById('contactModal');
+    modal.classList.add('active');
+    document.getElementById('contactModalTitle').innerHTML = `<i class="fas fa-envelope" style="color:var(--accent);"></i> ${getTranslation('contactTitle')}`;
+    document.getElementById('contactContent').innerHTML = `
+        <p>${getTranslation('contactInfo')}</p>
+        <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <a href="mailto:stevenhacen@gmail.com" style="color:var(--accent); text-decoration:none;">stevenhacen@gmail.com</a>
+        </div>
+        <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <a href="tel:0542163526" style="color:var(--accent); text-decoration:none;">0542163526</a>
+        </div>
+        <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
+    `;
+}
 
         function closeContactModal() {
             document.getElementById('contactModal').classList.remove('active');
@@ -3363,23 +3018,7 @@
         }
 
         // ================================================================
-        // 13.  Clear History
-        // ================================================================
-        async function clearHistory() {
-            if (!confirm('هل أنت متأكد من مسح سجل المشاهدة؟')) return;
-            try {
-                await apiCall('POST', '/user/history', { clear: true });
-                const userData = await apiCall('GET', '/auth/me');
-                setUser(userData.user);
-                buildSidebar();
-                applyFilters(true);
-            } catch (e) {
-                alert('فشل مسح السجل');
-            }
-        }
-
-        // ================================================================
-        // 14.  التهيئة
+        // 13.  التهيئة
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -3414,9 +3053,10 @@
                         applyCategoryMap();
                         localStorage.setItem('hacene_channels', JSON.stringify(allChannels));
                     } else {
+                        // إذا لم تكن هناك قنوات محفوظة، نحاول جلبها تلقائياً
                         if (user.xtream && user.xtream.server) {
                             try {
-                                await fetchChannelsForUser(true);
+                                await fetchChannelsForUser();
                             } catch (e) {
                                 console.warn('⚠️ فشل جلب القنوات تلقائياً:', e.message);
                             }
@@ -3459,30 +3099,24 @@
         }
 
         // ================================================================
-        // 15.  بدء التطبيق
+        // 14.  بدء التطبيق
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
             window.addEventListener('scroll', handleScroll);
-            // إغلاق القائمة عند النقر خارجها (للموبايل)
             document.addEventListener('click', (e) => {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('sidebarOverlay');
-                const toggleBtn = document.getElementById('menuToggle');
-                // إذا كانت القائمة مفتوحة والنقرة خارج القائمة وليس على زر التبديل
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-                    const isClickInsideSidebar = sidebar.contains(e.target);
-                    const isClickOnToggle = toggleBtn && toggleBtn.contains(e.target);
-                    if (!isClickInsideSidebar && !isClickOnToggle) {
-                        closeSidebar();
-                    }
+                const wrapper = document.querySelector('.notif-wrapper');
+                const dropdown = document.getElementById('notifDropdown');
+                if (wrapper && !wrapper.contains(e.target) && dropdown) {
+                    dropdown.classList.remove('active');
                 }
-            });
-
-            // إغلاق القائمة عند الضغط على زر الرجوع (Back) في المتصفح
-            window.addEventListener('popstate', () => {
-                if (window.innerWidth <= 768) {
-                    closeSidebar();
+                const aboutModal = document.getElementById('aboutModal');
+                const contactModal = document.getElementById('contactModal');
+                if (aboutModal.classList.contains('active') && e.target === aboutModal) {
+                    closeAboutModal();
+                }
+                if (contactModal.classList.contains('active') && e.target === contactModal) {
+                    closeContactModal();
                 }
             });
         });
@@ -3502,7 +3136,6 @@
                 closeAboutModal();
                 closeContactModal();
                 document.getElementById('notifDropdown')?.classList.remove('active');
-                closeSidebar();
             }
         });
     </script>
