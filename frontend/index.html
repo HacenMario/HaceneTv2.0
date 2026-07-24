@@ -67,7 +67,7 @@
         ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
         ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
 
-        /* ===== HEADER (sticky but hides on scroll down) ===== */
+        /* ===== HEADER (ثابت) ===== */
         .header {
             background: var(--bg-secondary);
             padding: 12px 20px;
@@ -83,12 +83,9 @@
             right: 0;
             z-index: 999;
             height: var(--header-height);
-            transition: transform 0.3s ease, background var(--transition), border-color var(--transition);
-            transform: translateY(0);
+            transition: background var(--transition), border-color var(--transition);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .header.hidden { transform: translateY(-100%); }
-        .header.visible { transform: translateY(0); }
 
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-area h1 { font-size: 20px; color: var(--accent); font-weight: 700; }
@@ -231,7 +228,7 @@
         .sidebar .cat-item .cat-fav-btn:hover { color: var(--warning); }
         .sidebar .cat-item .cat-fav-btn.active { color: var(--warning); }
 
-        /* ===== زر فتح القائمة (هامبورجر) ===== */
+        /* ===== زر فتح القائمة (هامبورجر) محسّن ===== */
         .menu-toggle {
             background: var(--bg-input);
             border: none;
@@ -245,9 +242,13 @@
             display: none;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .menu-toggle:hover { background: var(--border-light); }
         .menu-toggle.active { background: var(--accent); color: #fff; }
+        .menu-toggle:active { transform: scale(0.92); }
 
         /* ===== Overlay للقائمة على الموبايل ===== */
         .sidebar-overlay {
@@ -258,6 +259,7 @@
             z-index: 998;
             opacity: 0;
             transition: opacity 0.3s ease;
+            touch-action: none;
         }
         .sidebar-overlay.active {
             display: block;
@@ -638,25 +640,28 @@
             .sidebar {
                 position: fixed;
                 top: 0;
-                right: -280px;
+                right: -300px;
                 width: 280px;
                 height: 100%;
                 z-index: 999;
                 border-left: none;
                 border-right: 1px solid var(--border-color);
-                transition: right 0.3s ease;
+                transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                 padding-top: 60px;
                 background: var(--bg-secondary);
                 box-shadow: -4px 0 20px rgba(0,0,0,0.3);
                 overflow-y: auto;
+                touch-action: pan-y;
             }
             .sidebar.open {
                 right: 0;
             }
             .sidebar .cat-item {
-                padding: 10px 20px;
+                padding: 12px 20px;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
+                font-size: 15px;
+                touch-action: manipulation;
             }
             .sidebar .cat-item.active {
                 border-right: none;
@@ -666,6 +671,7 @@
             .sidebar .cat-item .cat-fav-btn { display: none; }
             .menu-toggle {
                 display: flex;
+                touch-action: manipulation;
             }
             .sidebar-overlay.active {
                 display: block;
@@ -2163,8 +2169,6 @@
         let allChannelsFiltered = [];
         let notifications = [];
         let unreadCount = 0;
-        let lastScrollY = 0;
-        let headerVisible = true;
 
         // ================================================================
         // 2.  دوال الترجمة
@@ -2266,9 +2270,9 @@
                 </button>
             `;
 
-            // زر هامبورجر (للموبايل)
+            // زر هامبورجر (للموبايل) - محسّن
             const menuToggle = `
-                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="فتح القائمة">
+                <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar(event)" aria-label="فتح القائمة">
                     <i class="fas fa-bars"></i>
                 </button>
             `;
@@ -2360,14 +2364,10 @@
 
         function handleSearchFocus() {
             // منع التكبير التلقائي على iOS (تم بالفعل عبر font-size: 16px)
-            // لا نقوم بأي إجراء إضافي
         }
 
         function handleSearchBlur() {
-            // بعد الانتهاء من البحث، إلغاء التكبير إذا حدث (بعض المتصفحات)
-            // نعيد ضبط viewport بشكل آمن
             if (window.visualViewport && window.visualViewport.scale > 1) {
-                // بعض المتصفحات تدعم إعادة الضبط
                 document.documentElement.style.zoom = '1';
                 setTimeout(() => { document.documentElement.style.zoom = ''; }, 100);
             }
@@ -2381,43 +2381,26 @@
             input.focus();
         }
 
-        // ===== التحكم في ظهور/اختفاء الهيدر =====
-function handleHeaderScroll() {
-    const currentScrollY = window.scrollY;
-    const header = document.getElementById('mainHeader');
-    
-    // إذا كان المستخدم في أعلى الصفحة (أو قريب جداً)، نظهر الهيدر
-    if (currentScrollY < 20) {
-        header.classList.remove('hidden');
-        header.classList.add('visible');
-        lastScrollY = currentScrollY;
-        return;
-    }
-    
-    // إذا كان التمرير للأسفل، نخفي الهيدر
-    if (currentScrollY > lastScrollY) {
-        header.classList.add('hidden');
-        header.classList.remove('visible');
-    } else {
-        // إذا كان التمرير للأعلى ولكن ليس في الأعلى، نبقيه مخفياً
-        // (لا نغير الحالة)
-        // ولكن إذا كان مخفياً ونحن في منتصف الصفحة، نبقيه مخفياً
-    }
-    lastScrollY = currentScrollY;
-}
-
-        // ===== التحكم في القائمة الجانبية (هامبورجر) =====
-        function toggleSidebar() {
+        // ===== التحكم في القائمة الجانبية (هامبورجر) - محسّن =====
+        function toggleSidebar(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const toggleBtn = document.getElementById('menuToggle');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-            toggleBtn.classList.toggle('active');
-            if (sidebar.classList.contains('open')) {
-                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+            const isOpen = sidebar.classList.contains('open');
+            
+            if (isOpen) {
+                closeSidebar();
             } else {
-                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                toggleBtn.classList.add('active');
+                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+                // منع التمرير في الخلفية
+                document.body.style.overflow = 'hidden';
             }
         }
 
@@ -2429,6 +2412,7 @@ function handleHeaderScroll() {
             overlay.classList.remove('active');
             toggleBtn.classList.remove('active');
             toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = '';
         }
 
         // ===== سجل المشاهدة =====
@@ -3370,7 +3354,6 @@ function handleHeaderScroll() {
             } else {
                 btn.classList.remove('show');
             }
-            handleHeaderScroll();
         }
 
         // ================================================================
@@ -3475,24 +3458,24 @@ function handleHeaderScroll() {
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
             window.addEventListener('scroll', handleScroll);
+            // إغلاق القائمة عند النقر خارجها (للموبايل)
             document.addEventListener('click', (e) => {
-                const wrapper = document.querySelector('.notif-wrapper');
-                const dropdown = document.getElementById('notifDropdown');
-                if (wrapper && !wrapper.contains(e.target) && dropdown) {
-                    dropdown.classList.remove('active');
-                }
-                const aboutModal = document.getElementById('aboutModal');
-                const contactModal = document.getElementById('contactModal');
-                if (aboutModal.classList.contains('active') && e.target === aboutModal) {
-                    closeAboutModal();
-                }
-                if (contactModal.classList.contains('active') && e.target === contactModal) {
-                    closeContactModal();
-                }
-                // إغلاق القائمة عند النقر خارجها (للموبايل)
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.getElementById('sidebarOverlay');
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target.id !== 'menuToggle') {
+                const toggleBtn = document.getElementById('menuToggle');
+                // إذا كانت القائمة مفتوحة والنقرة خارج القائمة وليس على زر التبديل
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                    const isClickInsideSidebar = sidebar.contains(e.target);
+                    const isClickOnToggle = toggleBtn && toggleBtn.contains(e.target);
+                    if (!isClickInsideSidebar && !isClickOnToggle) {
+                        closeSidebar();
+                    }
+                }
+            });
+
+            // إغلاق القائمة عند الضغط على زر الرجوع (Back) في المتصفح
+            window.addEventListener('popstate', () => {
+                if (window.innerWidth <= 768) {
                     closeSidebar();
                 }
             });
