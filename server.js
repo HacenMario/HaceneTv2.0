@@ -15,9 +15,7 @@ app.use(cors({
             'https://hacene-tv2-0.vercel.app',
             'http://localhost:3000',
             'http://localhost:5500',
-            'https://hacenetv2-0.onrender.com',
-            'https://hacenetv2-0-ua0u.onrender.com',
-            'https://hacenetvstalker.onrender.com'
+            'https://hacenetv2-0.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
@@ -70,6 +68,15 @@ const ChannelSchema = new mongoose.Schema({
 });
 
 const Channel = mongoose.model('Channel', ChannelSchema);
+
+// ===== Notification Schema =====
+const NotificationSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', NotificationSchema);
 
 // ===== Helpers =====
 function generateToken(userId, email, role) {
@@ -210,9 +217,8 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // استخدام وكيل لتجنب مشاكل CORS
         const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `https://hacenetv2-0-ua0u.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://hacenetv2-0.onrender.com/api/proxy?url=${encodeURIComponent(url)}`;
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -258,28 +264,6 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
             { upsert: true, new: true }
         );
         res.json({ success: true, channels });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ===== Notifications (without VOD) =====
-app.get('/api/user/notifications', authMiddleware, async (req, res) => {
-    try {
-        // إشعارات مؤقتة (لتجربة الواجهة)
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        // يمكن تخزين الإشعارات في قاعدة بيانات، لكن حالياً نعيد مصفوفة فارغة
-        res.json({ notifications: [] });
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
-    try {
-        // وهمي للتجربة
-        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -341,10 +325,11 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
+// ===== Admin Notifications =====
 app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { message, targetEmail } = req.body;
-        if (!message) return res.status(400).json({ error: 'Message required' });
+        if (!message) return res.status(400).json({ error: 'Message is required' });
 
         let users = [];
         if (targetEmail) {
@@ -352,12 +337,41 @@ app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req
             if (!user) return res.status(404).json({ error: 'User not found' });
             users = [user];
         } else {
-            users = await User.find({});
+            users = await User.find({ isActive: true });
         }
 
-        // هنا يمكن حفظ الإشعارات في قاعدة البيانات أو إرسالها عبر WebSocket
-        // لكن في هذا الإصدار نعيد فقط عدد المستخدمين المستلمين
-        res.json({ success: true, count: users.length, message });
+        const notifications = users.map(user => ({
+            userId: user._id,
+            message: message,
+            read: false,
+            createdAt: new Date()
+        }));
+        await Notification.insertMany(notifications);
+
+        res.json({ success: true, count: users.length });
+    } catch (err) {
+        console.error('Error sending notification:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ===== User Notifications =====
+app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+    try {
+        const notifications = await Notification.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+        res.json({ notifications });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
+    try {
+        const notification = await Notification.findOne({ _id: req.params.id, userId: req.user.userId });
+        if (!notification) return res.status(404).json({ error: 'Notification not found' });
+        notification.read = true;
+        await notification.save();
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -386,7 +400,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// ===== Start server =====
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
