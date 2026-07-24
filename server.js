@@ -15,7 +15,7 @@ app.use(cors({
             'https://hacene-tv2-0.vercel.app',
             'http://localhost:3000',
             'http://localhost:5500',
-            'https://hacenetv2-0.onrender.com'
+            'https://hacenetv2-0-ua0u.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
@@ -200,6 +200,9 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
+// ===== جلب القنوات باستخدام الوكيل المخصص =====
+const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com'; // استخدم متغير البيئة أو الرابط الثابت
+
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
@@ -209,20 +212,23 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // بناء رابط API
-        const url = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
+        // رابط API الأصلي
+        const targetUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
         
-        // ✅ استخدام fetch مباشرة مع User-Agent لمحاكاة متصفح عادي
-        const response = await fetch(url, {
+        // استخدام الوكيل المخصص لتجاوز الحظر
+        const proxyUrl = `${PROXY_URL}/${targetUrl}`;
+
+        const response = await fetch(proxyUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error('Invalid response');
 
@@ -334,7 +340,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
-// ===== Proxy =====
+// ===== Proxy (تم استبداله بوكيل خارجي، لكن يبقى للاستخدامات الأخرى) =====
 app.get('/api/proxy', async (req, res) => {
     try {
         const target = req.query.url;
@@ -348,7 +354,7 @@ app.get('/api/proxy', async (req, res) => {
     }
 });
 
-// إضافة نموذج Notification
+// ===== Notifications =====
 const NotificationSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     message: { type: String, required: true },
@@ -357,12 +363,10 @@ const NotificationSchema = new mongoose.Schema({
 });
 const Notification = mongoose.model('Notification', NotificationSchema);
 
-// إضافة endpoints
 app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { message } = req.body;
         if (!message) return res.status(400).json({ error: 'Message required' });
-        // إرسال الإشعار لجميع المستخدمين
         const users = await User.find({});
         const notifications = users.map(user => ({
             userId: user._id,
