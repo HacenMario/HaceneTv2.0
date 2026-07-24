@@ -2652,24 +2652,32 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
+        // ===== دالة التشغيل المعدلة (المفتاح) =====
         function playChannel(index) {
             const channel = allChannels[index];
-            if (!channel) { alert(getTranslation('channelNotFound')); return; }
+            if (!channel) {
+                alert(getTranslation('channelNotFound'));
+                return;
+            }
+
             let url = channel.url;
             const user = getUser();
+
+            // إذا كانت القناة من Xtream ولديها stream_id
             if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
                 const { server, username, password } = user.xtream;
-                // محاولة إنشاء الرابط بصيغ مختلفة
-                const baseUrl = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}`;
-                // جرب .m3u8 أولاً، إذا فشل يمكن تغيير الامتداد يدوياً في المستقبل
-                url = `${baseUrl}.m3u8`;
+                // بناء الرابط بصيغة Xtream القياسية
+                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
             }
-            if (!url || url === '#') {
+
+            // إذا لم يكن هناك رابط صالح
+            if (!url || url === '#' || url === '') {
                 alert(getTranslation('invalidUrl'));
                 return;
             }
-            // فتح الرابط في نافذة جديدة أو نفس الصفحة
-            window.open(url, '_blank');
+
+            // فتح الرابط في نفس النافذة
+            window.location.href = url;
         }
 
         function applyCategoryMap() {
