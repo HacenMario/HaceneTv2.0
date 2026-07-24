@@ -2671,12 +2671,12 @@ function playChannel(index) {
     if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
         const { server, username, password } = user.xtream;
         let streamId = String(channel.stream_id).trim();
-        // ✅ تنظيف stream_id: استخراج الرقم الأخير إذا كان يحتوي على "/"
+        // ✅ تنظيف إضافي: إذا كان يحتوي على "/" نستخرج الرقم الأخير
         if (streamId.includes('/')) {
             let parts = streamId.split('/');
             streamId = parts[parts.length - 1];
         }
-        // ✅ بناء الرابط بالصيغة القياسية
+        // ✅ بناء الرابط بالصيغة القياسية التي يستخدمها Smarters
         url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
     }
 
@@ -2685,7 +2685,7 @@ function playChannel(index) {
         return;
     }
 
-    // ✅ فتح الرابط في نافذة جديدة لتجنب إغلاق الصفحة
+    // ✅ فتح الرابط في نافذة جديدة (كما يفعل Smarters عادة)
     window.open(url, '_blank');
 }
         function applyCategoryMap() {
