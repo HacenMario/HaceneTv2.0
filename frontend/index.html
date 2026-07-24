@@ -2382,26 +2382,29 @@
         }
 
         // ===== التحكم في ظهور/اختفاء الهيدر =====
-        function handleHeaderScroll() {
-            const currentScrollY = window.scrollY;
-            const header = document.getElementById('mainHeader');
-            if (currentScrollY > 80) {
-                if (currentScrollY > lastScrollY) {
-                    // التمرير للأسفل → إخفاء الهيدر
-                    header.classList.remove('visible');
-                    header.classList.add('hidden');
-                } else {
-                    // التمرير للأعلى → إظهار الهيدر
-                    header.classList.remove('hidden');
-                    header.classList.add('visible');
-                }
-            } else {
-                // في الأعلى → إظهار الهيدر
-                header.classList.remove('hidden');
-                header.classList.add('visible');
-            }
-            lastScrollY = currentScrollY;
-        }
+function handleHeaderScroll() {
+    const currentScrollY = window.scrollY;
+    const header = document.getElementById('mainHeader');
+    
+    // إذا كان المستخدم في أعلى الصفحة (أو قريب جداً)، نظهر الهيدر
+    if (currentScrollY < 20) {
+        header.classList.remove('hidden');
+        header.classList.add('visible');
+        lastScrollY = currentScrollY;
+        return;
+    }
+    
+    // إذا كان التمرير للأسفل، نخفي الهيدر
+    if (currentScrollY > lastScrollY) {
+        header.classList.add('hidden');
+        header.classList.remove('visible');
+    } else {
+        // إذا كان التمرير للأعلى ولكن ليس في الأعلى، نبقيه مخفياً
+        // (لا نغير الحالة)
+        // ولكن إذا كان مخفياً ونحن في منتصف الصفحة، نبقيه مخفياً
+    }
+    lastScrollY = currentScrollY;
+}
 
         // ===== التحكم في القائمة الجانبية (هامبورجر) =====
         function toggleSidebar() {
