@@ -2668,34 +2668,32 @@ function playChannel(index) {
     let url = channel.url;
     const user = getUser();
 
-    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
-        const { server, username, password } = user.xtream;
+    // بناء الرابط إذا كانت القناة من Xtream
+    if (channel.stream_id && user?.xtream?.server) {
+        const { server } = user.xtream;
         let streamId = String(channel.stream_id);
-
-        // التحقق مما إذا كان stream_id هو مسار كامل (يحتوي على '/')
-        // أو مجرد معرف رقمي
-        if (streamId.includes('/')) {
-            // الحالة 1: stream_id هو مسار كامل (مثل live/user/pass/12345)
-            // نستخدمه مباشرة كمسار، ونضيف .m3u8 إذا لم يكن موجوداً
+        
+        // إذا كان stream_id يبدأ بـ "live/" (المسار كامل من المزود)
+        if (streamId.startsWith('live/')) {
+            // إضافة .m3u8 إذا لم يكن موجوداً
             if (!streamId.endsWith('.m3u8') && !streamId.endsWith('.ts')) {
-                streamId += '.m3u8';
+                streamId = streamId + '.m3u8';
             }
             url = `${server}/${streamId}`;
         } else {
-            // الحالة 2: stream_id هو مجرد معرف (مثل 85692671)
-            // نستخدم الصيغة التقليدية
+            // الصيغة القديمة: stream_id هو رقم فقط
+            const { username, password } = user.xtream;
             url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${streamId}.m3u8`;
         }
     }
 
-    // التحقق النهائي من صحة الرابط قبل التوجيه
     if (!url || url === '#' || url === '') {
         alert(getTranslation('invalidUrl'));
         return;
     }
 
-    // فتح الرابط في نفس النافذة
-    window.location.href = url;
+    // ✅ الحل: فتح الرابط في نافذة/تبويب جديد
+    window.open(url, '_blank');
 }
         function applyCategoryMap() {
             allChannels = allChannels.map(ch => {
