@@ -3490,7 +3490,7 @@
                 setUser(data.user);
                 closeLoginModal();
                 await initializeApp(true);
-               // await loadNotifications();
+               // await loadNotifications(); //
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -3523,7 +3523,7 @@
                 setUser(data.user);
                 closeLoginModal();
                 await initializeApp(true);
-               // await loadNotifications();
+               // await loadNotifications(); //
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -3742,11 +3742,9 @@ function playChannel(index) {
         return;
     }
 
-    // تحويل الرابط إلى HTTPS لتجنب Mixed Content
-    if (url.startsWith('http://')) {
-        url = url.replace('http://', 'https://');
-        console.warn('تم تحويل الرابط إلى HTTPS:', url);
-    }
+    // لا نقوم بتحويل الرابط إلى HTTPS تلقائياً، بل نتركه كما هو.
+    // إذا كان الموقع يعمل عبر HTTPS، فإن المتصفح سيمنع الطلب إلى HTTP، وسنعرض رسالة.
+    // يمكنك إضافة خيار للمستخدم لتجربة HTTP إذا كان الرابط HTTP.
 
     const modal = document.getElementById('playerModal');
     const title = document.getElementById('playerModalTitle');
@@ -3764,15 +3762,19 @@ function playChannel(index) {
         return;
     }
 
+    // محاولة التحميل مع إظهار رسالة مناسبة
     player.load(url).catch(err => {
         console.error('Load error:', err);
         const errorText = document.getElementById('playerErrorText');
-        // رسائل أكثر وضوحاً
-        if (err.message && err.message.includes('HTTP')) {
-            errorText.textContent = '⚠️ تعذر الاتصال بالخادم. تأكد من أن الرابط صحيح ويعمل عبر HTTPS.';
-        } else {
-            errorText.textContent = '⚠️ ' + (err.message || 'فشل تحميل البث.');
+        let msg = '⚠️ تعذر تحميل البث.';
+        if (err.message && err.message.includes('CERT_AUTHORITY_INVALID')) {
+            msg = '⚠️ شهادة الأمان غير صالحة للخادم. يرجى استخدام رابط HTTPS موثوق أو الاتصال بالدعم.';
+        } else if (err.message && err.message.includes('Mixed Content')) {
+            msg = '⚠️ المتصفح يمنع تحميل محتوى غير آمن (HTTP) من موقع آمن (HTTPS). يرجى استخدام رابط HTTPS.';
+        } else if (err.message) {
+            msg = '⚠️ ' + err.message;
         }
+        errorText.textContent = msg;
         errorEl.classList.add('show');
     });
 }
@@ -4132,7 +4134,7 @@ function playChannel(index) {
                             allChannels = [];
                         }
                     }
-                   // await loadNotifications();
+                   // await loadNotifications(); //
                 } catch (err) {
                     console.error('❌ Error initializing:', err.message);
                     setToken(null);
