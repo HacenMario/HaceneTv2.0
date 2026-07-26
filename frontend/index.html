@@ -1,79 +1,87 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HACENE TV - IPTV</title>
-    <!-- Fonts & Icons -->
+    <!-- ===== Fonts ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- ===== Icons ===== -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- ===== Chart.js ===== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* ================================================
-                   ROOT VARIABLES & RESET
-                   ================================================ */
-        * {
+        /* ============================================================
+               GLOBAL RESET & VARIABLES
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         :root {
+            /* ---- Primary palette ---- */
             --primary: #6C63FF;
             --primary-dark: #5A52D5;
-            --primary-glow: rgba(108, 99, 255, 0.3);
+            --primary-glow: rgba(108, 99, 255, 0.4);
             --secondary: #00D4FF;
+            --secondary-glow: rgba(0, 212, 255, 0.3);
             --accent: #FF6584;
-            --bg-body: #0E0E18;
-            --bg-surface: #18182A;
-            --bg-card: #1F1F35;
-            --bg-input: #282840;
-            --bg-hover: #343458;
-            --border-color: #2D2D4A;
+            --accent-glow: rgba(255, 101, 132, 0.3);
+
+            /* ---- Surfaces ---- */
+            --bg-body: #0B0B14;
+            --bg-surface: #13131F;
+            --bg-card: #1A1A2E;
+            --bg-sidebar: #111122;
+            --bg-input: #22223A;
+            --bg-hover: #2A2A44;
+
+            /* ---- Borders & shadows ---- */
+            --border-color: #2A2A44;
+            --border-glow: var(--primary);
+            --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
+            --shadow-hover: 0 12px 40px rgba(108, 99, 255, 0.25);
+
+            /* ---- Text ---- */
             --text-primary: #F0F0F5;
             --text-secondary: #A0A0B8;
             --text-muted: #6A6A80;
+
+            /* ---- Radius & transitions ---- */
             --radius: 16px;
-            --radius-sm: 8px;
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            --transition: 0.25s ease;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* ---- Sidebar width ---- */
+            --sidebar-width: 270px;
         }
 
+        /* ----- Light theme (optional override) ----- */
         [data-theme="light"] {
             --bg-body: #F4F4FA;
             --bg-surface: #FFFFFF;
             --bg-card: #FFFFFF;
+            --bg-sidebar: #EEEEF5;
             --bg-input: #E8E8F0;
             --bg-hover: #DCDCE8;
             --border-color: #D0D0DC;
             --text-primary: #1A1A2E;
             --text-secondary: #4A4A60;
             --text-muted: #7A7A90;
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 30px rgba(108, 99, 255, 0.15);
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background: var(--bg-body);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background var(--transition), color var(--transition);
-        }
-
-        /* ================================================
-                   SCROLLBAR
-                   ================================================ */
+        /* ----- Scrollbar ----- */
         ::-webkit-scrollbar {
-            width: 5px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
             background: var(--bg-body);
@@ -82,10 +90,30 @@
             background: var(--primary);
             border-radius: 10px;
         }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
 
-        /* ================================================
-                   HEADER
-                   ================================================ */
+        /* ----- Base ----- */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Tajawal', 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ============================================================
+               HEADER
+               ============================================================ */
         .header {
             background: var(--bg-surface);
             padding: 10px 24px;
@@ -94,12 +122,13 @@
             justify-content: space-between;
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             position: sticky;
             top: 0;
             z-index: 999;
             backdrop-filter: blur(12px);
-            transition: background var(--transition);
+            -webkit-backdrop-filter: blur(12px);
+            transition: background var(--transition), border-color var(--transition);
         }
 
         .logo-area {
@@ -107,6 +136,7 @@
             align-items: center;
             gap: 12px;
         }
+
         .logo-area h1 {
             font-size: 22px;
             font-weight: 700;
@@ -114,10 +144,12 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
         }
+
         .logo-area h1 i {
             -webkit-text-fill-color: var(--secondary);
-            margin-left: 6px;
+            margin-right: 6px;
         }
 
         .hamburger {
@@ -125,7 +157,7 @@
             background: transparent;
             border: none;
             color: var(--text-primary);
-            font-size: 24px;
+            font-size: 26px;
             cursor: pointer;
             padding: 4px 8px;
             transition: var(--transition);
@@ -137,13 +169,15 @@
         .controls-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
-        /* --- Buttons --- */
+        /* ============================================================
+               BUTTONS
+               ============================================================ */
         .btn {
-            padding: 6px 16px;
+            padding: 8px 18px;
             border-radius: 50px;
             border: none;
             font-weight: 600;
@@ -153,43 +187,54 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
             background: var(--bg-input);
             color: var(--text-secondary);
             border: 1px solid transparent;
         }
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             border-color: var(--primary);
         }
         .btn-primary:hover {
-            box-shadow: 0 4px 16px var(--primary-glow);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 4px 20px var(--primary-glow);
         }
+
         .btn-success {
-            background: #2ECC71;
+            background: linear-gradient(135deg, #2ECC71, #27AE60);
             color: #fff;
+            border-color: #2ECC71;
         }
         .btn-success:hover {
-            background: #27AE60;
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
         }
+
         .btn-danger {
-            background: #E74C3C;
+            background: linear-gradient(135deg, #E74C3C, #C0392B);
             color: #fff;
+            border-color: #E74C3C;
         }
         .btn-danger:hover {
-            background: #C0392B;
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
         }
+
         .btn-warning {
-            background: #F39C12;
+            background: linear-gradient(135deg, #F39C12, #E67E22);
             color: #fff;
+            border-color: #F39C12;
         }
         .btn-warning:hover {
-            background: #E67E22;
+            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
         }
+
         .btn-outline {
             background: transparent;
             color: var(--primary);
@@ -198,20 +243,45 @@
         .btn-outline:hover {
             background: var(--primary);
             color: #fff;
+            box-shadow: 0 4px 20px var(--primary-glow);
         }
+
         .btn-sm {
-            padding: 4px 12px;
+            padding: 5px 14px;
             font-size: 12px;
         }
 
-        /* --- Search --- */
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-input);
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        /* ============================================================
+               SEARCH BOX
+               ============================================================ */
         .search-box {
-            padding: 6px 16px;
+            padding: 8px 18px;
             border-radius: 50px;
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            width: 180px;
+            width: 200px;
             outline: none;
             transition: var(--transition);
             font-size: 13px;
@@ -224,11 +294,13 @@
             color: var(--text-muted);
         }
 
-        /* --- Badges & User --- */
+        /* ============================================================
+               BADGE & COUNTER
+               ============================================================ */
         .badge-count {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: #fff;
-            padding: 3px 14px;
+            padding: 4px 14px;
             border-radius: 50px;
             font-weight: 700;
             font-size: 13px;
@@ -237,20 +309,31 @@
             gap: 6px;
         }
 
+        .channel-counter {
+            color: var(--text-secondary);
+            font-size: 13px;
+            background: var(--bg-input);
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+
+        /* ============================================================
+               USER INFO
+               ============================================================ */
         .user-info {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
             background: var(--bg-input);
-            padding: 3px 14px 3px 18px;
+            padding: 4px 14px 4px 18px;
             border-radius: 50px;
             border: 1px solid var(--border-color);
-            font-size: 13px;
-            color: var(--text-secondary);
         }
         .user-info .email {
             color: var(--primary);
-            max-width: 130px;
+            max-width: 150px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -263,128 +346,12 @@
             padding: 1px 10px;
             border-radius: 50px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .channel-counter {
-            background: var(--bg-input);
-            padding: 3px 12px;
-            border-radius: 50px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        /* --- Notification --- */
-        .notif-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .notif-bell {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px 6px;
-            position: relative;
-        }
-        .notif-bell:hover {
-            color: var(--primary);
-        }
-        .notif-bell .badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #E74C3C;
-            color: #fff;
-            border-radius: 50%;
-            padding: 2px 7px;
-            font-size: 10px;
-            min-width: 18px;
-            text-align: center;
-            border: 2px solid var(--bg-surface);
-        }
-
-        .notif-dropdown {
-            position: absolute;
-            top: 44px;
-            right: 0;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            width: 320px;
-            max-height: 360px;
-            overflow-y: auto;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            display: none;
-            padding: 8px 0;
-        }
-        .notif-dropdown.active {
-            display: block;
-        }
-        .notif-dropdown .notif-item {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-        .notif-dropdown .notif-item:last-child {
-            border-bottom: none;
-        }
-        .notif-dropdown .notif-empty {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        /* --- Theme & Lang --- */
-        .theme-toggle {
-            background: var(--bg-input);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            font-size: 18px;
-            cursor: pointer;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-        .theme-toggle:hover {
-            background: var(--bg-hover);
-            transform: rotate(20deg);
-        }
-
-        .lang-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 3px 12px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .lang-btn:hover {
-            border-color: var(--primary);
-            color: var(--text-primary);
-        }
-        .lang-btn.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(108, 99, 255, 0.08);
-        }
-
-        /* ================================================
-                   SIDEBAR (قابلة للطي)
-                   ================================================ */
+        /* ============================================================
+               SIDEBAR (slide-in)
+               ============================================================ */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -392,8 +359,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
             z-index: 1000;
         }
         .sidebar-overlay.active {
@@ -409,40 +376,43 @@
         }
 
         .sidebar {
-            width: 260px;
-            background: var(--bg-surface);
-            border-left: 1px solid var(--border-color);
-            flex-shrink: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
             overflow-y: auto;
-            padding: 12px 0;
-            transition: transform var(--transition);
+            padding: 16px 0;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            transition: transform var(--transition), background var(--transition), border-color var(--transition);
             z-index: 1001;
         }
         .sidebar::-webkit-scrollbar {
             width: 4px;
         }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
 
-        /* عناصر التصنيف في السايدبار */
         .sidebar .cat-item {
-            padding: 12px 20px;
+            padding: 10px 20px;
             cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 14px;
             color: var(--text-secondary);
-            border-right: 4px solid transparent;
-            transition: var(--transition);
-            margin: 2px 0;
-            user-select: none;
+            border-radius: 0 8px 8px 0;
+            margin: 2px 8px 2px 0;
         }
         .sidebar .cat-item:hover {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
         .sidebar .cat-item.active {
-            background: rgba(108, 99, 255, 0.12);
-            border-right-color: var(--primary);
+            background: rgba(108, 99, 255, 0.15);
+            border-left-color: var(--primary);
             color: var(--primary);
             font-weight: 600;
         }
@@ -452,6 +422,7 @@
             border-radius: 50px;
             font-size: 11px;
             color: var(--text-muted);
+            font-weight: 400;
         }
         .sidebar .cat-item.active .count {
             background: var(--primary);
@@ -463,26 +434,24 @@
             color: var(--text-muted);
             cursor: pointer;
             font-size: 14px;
-            padding: 4px 8px;
             transition: var(--transition);
-            border-radius: 6px;
+            padding: 0 4px;
         }
         .sidebar .cat-item .cat-fav-btn:hover {
-            background: rgba(255, 101, 132, 0.15);
             color: var(--accent);
         }
         .sidebar .cat-item .cat-fav-btn.active {
             color: var(--accent);
         }
 
-        /* السجل في السايدبار */
+        /* History */
         .sidebar .history-section {
-            margin-top: 16px;
+            margin-top: 20px;
             border-top: 1px solid var(--border-color);
             padding-top: 12px;
         }
         .sidebar .history-title {
-            padding: 0 20px 8px 20px;
+            padding: 0 20px 10px 20px;
             color: var(--text-secondary);
             font-size: 13px;
             display: flex;
@@ -492,26 +461,27 @@
         .sidebar .history-title button {
             background: transparent;
             border: none;
-            color: #E74C3C;
+            color: var(--danger, #E74C3C);
             cursor: pointer;
             font-size: 13px;
             transition: var(--transition);
         }
         .sidebar .history-title button:hover {
             color: #C0392B;
+            transform: scale(1.1);
         }
         .sidebar .history-item {
-            padding: 6px 20px;
+            padding: 8px 20px;
             font-size: 13px;
             color: var(--text-secondary);
             cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             border-bottom: 1px solid var(--border-color);
-            transition: var(--transition);
-            overflow: hidden;
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
         }
         .sidebar .history-item:hover {
@@ -521,66 +491,68 @@
         .sidebar .history-item .time {
             font-size: 10px;
             color: var(--text-muted);
-            margin-right: auto;
+            margin-left: auto;
             flex-shrink: 0;
         }
         .sidebar .history-empty {
             padding: 12px 20px;
-            text-align: center;
             color: var(--text-muted);
             font-size: 13px;
+            text-align: center;
         }
 
-        /* ================================================
-                   MAIN CONTENT
-                   ================================================ */
+        /* ============================================================
+               MAIN CONTENT
+               ============================================================ */
         .main-content {
             flex: 1;
-            padding: 20px 28px;
+            padding: 24px 28px;
             overflow-y: auto;
             background: var(--bg-body);
             transition: background var(--transition);
         }
 
-        /* ================================================
-                   CHANNELS GRID
-                   ================================================ */
+        /* ============================================================
+               CHANNELS GRID
+               ============================================================ */
         .channels-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 18px;
-            margin-top: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 12px;
         }
 
         .channel-card {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 14px 16px;
+            padding: 16px 18px;
             border: 1px solid var(--border-color);
             transition: var(--transition);
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            box-shadow: var(--shadow);
+            gap: 8px;
+            position: relative;
+            box-shadow: var(--shadow-card);
         }
         .channel-card:hover {
             border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(108, 99, 255, 0.15);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
         }
+
         .channel-card .ch-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .channel-card .ch-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: var(--radius-sm);
             object-fit: cover;
             background: var(--bg-input);
-            border: 1px solid var(--border-color);
             flex-shrink: 0;
+            border: 1px solid var(--border-color);
         }
         .channel-card .ch-name {
             font-size: 15px;
@@ -588,11 +560,11 @@
             color: var(--text-primary);
             flex: 1;
             cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             word-break: break-word;
-            transition: var(--transition);
         }
         .channel-card .ch-name:hover {
             color: var(--primary);
@@ -600,17 +572,21 @@
         .channel-card .ch-name i {
             color: var(--secondary);
             font-size: 14px;
+            flex-shrink: 0;
         }
+
         .channel-card .ch-cat {
             font-size: 11px;
             background: var(--bg-input);
-            padding: 2px 12px;
+            padding: 2px 14px;
             border-radius: 50px;
             display: inline-block;
             width: fit-content;
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
+            font-weight: 500;
         }
+
         .channel-card .card-actions {
             display: flex;
             gap: 8px;
@@ -621,7 +597,7 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             border: none;
-            padding: 6px 0;
+            padding: 8px 0;
             border-radius: var(--radius-sm);
             font-weight: 700;
             font-size: 14px;
@@ -630,22 +606,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
         }
         .channel-card .btn-play:hover {
-            box-shadow: 0 4px 16px var(--primary-glow);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 4px 20px var(--primary-glow);
             transform: scale(1.02);
         }
+
         .channel-card .btn-fav {
             background: var(--bg-input);
             color: var(--text-secondary);
             border: none;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: var(--radius-sm);
             cursor: pointer;
+            transition: var(--transition);
             font-size: 15px;
             border: 1px solid var(--border-color);
-            transition: var(--transition);
         }
         .channel-card .btn-fav.active {
             background: var(--accent);
@@ -654,67 +632,73 @@
         }
         .channel-card .btn-fav:hover {
             background: var(--bg-hover);
+            transform: scale(1.05);
         }
         .channel-card .btn-fav.active:hover {
             background: #E0556A;
         }
 
-        /* ================================================
-                   EMPTY STATE
-                   ================================================ */
+        /* ============================================================
+               EMPTY STATE
+               ============================================================ */
         .empty-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 360px;
+            min-height: 380px;
             text-align: center;
             color: var(--text-secondary);
+            padding: 20px;
         }
         .empty-state i {
-            font-size: 64px;
+            font-size: 72px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
         .empty-state h2 {
-            font-size: 24px;
+            font-size: 26px;
             margin-bottom: 8px;
             color: var(--text-primary);
+            font-weight: 700;
         }
         .empty-state p {
-            max-width: 400px;
+            max-width: 440px;
+            line-height: 1.8;
             font-size: 15px;
-            line-height: 1.7;
+            color: var(--text-secondary);
         }
         .empty-state .btn-add-large {
-            margin-top: 20px;
+            margin-top: 24px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
-            padding: 10px 36px;
+            padding: 12px 40px;
             border-radius: 50px;
             border: none;
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
             transition: var(--transition);
-        }
-        .empty-state .btn-add-large:hover {
-            transform: scale(1.03);
             box-shadow: 0 4px 20px var(--primary-glow);
         }
+        .empty-state .btn-add-large:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
 
-        /* ================================================
-                   MODALS (نوافذ منبثقة)
-                   ================================================ */
+        /* ============================================================
+               MODALS
+               ============================================================ */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -727,54 +711,60 @@
         .modal-box {
             background: var(--bg-surface);
             border-radius: var(--radius);
-            padding: 28px;
+            padding: 30px;
             width: 100%;
-            max-width: 500px;
+            max-width: 540px;
             border: 1px solid var(--border-color);
             position: relative;
             max-height: 90vh;
             overflow-y: auto;
-            animation: modalFade 0.25s ease;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+            animation: modalSlideIn 0.3s ease;
         }
-        @keyframes modalFade {
+        @keyframes modalSlideIn {
             from {
                 opacity: 0;
-                transform: scale(0.95) translateY(20px);
+                transform: translateY(30px) scale(0.96);
             }
             to {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
+
         .modal-box .close-modal {
             position: absolute;
-            top: 12px;
-            left: 18px;
+            top: 14px;
+            right: 18px;
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             transition: var(--transition);
+            line-height: 1;
         }
         .modal-box .close-modal:hover {
             color: var(--text-primary);
             transform: rotate(90deg);
         }
+
         .modal-box h2 {
             color: var(--text-primary);
-            margin-bottom: 18px;
-            font-size: 22px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .modal-box h2 i {
             color: var(--primary);
         }
+
         .modal-box label {
             display: block;
-            margin: 12px 0 4px 0;
+            margin: 14px 0 6px 0;
             color: var(--text-secondary);
             font-size: 13px;
             font-weight: 600;
@@ -783,7 +773,7 @@
         .modal-box textarea,
         .modal-box select {
             width: 100%;
-            padding: 8px 14px;
+            padding: 10px 14px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-color);
             background: var(--bg-input);
@@ -799,13 +789,17 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
+        .modal-box select option {
+            background: var(--bg-surface);
+        }
+
         .modal-box .btn-save {
             width: 100%;
-            margin-top: 16px;
+            margin-top: 20px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: var(--radius-sm);
             font-weight: 700;
             font-size: 16px;
@@ -813,11 +807,21 @@
             transition: var(--transition);
         }
         .modal-box .btn-save:hover {
-            box-shadow: 0 4px 20px var(--primary-glow);
+            box-shadow: 0 4px 24px var(--primary-glow);
+            transform: translateY(-2px);
         }
+
+        .modal-box .btn-danger {
+            background: linear-gradient(135deg, #E74C3C, #C0392B);
+            color: #fff;
+        }
+        .modal-box .btn-danger:hover {
+            box-shadow: 0 4px 24px rgba(231, 76, 60, 0.4);
+        }
+
         .modal-box .status-msg {
-            margin-top: 12px;
-            padding: 8px 14px;
+            margin-top: 14px;
+            padding: 10px 16px;
             border-radius: var(--radius-sm);
             background: var(--bg-input);
             color: var(--text-secondary);
@@ -828,30 +832,33 @@
         .modal-box .status-msg.success {
             color: #2ECC71;
             border-color: #2ECC71;
+            background: rgba(46, 204, 113, 0.08);
         }
         .modal-box .status-msg.error {
             color: #E74C3C;
             border-color: #E74C3C;
+            background: rgba(231, 76, 60, 0.08);
         }
 
-        /* ================================================
-                   ADMIN PANEL (داخل النافذة)
-                   ================================================ */
+        /* ============================================================
+               ADMIN PANEL (inside modal)
+               ============================================================ */
         .admin-panel {
             background: var(--bg-card);
             border-radius: var(--radius-sm);
-            padding: 16px 18px;
-            margin-bottom: 16px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-color);
         }
         .admin-panel h3 {
             color: var(--primary);
-            margin-bottom: 12px;
-            font-size: 17px;
+            margin-bottom: 14px;
+            font-size: 18px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
+
         .admin-panel table {
             width: 100%;
             border-collapse: collapse;
@@ -859,23 +866,25 @@
         }
         .admin-panel th {
             text-align: right;
-            padding: 6px 10px;
+            padding: 8px 10px;
             border-bottom: 2px solid var(--border-color);
             color: var(--text-secondary);
             font-weight: 600;
             font-size: 12px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .admin-panel td {
-            padding: 6px 10px;
+            padding: 8px 10px;
             border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
         }
         .admin-panel .user-email {
             color: var(--primary);
             font-weight: 500;
         }
         .admin-panel .status-badge {
-            padding: 2px 12px;
+            padding: 2px 14px;
             border-radius: 50px;
             font-size: 11px;
             font-weight: 700;
@@ -893,10 +902,10 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 4px 6px;
-            font-size: 14px;
+            padding: 4px 8px;
+            font-size: 15px;
             transition: var(--transition);
-            border-radius: 4px;
+            border-radius: 6px;
         }
         .admin-panel .btn-icon:hover {
             background: var(--bg-hover);
@@ -905,28 +914,34 @@
         .admin-panel .btn-icon.danger:hover {
             color: #E74C3C;
         }
-        .admin-panel .btn-icon.warning:hover {
-            color: #F39C12;
-        }
         .admin-panel .btn-icon.success:hover {
             color: #2ECC71;
         }
+        .admin-panel .btn-icon.warning:hover {
+            color: #F39C12;
+        }
 
+        /* Stats cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
         }
         .stat-card {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
-            padding: 14px;
+            padding: 16px;
             text-align: center;
             border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
         }
         .stat-card .stat-number {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -936,61 +951,378 @@
         .stat-card .stat-label {
             font-size: 12px;
             color: var(--text-secondary);
-            margin-top: 2px;
+            margin-top: 4px;
         }
         .stat-card .stat-icon {
-            font-size: 20px;
+            font-size: 22px;
             color: var(--text-muted);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
-        /* ================================================
-                   SCROLL TO TOP
-                   ================================================ */
+        .chart-container {
+            max-width: 100%;
+            height: 200px;
+            margin-top: 12px;
+        }
+
+        /* ============================================================
+               NOTIFICATION DROPDOWN
+               ============================================================ */
+        .notif-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notif-bell {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 6px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .notif-bell:hover {
+            color: var(--primary);
+        }
+        .notif-bell .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #E74C3C;
+            color: #fff;
+            border-radius: 50%;
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
+            border: 2px solid var(--bg-surface);
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: 44px;
+            right: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            width: 340px;
+            max-height: 360px;
+            overflow-y: auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            padding: 8px 0;
+        }
+        .notif-dropdown.active {
+            display: block;
+        }
+        .notif-dropdown .notif-item {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .notif-dropdown .notif-item:last-child {
+            border-bottom: none;
+        }
+        .notif-dropdown .notif-item .notif-text {
+            flex: 1;
+            word-break: break-word;
+        }
+        .notif-dropdown .notif-item .notif-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .notif-dropdown .notif-item .notif-read-btn {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .notif-dropdown .notif-item .notif-read-btn:hover {
+            background: var(--primary-dark);
+        }
+        .notif-dropdown .notif-empty {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+               SCROLL TO TOP
+               ============================================================ */
         #scrollTopBtn {
             position: fixed;
             bottom: 30px;
             right: 30px;
             z-index: 9999;
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             font-size: 22px;
             cursor: pointer;
-            box-shadow: 0 4px 20px var(--primary-glow);
+            box-shadow: 0 4px 24px var(--primary-glow);
             transition: var(--transition);
             display: none;
             align-items: center;
             justify-content: center;
         }
         #scrollTopBtn:hover {
-            transform: scale(1.08);
+            transform: scale(1.1);
+            box-shadow: 0 8px 32px var(--primary-glow);
         }
         #scrollTopBtn.show {
             display: flex;
         }
 
-        /* ================================================
-                   LOADING & LOAD MORE
-                   ================================================ */
+        /* ============================================================
+               THEME TOGGLE
+               ============================================================ */
+        .theme-toggle {
+            background: var(--bg-input);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+        }
+        .theme-toggle:hover {
+            background: var(--bg-hover);
+            transform: rotate(20deg);
+        }
+
+        /* ============================================================
+               LANGUAGE BUTTONS
+               ============================================================ */
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .lang-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+        .lang-btn.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(108, 99, 255, 0.08);
+        }
+
+        /* ============================================================
+               ABOUT / CONTENT MODALS
+               ============================================================ */
+        .modal-box .about-content,
+        .modal-box .contact-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+        .modal-box .about-content h3,
+        .modal-box .contact-content h3 {
+            color: var(--text-primary);
+            margin: 16px 0 8px;
+        }
+        .modal-box .about-content p,
+        .modal-box .contact-content p {
+            margin-bottom: 12px;
+        }
+        .modal-box .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0;
+            padding: 10px 16px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+        .modal-box .contact-item i {
+            width: 28px;
+            color: var(--primary);
+            font-size: 20px;
+        }
+        .modal-box .contact-item span {
+            color: var(--text-primary);
+        }
+        .modal-box .contact-item a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .modal-box .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 992px) {
+            .channels-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            .main-content {
+                padding: 16px 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            .app-container {
+                height: auto;
+                flex-direction: column;
+            }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: 80%;
+                max-width: 300px;
+                transform: translateX(100%);
+                border-left: none;
+                border-right: 1px solid var(--border-color);
+                z-index: 1001;
+                padding-top: 64px;
+                background: var(--bg-sidebar);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar .cat-item {
+                border-left: none;
+                border-right: 4px solid transparent;
+                border-radius: 8px 0 0 8px;
+                margin: 2px 0 2px 8px;
+            }
+            .sidebar .cat-item.active {
+                border-right-color: var(--primary);
+                border-left-color: transparent;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px 16px;
+                gap: 8px;
+            }
+            .controls-area {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .search-box {
+                width: 100%;
+                max-width: 280px;
+            }
+            .channels-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-box {
+                padding: 20px;
+                max-width: 100%;
+            }
+            .user-info .email {
+                max-width: 100px;
+            }
+            .notif-dropdown {
+                width: 290px;
+                right: -10px;
+            }
+            #scrollTopBtn {
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+                bottom: 20px;
+                right: 20px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .admin-panel table {
+                font-size: 12px;
+            }
+            .admin-panel th,
+            .admin-panel td {
+                padding: 6px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls-area .btn {
+                font-size: 11px;
+                padding: 5px 12px;
+            }
+            .controls-area .btn-sm {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+            .search-box {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+            .logo-area h1 {
+                font-size: 18px;
+            }
+        }
+
+        /* ============================================================
+               LOADING MODAL
+               ============================================================ */
         #loadingModal .modal-box {
             text-align: center;
             max-width: 400px;
+        }
+        #loadingModal h2 i {
+            color: var(--primary);
         }
         #loadingProgress {
             width: 0%;
             height: 6px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             border-radius: 10px;
-            transition: width 0.4s ease;
+            transition: width 0.5s ease;
         }
 
+        /* ============================================================
+               LOAD MORE INDICATOR
+               ============================================================ */
         #loadMoreIndicator {
             text-align: center;
-            padding: 16px;
+            padding: 20px;
             color: var(--text-muted);
             font-size: 14px;
             display: flex;
@@ -1009,114 +1341,6 @@
         @keyframes spin {
             to {
                 transform: rotate(360deg);
-            }
-        }
-
-        /* ================================================
-                   RESPONSIVE
-                   ================================================ */
-        @media (max-width: 992px) {
-            .channels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-            .main-content {
-                padding: 16px 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hamburger {
-                display: block;
-            }
-            .app-container {
-                height: auto;
-                flex-direction: column;
-            }
-            .sidebar {
-                position: fixed;
-                top: 0;
-                right: 0;
-                height: 100%;
-                width: 280px;
-                transform: translateX(100%);
-                border-left: none;
-                border-right: 1px solid var(--border-color);
-                padding-top: 60px;
-                background: var(--bg-surface);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .sidebar .cat-item {
-                border-right: none;
-                border-left: 4px solid transparent;
-            }
-            .sidebar .cat-item.active {
-                border-left-color: var(--primary);
-                border-right-color: transparent;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 8px 16px;
-                gap: 6px;
-            }
-            .controls-area {
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            .search-box {
-                width: 100%;
-                max-width: 260px;
-            }
-            .channels-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal-box {
-                padding: 20px;
-                max-width: 100%;
-            }
-            .user-info .email {
-                max-width: 100px;
-            }
-            .notif-dropdown {
-                width: 280px;
-                right: -10px;
-            }
-            #scrollTopBtn {
-                width: 42px;
-                height: 42px;
-                font-size: 18px;
-                bottom: 20px;
-                right: 20px;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .admin-panel table {
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .controls-area .btn {
-                font-size: 11px;
-                padding: 4px 10px;
-            }
-            .controls-area .btn-sm {
-                font-size: 10px;
-                padding: 3px 8px;
-            }
-            .search-box {
-                font-size: 12px;
-            }
-            .logo-area h1 {
-                font-size: 18px;
             }
         }
     </style>
@@ -1160,7 +1384,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ===== MODALS (النوافذ المنبثقة) ===== -->
+    <!-- ===== MODALS ===== -->
     <!-- Login / Register -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
@@ -1172,7 +1396,7 @@
                 <label id="loginPasswordLabel">كلمة المرور</label>
                 <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" />
                 <button class="btn-save" id="loginBtn" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
-                <div style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:13px;">
+                <div style="text-align:center; margin-top:14px; color:var(--text-secondary); font-size:13px;">
                     <span id="noAccountText">ليس لديك حساب؟</span>
                     <span style="color:var(--primary); cursor:pointer; font-weight:600;" onclick="showRegister()" id="registerLink">سجل الآن</span>
                 </div>
@@ -1184,7 +1408,7 @@
                 <label id="registerPasswordLabel">كلمة المرور</label>
                 <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" />
                 <button class="btn-save" id="registerBtn" onclick="register()"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
-                <div style="text-align:center; margin-top:12px; color:var(--text-secondary); font-size:13px;">
+                <div style="text-align:center; margin-top:14px; color:var(--text-secondary); font-size:13px;">
                     <span id="haveAccountText">لديك حساب؟</span>
                     <span style="color:var(--primary); cursor:pointer; font-weight:600;" onclick="showLogin()" id="loginLink">تسجيل الدخول</span>
                 </div>
@@ -1226,7 +1450,7 @@
 
     <!-- Admin Panel -->
     <div class="modal-overlay" id="adminModal">
-        <div class="modal-box" style="max-width: 780px;">
+        <div class="modal-box" style="max-width: 800px;">
             <button class="close-modal" onclick="closeAdminModal()">✕</button>
             <h2 id="adminModalTitle"><i class="fas fa-users-cog"></i> لوحة تحكم المدير</h2>
             <div id="adminContent">
@@ -1254,7 +1478,7 @@
                             <div class="stat-label">إجمالي المفضلات</div>
                         </div>
                     </div>
-                    <div style="margin-top: 12px;">
+                    <div style="margin-top: 16px;">
                         <canvas id="categoryChart" width="400" height="200"></canvas>
                     </div>
                 </div>
@@ -1277,12 +1501,12 @@
                 </div>
 
                 <div class="admin-panel">
-                    <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار</h3>
+                    <h3 id="adminNotifTitle"><i class="fas fa-bell"></i> إرسال إشعار لجميع المستخدمين</h3>
                     <label id="adminNotifLabel">نص الإشعار</label>
-                    <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:8px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
+                    <textarea id="adminNotifMessage" rows="3" placeholder="أدخل رسالة الإشعار..." style="width:100%; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px; resize:vertical;"></textarea>
                     <label id="adminNotifTargetLabel">البريد الإلكتروني المستهدف (اختياري)</label>
-                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:8px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
-                    <button class="btn-save" onclick="sendNotification()" style="margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال</button>
+                    <input type="email" id="adminNotifTarget" placeholder="example@email.com - اترك فارغاً للإرسال للجميع" style="width:100%; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); font-size:14px;" />
+                    <button class="btn-save" onclick="sendNotification()" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> إرسال الإشعار</button>
                     <div id="adminNotifStatus" class="status-msg"></div>
                 </div>
             </div>
@@ -1319,9 +1543,9 @@
     <div class="modal-overlay" id="loadingModal">
         <div class="modal-box">
             <h2 id="loadingModalTitle"><i class="fas fa-spinner fa-spin"></i> جاري التحميل</h2>
-            <p id="loadingModalText" style="font-size:16px; margin:16px 0;">يرجى الانتظار...</p>
-            <div style="width:100%; height:6px; background:var(--bg-input); border-radius:10px; overflow:hidden;">
-                <div id="loadingProgress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+            <p id="loadingModalText" style="font-size:16px; margin:20px 0;">يرجى الانتظار، سيتم تحميل القنوات...</p>
+            <div style="width:100%; height:6px; background:var(--bg-input); border-radius:10px; overflow:hidden; margin-top:12px;">
+                <div id="loadingProgress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.5s;"></div>
             </div>
         </div>
     </div>
@@ -1334,7 +1558,7 @@
             <div class="about-content" id="aboutContent">
                 <p>HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية.</p>
                 <p>نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً.</p>
-                <p>تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة.</p>
+                <p>تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة.</p>
                 <p><strong>نسعى دائماً لتقديم الأفضل لمستخدمينا.</strong></p>
             </div>
         </div>
@@ -1347,15 +1571,15 @@
             <h2 id="contactModalTitle"><i class="fas fa-envelope"></i> تواصل معنا</h2>
             <div class="contact-content" id="contactContent">
                 <p>للتواصل معنا، يمكنك استخدام المعلومات التالية:</p>
-                <div class="contact-item" style="display:flex; align-items:center; gap:10px; background:var(--bg-input); padding:8px 14px; border-radius:var(--radius-sm); margin:8px 0;">
-                    <i class="fas fa-envelope" style="color:var(--primary); width:24px;"></i>
-                    <a href="mailto:stevenhacen@gmail.com" style="color:var(--primary); text-decoration:none;">stevenhacen@gmail.com</a>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:stevenhacen@gmail.com">stevenhacen@gmail.com</a>
                 </div>
-                <div class="contact-item" style="display:flex; align-items:center; gap:10px; background:var(--bg-input); padding:8px 14px; border-radius:var(--radius-sm); margin:8px 0;">
-                    <i class="fas fa-phone-alt" style="color:var(--primary); width:24px;"></i>
-                    <a href="tel:0542163526" style="color:var(--primary); text-decoration:none;">0542163526</a>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <a href="tel:0542163526">0542163526</a>
                 </div>
-                <p style="margin-top:12px;">نحن في انتظار استفساراتكم واقتراحاتكم.</p>
+                <p style="margin-top:15px;">نحن في انتظار استفساراتكم واقتراحاتكم.</p>
             </div>
         </div>
     </div>
@@ -1364,16 +1588,16 @@
     <div class="notif-dropdown" id="notifDropdown"></div>
 
     <!-- ============================================================ -->
-    <!-- ===== JAVASCRIPT (الكود الأساسي مع الإصلاحات) ===== -->
+    <!-- ===== JAVASCRIPT (نفس الكود الأصلي مع الحفاظ على الوظائف) ===== -->
     <!-- ============================================================ -->
     <script>
         // ================================================================
-        // 0.  القنوات الافتراضية (فارغة)
+        // 0.  القنوات الافتراضية (اتركها فارغة)
         // ================================================================
         const DEFAULT_CHANNELS = [];
 
         // ================================================================
-        // 0b.  خريطة التصنيفات - اتركها فارغة وضع المحتوى يدوياً
+        // 0b.  خريطة التصنيفات المخصصة (اتركها كما هي)
         // ================================================================
         const CHANNEL_CATEGORY_MAP = {
             // ----- ALGERIA -----
@@ -2329,7 +2553,7 @@
         };
 
         // ================================================================
-        // 0c.  الترجمات (i18n)
+        // 0c.  الترجمات (i18n) - موسعة (نفس النسخة الأصلية)
         // ================================================================
         const translations = {
             ar: {
@@ -2343,8 +2567,8 @@
                 "search": "بحث",
                 "all": "الكل",
                 "favorites": "المفضلة",
-                "removeCatFav": "إزالة من المفضلة",
-                "addCatFav": "إضافة للمفضلة",
+                "removeCatFav": "إزالة التصنيف من المفضلة",
+                "addCatFav": "إضافة التصنيف إلى المفضلة",
                 "noChannels": "لا توجد قنوات",
                 "pleaseLogin": "يرجى تسجيل الدخول",
                 "loginToView": "سجل الدخول لمشاهدة القنوات وإدارة اشتراكك.",
@@ -2354,13 +2578,13 @@
                 "orAddManual": "أو أضف قناة يدوياً.",
                 "addNewChannel": "إضافة قناة جديدة",
                 "play": "تشغيل",
-                "addFav": "إضافة للمفضلة",
+                "addFav": "إضافة إلى المفضلة",
                 "removeFav": "إزالة من المفضلة",
                 "general": "عام",
                 "xtreamSettings": "إعدادات Xtream",
-                "serverUrl": "رابط الخادم",
-                "username": "اسم المستخدم",
-                "password": "كلمة المرور",
+                "serverUrl": "رابط الخادم (Server URL)",
+                "username": "اسم المستخدم (Username)",
+                "password": "كلمة المرور (Password)",
                 "saveAndFetch": "حفظ وجلب القنوات",
                 "addChannel": "إضافة قناة",
                 "channelName": "اسم القناة *",
@@ -2379,7 +2603,7 @@
                 "editUser": "تعديل المستخدم",
                 "saveChanges": "حفظ التعديلات",
                 "loading": "جاري التحميل",
-                "pleaseWait": "يرجى الانتظار...",
+                "pleaseWait": "يرجى الانتظار، سيتم تحميل القنوات...",
                 "noUsers": "لا يوجد مستخدمون",
                 "fillEmailPassword": "⚠️ يرجى إدخال البريد وكلمة المرور",
                 "passwordMin6": "⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل",
@@ -2422,9 +2646,16 @@
                 "contact": "تواصل معنا",
                 "aboutTitle": "من نحن",
                 "contactTitle": "تواصل معنا",
-                "aboutDesc": "HACENE TV هو منصة IPTV متطورة...",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
+                "email": "البريد الإلكتروني",
+                "phone": "الهاتف",
+                "facebook": "فيسبوك",
                 "contactInfo": "للتواصل معنا، يمكنك استخدام المعلومات التالية:",
+                "contactEmail": "البريد الإلكتروني",
+                "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
+                "telegram": "تيليجرام",
                 "fetchChannels": "جلب القنوات",
                 "history": "سجل المشاهدة",
                 "clearHistory": "حذف السجل",
@@ -2437,12 +2668,120 @@
                 "confirmClearHistory": "هل أنت متأكد من حذف سجل المشاهدة؟"
             },
             fr: {
-                // يمكنك إضافة الترجمة الفرنسية إذا أردت
+                "live": "En direct",
+                "login": "Connexion",
+                "register": "S'inscrire",
+                "adminPanel": "Tableau de bord",
+                "xtream": "Xtream",
+                "add": "Ajouter",
+                "logout": "Déconnexion",
+                "search": "Rechercher",
+                "all": "Tout",
+                "favorites": "Favoris",
+                "removeCatFav": "Retirer la catégorie des favoris",
+                "addCatFav": "Ajouter la catégorie aux favoris",
+                "noChannels": "Aucune chaîne",
+                "pleaseLogin": "Veuillez vous connecter",
+                "loginToView": "Connectez-vous pour voir les chaînes et gérer votre abonnement.",
+                "loginButton": "Se connecter",
+                "setupXtream": "Configurez un compte Xtream en cliquant sur le bouton",
+                "adminOnly": "réservé à l'administrateur",
+                "orAddManual": "ou ajoutez une chaîne manuellement.",
+                "addNewChannel": "Ajouter une nouvelle chaîne",
+                "play": "Lire",
+                "addFav": "Ajouter aux favoris",
+                "removeFav": "Retirer des favoris",
+                "general": "Général",
+                "xtreamSettings": "Paramètres Xtream",
+                "serverUrl": "URL du serveur",
+                "username": "Nom d'utilisateur",
+                "password": "Mot de passe",
+                "saveAndFetch": "Enregistrer et récupérer les chaînes",
+                "addChannel": "Ajouter une chaîne",
+                "channelName": "Nom de la chaîne *",
+                "category": "Catégorie",
+                "streamUrl": "Lien de visionnage (.m3u8) *",
+                "save": "Enregistrer",
+                "adminDashboard": "Tableau de bord de l'administrateur",
+                "userManagement": "Gestion des utilisateurs",
+                "email": "Email",
+                "status": "Statut",
+                "actions": "Actions",
+                "active": "Actif",
+                "inactive": "Inactif",
+                "edit": "Modifier",
+                "delete": "Supprimer",
+                "editUser": "Modifier l'utilisateur",
+                "saveChanges": "Enregistrer les modifications",
+                "loading": "Chargement en cours",
+                "pleaseWait": "Veuillez patienter, les chaînes sont en cours de chargement...",
+                "noUsers": "Aucun utilisateur",
+                "fillEmailPassword": "⚠️ Veuillez saisir l'email et le mot de passe",
+                "passwordMin6": "⚠️ Le mot de passe doit comporter au moins 6 caractères",
+                "updateSuccess": "✅ Mise à jour réussie",
+                "userNotSpecified": "⚠️ Utilisateur non spécifié",
+                "adminOnlyPage": "⚠️ Cette page est réservée à l'administrateur",
+                "adminOnlySettings": "⚠️ Ces paramètres sont réservés à l'administrateur",
+                "notAuthorized": "⚠️ Vous n'êtes pas autorisé à modifier ces paramètres",
+                "loginFirst": "⚠️ Veuillez vous connecter d'abord",
+                "channelNotFound": "⚠️ La chaîne n'existe pas.",
+                "invalidUrl": "⚠️ Ce lien n'est pas valide.",
+                "fillAllFields": "⚠️ Veuillez remplir tous les champs",
+                "enterChannelName": "⚠️ Veuillez entrer le nom de la chaîne.",
+                "pasteChannelUrl": "⚠️ Veuillez coller le lien de la chaîne.",
+                "userNotFound": "Utilisateur introuvable",
+                "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ?",
+                "confirmDeleteUser": "Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?",
+                "loginInProgress": "⏳ Connexion en cours...",
+                "registerInProgress": "⏳ Création du compte en cours...",
+                "fetchSuccess": "✅ {count} chaînes récupérées avec succès",
+                "noAccount": "Pas de compte ?",
+                "registerNow": "S'inscrire",
+                "haveAccount": "Déjà un compte ?",
+                "loginNow": "Se connecter",
+                "lang": "Langue",
+                "notifications": "Notifications",
+                "noNotifications": "Aucune notification",
+                "sendNotification": "Envoyer une notification à tous les utilisateurs",
+                "notificationMessage": "Message de la notification",
+                "send": "Envoyer",
+                "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
+                "adminNotifTargetLabel": "Email ciblé (optionnel)",
+                "theme": "Thème",
+                "scrollToTop": "Retour en haut",
+                "loadingMore": "Chargement...",
+                "endOfList": "Fin de la liste",
+                "unread": "Non lu",
+                "markAsRead": "Marquer comme lu",
+                "about": "À propos",
+                "contact": "Nous contacter",
+                "aboutTitle": "À propos de nous",
+                "contactTitle": "Nous contacter",
+                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
+                "email": "Email",
+                "phone": "Téléphone",
+                "facebook": "Facebook",
+                "contactInfo": "Pour nous contacter, vous pouvez utiliser les informations suivantes :",
+                "contactEmail": "Email",
+                "contactPhone": "Téléphone",
+                "contactWaiting": "Nous attendons vos questions et suggestions.",
+                "telegram": "Telegram",
+                "fetchChannels": "Récupérer les chaînes",
+                "history": "Historique",
+                "clearHistory": "Effacer l'historique",
+                "noHistory": "Aucune chaîne dans l'historique",
+                "adminStats": "Statistiques de la plateforme",
+                "totalChannels": "Chaînes totales",
+                "totalUsers": "Utilisateurs enregistrés",
+                "activeToday": "Actifs aujourd'hui",
+                "totalFavorites": "Favoris totaux",
+                "confirmClearHistory": "Êtes-vous sûr de vouloir effacer l'historique ?"
             }
         };
 
         // ================================================================
-        // 1.  الإعدادات العامة
+        // 1.  الإعدادات العامة (نفس الأصل)
         // ================================================================
         const API_URL = 'https://hacenetv2-0-ua0u.onrender.com/api';
 
@@ -2464,7 +2803,7 @@
         let categoryChart = null;
 
         // ================================================================
-        // 2.  دوال الترجمة
+        // 2.  دوال الترجمة (نفس الأصل)
         // ================================================================
         function getTranslation(key, params = {}) {
             const langData = translations[currentLang] || translations.ar;
@@ -2489,6 +2828,7 @@
                 localStorage.setItem('hacene_lang', lang);
                 document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                updateAllTexts();
                 renderHeader();
                 buildSidebar();
                 applyFilters(true);
@@ -2499,8 +2839,12 @@
             }
         }
 
+        function updateAllTexts() {
+            // يتم تحديث النصوص عند فتح النوافذ
+        }
+
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين
+        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي (نفس الأصل)
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2512,7 +2856,7 @@
         function setHistory(h) { history = h; localStorage.setItem('hacene_history', JSON.stringify(h)); }
 
         // ================================================================
-        // 4.  API
+        // 4.  API (نفس الأصل)
         // ================================================================
         function getAuthHeaders() {
             const t = getToken();
@@ -2527,17 +2871,27 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Request failed');
                 return data;
-            } catch (err) {
-                console.error('API Call Error:', err);
-                throw err;
-            }
+            } catch (err) { console.error('API Call Error:', err); throw err; }
         }
 
         // ================================================================
-        // 5.  دوال العرض الأساسية
+        // 5.  دوال العرض والهيكل (نفس الأصل مع تحسينات التصميم)
         // ================================================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
 
-        // ----- History -----
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        // ----- History (نفس الأصل) -----
         function addToHistory(channel) {
             if (!channel) return;
             const entry = {
@@ -2589,7 +2943,7 @@
             }
         }
 
-        // ----- Header -----
+        // ----- Render Header, Sidebar, Filters (نفس الأصل مع تحسينات الأزرار) -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -2704,12 +3058,11 @@
             document.documentElement.setAttribute('data-theme', theme);
         }
 
-        // ----- Sidebar -----
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
             if (!allChannels || allChannels.length === 0) {
                 sidebar.innerHTML = `
-                    <div class="cat-item" style="color:var(--text-secondary); text-align:center; cursor:default;">${getTranslation('noChannels')}</div>
+                    <div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>
                     <div class="history-section">
                         <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
                         <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
@@ -2728,10 +3081,10 @@
                 const active = cat === currentCategory ? 'active' : '';
                 const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
                 const displayName = translateCategory(cat);
-                return `<div class="cat-item ${active}" data-cat="${cat}">
+                return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
                             <span>${displayName}</span>
                             <span class="count">${count}</span>
-                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" data-cat="${cat}" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
+                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
                         </div>`;
             }).join('');
 
@@ -2745,39 +3098,7 @@
                 </div>
             `;
             sidebar.innerHTML = html;
-
-            // ربط الأحداث (بدلاً من onclick في HTML)
-            sidebar.querySelectorAll('.cat-item').forEach(item => {
-                const cat = item.dataset.cat;
-                item.addEventListener('click', function(e) {
-                    if (e.target.closest('.cat-fav-btn')) return;
-                    selectCategory(cat);
-                });
-            });
-
-            sidebar.querySelectorAll('.cat-fav-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const cat = this.dataset.cat;
-                    toggleCategoryFavorite(cat);
-                });
-            });
-
             renderHistory();
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
         }
 
         function isCategoryFavorite(category) {
@@ -2820,17 +3141,6 @@
                 if (!ch.url) ch.url = '';
                 return ch;
             });
-        }
-
-        function selectCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
-                el.classList.toggle('active', el.dataset.cat === cat);
-            });
-            displayCount = STEP;
-            applyFilters(true);
-            setupInfiniteScroll();
-            if (window.innerWidth <= 768) closeSidebar();
         }
 
         function applyFilters(resetDisplay = true) {
@@ -2955,6 +3265,17 @@
             }
         }
 
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.cat === cat);
+            });
+            displayCount = STEP;
+            applyFilters(true);
+            setupInfiniteScroll();
+            if (window.innerWidth <= 768) closeSidebar();
+        }
+
         function toggleFavorite(index) {
             const channel = allChannels[index];
             if (!channel) return;
@@ -2970,7 +3291,7 @@
         }
 
         // ================================================================
-        // 6.  المصادقة
+        // 6.  المصادقة (نفس الأصل)
         // ================================================================
         function openLoginModal() {
             document.getElementById('loginModal').classList.add('active');
@@ -3034,6 +3355,7 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
+        // ===== Fetch Channels (نفس الأصل) =====
         async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
@@ -3104,6 +3426,7 @@
             }
         }
 
+        // ===== Login / Register / Logout (نفس الأصل) =====
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -3184,7 +3507,7 @@
         }
 
         // ================================================================
-        // 7.  Xtream
+        // 7.  Xtream (نفس الأصل)
         // ================================================================
         function openXtreamModal() {
             const user = getUser();
@@ -3243,7 +3566,7 @@
         }
 
         // ================================================================
-        // 8.  القنوات (تشغيل)
+        // 8.  القنوات (تشغيل مع إضافة للسجل) (نفس الأصل)
         // ================================================================
         function openAddModal() {
             const user = getUser();
@@ -3312,7 +3635,7 @@
         }
 
         // ================================================================
-        // 9.  Admin
+        // 9.  Admin (مع الإحصائيات المتقدمة) (نفس الأصل)
         // ================================================================
         async function openAdminModal() {
             const user = getUser();
@@ -3495,7 +3818,7 @@
         }
 
         // ================================================================
-        // 10.  الإشعارات
+        // 10.  الإشعارات (نفس الأصل)
         // ================================================================
         async function loadNotifications() {
             if (!getUser()) return;
@@ -3570,7 +3893,7 @@
         }
 
         // ================================================================
-        // 11.  About & Contact Modals
+        // 11.  About & Contact Modals (نفس الأصل)
         // ================================================================
         function openAboutModal() {
             const modal = document.getElementById('aboutModal');
@@ -3599,7 +3922,7 @@
                     <i class="fas fa-phone-alt"></i>
                     <a href="tel:0542163526">0542163526</a>
                 </div>
-                <p style="margin-top:12px;">${getTranslation('contactWaiting')}</p>
+                <p style="margin-top:15px;">${getTranslation('contactWaiting')}</p>
             `;
         }
 
@@ -3608,7 +3931,7 @@
         }
 
         // ================================================================
-        // 12.  Scroll to Top
+        // 12.  Scroll to Top (نفس الأصل)
         // ================================================================
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3624,7 +3947,7 @@
         }
 
         // ================================================================
-        // 13.  التهيئة
+        // 13.  التهيئة (نفس الأصل)
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -3703,7 +4026,7 @@
         }
 
         // ================================================================
-        // 14.  بدء التطبيق
+        // 14.  بدء التطبيق (نفس الأصل مع إضافة مستمع للأحداث)
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
@@ -3722,7 +4045,6 @@
                 if (contactModal.classList.contains('active') && e.target === contactModal) {
                     closeContactModal();
                 }
-                // إغلاق السايدبار عند النقر خارجها (للجوال)
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.getElementById('sidebarOverlay');
                 if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
