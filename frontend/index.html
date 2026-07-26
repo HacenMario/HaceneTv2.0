@@ -2863,16 +2863,28 @@
             return t ? { 'Authorization': 'Bearer ' + t } : {};
         }
 
-        async function apiCall(method, endpoint, body = null) {
-            const options = { method, headers: { 'Content-Type': 'application/json', ...getAuthHeaders() } };
-            if (body) options.body = JSON.stringify(body);
-            try {
-                const response = await fetch(API_URL + endpoint, options);
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Request failed');
-                return data;
-            } catch (err) { console.error('API Call Error:', err); throw err; }
+async function apiCall(method, endpoint, body = null) {
+    const options = { method, headers: { 'Content-Type': 'application/json', ...getAuthHeaders() } };
+    if (body) options.body = JSON.stringify(body);
+    try {
+        const response = await fetch(API_URL + endpoint, options);
+        // إذا كان الرد غير ناجح، نحاول قراءة النص كـ JSON، وإلا نرمي خطأ مع status
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Request failed');
+            return data;
+        } else {
+            // إذا لم يكن JSON، نقرأ النص ونرمي خطأ
+            const text = await response.text();
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+            return { success: true }; // في حالة نجاح بدون JSON (نادر)
         }
+    } catch (err) {
+        console.error('API Call Error:', err);
+        throw err;
+    }
+}
 
         // ================================================================
         // 5.  دوال العرض والهيكل (نفس الأصل مع تحسينات التصميم)
@@ -3820,18 +3832,29 @@
         // ================================================================
         // 10.  الإشعارات (نفس الأصل)
         // ================================================================
-        async function loadNotifications() {
-            if (!getUser()) return;
-            try {
-                const data = await apiCall('GET', '/user/notifications');
-                notifications = data.notifications || [];
-                unreadCount = notifications.filter(n => !n.read).length;
-                updateNotifBadge();
-                renderNotifDropdown();
-            } catch (err) {
-                console.error('Failed to load notifications:', err);
-            }
-        }
+let isLoadingNotifications = false;
+
+async function loadNotifications() {
+    if (!getUser()) return;
+    if (isLoadingNotifications) return; // منع التكرار
+    isLoadingNotifications = true;
+    try {
+        const data = await apiCall('GET', '/user/notifications');
+        notifications = data.notifications || [];
+        unreadCount = notifications.filter(n => !n.read).length;
+        updateNotifBadge();
+        renderNotifDropdown();
+    } catch (err) {
+        // في حالة 404 أو أي خطأ، نعتبر أنه لا توجد إشعارات
+        console.warn('⚠️ تعذر تحميل الإشعارات (سيتم تجاهل هذا الخطأ):', err.message);
+        notifications = [];
+        unreadCount = 0;
+        updateNotifBadge();
+        renderNotifDropdown();
+    } finally {
+        isLoadingNotifications = false;
+    }
+}
 
         function updateNotifBadge() {
             const badge = document.getElementById('notifBadge');
