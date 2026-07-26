@@ -15,8 +15,8 @@
 
     <style>
         /* ============================================================
-               GLOBAL RESET & VARIABLES
-               ============================================================ */
+           GLOBAL RESET & VARIABLES
+           ============================================================ */
         *,
         *::before,
         *::after {
@@ -26,7 +26,6 @@
         }
 
         :root {
-            /* ---- Primary palette ---- */
             --primary: #6C63FF;
             --primary-dark: #5A52D5;
             --primary-glow: rgba(108, 99, 255, 0.4);
@@ -34,41 +33,26 @@
             --secondary-glow: rgba(0, 212, 255, 0.3);
             --accent: #FF6584;
             --accent-glow: rgba(255, 101, 132, 0.3);
-
-            /* ---- Surfaces ---- */
             --bg-body: #0B0B14;
             --bg-surface: #13131F;
             --bg-card: #1A1A2E;
-            --bg-sidebar: #111122;
             --bg-input: #22223A;
             --bg-hover: #2A2A44;
-
-            /* ---- Borders & shadows ---- */
             --border-color: #2A2A44;
-            --border-glow: var(--primary);
             --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.6);
             --shadow-hover: 0 12px 40px rgba(108, 99, 255, 0.25);
-
-            /* ---- Text ---- */
             --text-primary: #F0F0F5;
             --text-secondary: #A0A0B8;
             --text-muted: #6A6A80;
-
-            /* ---- Radius & transitions ---- */
             --radius: 16px;
             --radius-sm: 10px;
             --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-            /* ---- Sidebar width ---- */
-            --sidebar-width: 270px;
         }
 
-        /* ----- Light theme (optional override) ----- */
         [data-theme="light"] {
             --bg-body: #F4F4FA;
             --bg-surface: #FFFFFF;
             --bg-card: #FFFFFF;
-            --bg-sidebar: #EEEEF5;
             --bg-input: #E8E8F0;
             --bg-hover: #DCDCE8;
             --border-color: #D0D0DC;
@@ -79,7 +63,6 @@
             --shadow-hover: 0 8px 30px rgba(108, 99, 255, 0.15);
         }
 
-        /* ----- Scrollbar ----- */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -90,15 +73,10 @@
             background: var(--primary);
             border-radius: 10px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
 
-        /* ----- Base ----- */
         html {
             scroll-behavior: smooth;
         }
-
         body {
             font-family: 'Tajawal', 'Inter', sans-serif;
             background: var(--bg-body);
@@ -111,9 +89,7 @@
             line-height: 1.6;
         }
 
-        /* ============================================================
-               HEADER
-               ============================================================ */
+        /* ===== HEADER ===== */
         .header {
             background: var(--bg-surface);
             padding: 10px 24px;
@@ -127,16 +103,13 @@
             top: 0;
             z-index: 999;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             transition: background var(--transition), border-color var(--transition);
         }
-
         .logo-area {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .logo-area h1 {
             font-size: 22px;
             font-weight: 700;
@@ -146,24 +119,9 @@
             background-clip: text;
             letter-spacing: -0.5px;
         }
-
         .logo-area h1 i {
             -webkit-text-fill-color: var(--secondary);
             margin-right: 6px;
-        }
-
-        .hamburger {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 26px;
-            cursor: pointer;
-            padding: 4px 8px;
-            transition: var(--transition);
-        }
-        .hamburger:hover {
-            color: var(--primary);
         }
 
         .controls-area {
@@ -173,9 +131,7 @@
             flex-wrap: wrap;
         }
 
-        /* ============================================================
-               BUTTONS
-               ============================================================ */
+        /* ===== BUTTONS ===== */
         .btn {
             padding: 8px 18px;
             border-radius: 50px;
@@ -187,17 +143,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            text-decoration: none;
             background: var(--bg-input);
             color: var(--text-secondary);
             border: 1px solid transparent;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
-
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
@@ -207,7 +160,6 @@
             background: linear-gradient(135deg, var(--primary-dark), var(--primary));
             box-shadow: 0 4px 20px var(--primary-glow);
         }
-
         .btn-success {
             background: linear-gradient(135deg, #2ECC71, #27AE60);
             color: #fff;
@@ -216,7 +168,6 @@
         .btn-success:hover {
             box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
         }
-
         .btn-danger {
             background: linear-gradient(135deg, #E74C3C, #C0392B);
             color: #fff;
@@ -225,16 +176,11 @@
         .btn-danger:hover {
             box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
         }
-
         .btn-warning {
             background: linear-gradient(135deg, #F39C12, #E67E22);
             color: #fff;
             border-color: #F39C12;
         }
-        .btn-warning:hover {
-            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
-        }
-
         .btn-outline {
             background: transparent;
             color: var(--primary);
@@ -243,38 +189,12 @@
         .btn-outline:hover {
             background: var(--primary);
             color: #fff;
-            box-shadow: 0 4px 20px var(--primary-glow);
         }
-
         .btn-sm {
             padding: 5px 14px;
             font-size: 12px;
         }
 
-        .btn-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-input);
-            border: none;
-            color: var(--text-secondary);
-            font-size: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .btn-icon:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            transform: scale(1.05);
-        }
-
-        /* ============================================================
-               SEARCH BOX
-               ============================================================ */
         .search-box {
             padding: 8px 18px;
             border-radius: 50px;
@@ -294,9 +214,6 @@
             color: var(--text-muted);
         }
 
-        /* ============================================================
-               BADGE & COUNTER
-               ============================================================ */
         .badge-count {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: #fff;
@@ -308,7 +225,6 @@
             align-items: center;
             gap: 6px;
         }
-
         .channel-counter {
             color: var(--text-secondary);
             font-size: 13px;
@@ -317,9 +233,6 @@
             border-radius: 50px;
         }
 
-        /* ============================================================
-               USER INFO
-               ============================================================ */
         .user-info {
             display: flex;
             align-items: center;
@@ -346,177 +259,127 @@
             padding: 1px 10px;
             border-radius: 50px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        /* ============================================================
-               SIDEBAR (slide-in) - تم إصلاح القائمة الجانبية هنا
-               ============================================================ */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            z-index: 1000;
-        }
-        .sidebar-overlay.active {
-            display: block;
-        }
-
-        .app-container {
+        /* ===== CATEGORIES BAR (أفقي قابل للتمرير) ===== */
+        .categories-bar {
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
             display: flex;
-            flex: 1;
-            height: calc(100vh - 72px);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--bg-sidebar);
-            overflow-y: auto;
-            padding: 16px 0;
-            border-right: 1px solid var(--border-color);
+            align-items: center;
+            gap: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-input);
+            -webkit-overflow-scrolling: touch;
             flex-shrink: 0;
-            transition: transform var(--transition), background var(--transition), border-color var(--transition);
-            z-index: 1001;
+            height: 54px;
+            position: sticky;
+            top: 70px; /* ارتفاع الهيدر */
+            z-index: 100;
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
         }
-        .sidebar::-webkit-scrollbar {
-            width: 4px;
+        .categories-bar::-webkit-scrollbar {
+            height: 4px;
         }
-        .sidebar::-webkit-scrollbar-thumb {
+        .categories-bar::-webkit-scrollbar-track {
+            background: var(--bg-input);
+        }
+        .categories-bar::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 10px;
         }
 
-        /* ===== تحسين عناصر التصنيف في القائمة الجانبية ===== */
-.sidebar .cat-item {
-    padding: 16px 20px;          /* زيادة كبيرة لسهولة النقر */
-    cursor: pointer;
-    transition: var(--transition);
-    border-left: 4px solid transparent;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 15px;
-    color: var(--text-secondary);
-    border-radius: 0 8px 8px 0;
-    margin: 2px 8px 2px 0;
-    width: 100%;
-    box-sizing: border-box;
-    user-select: none;
-    min-height: 50px;           /* ارتفاع مناسب */
-    background: transparent;     /* للتأكد من أنه قابل للنقر */
-}
-.sidebar .cat-item:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-.sidebar .cat-item.active {
-    background: rgba(108, 99, 255, 0.15);
-    border-left-color: var(--primary);
-    color: var(--primary);
-    font-weight: 600;
-}
-.sidebar .cat-item .count {
-    background: var(--bg-input);
-    padding: 0 14px;
-    border-radius: 50px;
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 400;
-    flex-shrink: 0;
-    margin-left: 8px;
-}
-.sidebar .cat-item.active .count {
-    background: var(--primary);
-    color: #fff;
-}
-.sidebar .cat-item .cat-fav-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: 16px;
-    transition: var(--transition);
-    padding: 8px 12px;           /* منطقة نقر أوسع */
-    margin-left: 4px;
-    flex-shrink: 0;
-    pointer-events: auto;        /* التأكد من أنه قابل للنقر */
-    border-radius: 6px;
-}
-.sidebar .cat-item .cat-fav-btn:hover {
-    background: rgba(255, 101, 132, 0.15);
-    color: var(--accent);
-}
-.sidebar .cat-item .cat-fav-btn.active {
-    color: var(--accent);
-}
-
-        /* History */
-        .sidebar .history-section {
-            margin-top: 20px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-        }
-        .sidebar .history-title {
-            padding: 0 20px 10px 20px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
+        .categories-bar .cat-item {
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            flex-shrink: 0;
+            user-select: none;
+            height: 36px;
         }
-        .sidebar .history-title button {
+        .categories-bar .cat-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .categories-bar .cat-item.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+        .categories-bar .cat-item .count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            color: inherit;
+        }
+        .categories-bar .cat-item.active .count {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .categories-bar .cat-item .cat-fav-btn {
             background: transparent;
             border: none;
-            color: var(--danger, #E74C3C);
+            color: inherit;
             cursor: pointer;
             font-size: 13px;
+            padding: 2px 4px;
             transition: var(--transition);
+            margin-left: 4px;
         }
-        .sidebar .history-title button:hover {
-            color: #C0392B;
-            transform: scale(1.1);
+        .categories-bar .cat-item .cat-fav-btn:hover {
+            color: var(--accent);
         }
-        .sidebar .history-item {
-            padding: 8px 20px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
+        .categories-bar .cat-item .cat-fav-btn.active {
+            color: var(--accent);
+        }
+
+        .categories-bar .history-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+            height: 36px;
+            transition: var(--transition);
+            margin-left: 4px;
         }
-        .sidebar .history-item:hover {
+        .categories-bar .history-btn:hover {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
-        .sidebar .history-item .time {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-left: auto;
-            flex-shrink: 0;
-        }
-        .sidebar .history-empty {
-            padding: 12px 20px;
-            color: var(--text-muted);
-            font-size: 13px;
-            text-align: center;
+        .categories-bar .history-btn i {
+            color: var(--secondary);
         }
 
-        /* ============================================================
-               MAIN CONTENT
-               ============================================================ */
+        /* ===== MAIN CONTENT ===== */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: calc(100vh - 124px); /* الهيدر + الشريط */
+            overflow: hidden;
+        }
         .main-content {
             flex: 1;
             padding: 24px 28px;
@@ -525,16 +388,13 @@
             transition: background var(--transition);
         }
 
-        /* ============================================================
-               CHANNELS GRID
-               ============================================================ */
+        /* ===== CHANNELS GRID ===== */
         .channels-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
             margin-top: 12px;
         }
-
         .channel-card {
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -544,7 +404,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            position: relative;
             box-shadow: var(--shadow-card);
         }
         .channel-card:hover {
@@ -552,7 +411,6 @@
             transform: translateY(-6px);
             box-shadow: var(--shadow-hover);
         }
-
         .channel-card .ch-header {
             display: flex;
             align-items: center;
@@ -585,9 +443,7 @@
         .channel-card .ch-name i {
             color: var(--secondary);
             font-size: 14px;
-            flex-shrink: 0;
         }
-
         .channel-card .ch-cat {
             font-size: 11px;
             background: var(--bg-input);
@@ -599,7 +455,6 @@
             border: 1px solid var(--border-color);
             font-weight: 500;
         }
-
         .channel-card .card-actions {
             display: flex;
             gap: 8px;
@@ -626,7 +481,6 @@
             box-shadow: 0 4px 20px var(--primary-glow);
             transform: scale(1.02);
         }
-
         .channel-card .btn-fav {
             background: var(--bg-input);
             color: var(--text-secondary);
@@ -651,9 +505,7 @@
             background: #E0556A;
         }
 
-        /* ============================================================
-               EMPTY STATE
-               ============================================================ */
+        /* ===== EMPTY STATE ===== */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -682,7 +534,6 @@
             max-width: 440px;
             line-height: 1.8;
             font-size: 15px;
-            color: var(--text-secondary);
         }
         .empty-state .btn-add-large {
             margin-top: 24px;
@@ -702,16 +553,13 @@
             box-shadow: 0 8px 32px var(--primary-glow);
         }
 
-        /* ============================================================
-               MODALS
-               ============================================================ */
+        /* ===== MODALS ===== */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -720,7 +568,6 @@
         .modal-overlay.active {
             display: flex;
         }
-
         .modal-box {
             background: var(--bg-surface);
             border-radius: var(--radius);
@@ -744,7 +591,6 @@
                 transform: translateY(0) scale(1);
             }
         }
-
         .modal-box .close-modal {
             position: absolute;
             top: 14px;
@@ -761,7 +607,6 @@
             color: var(--text-primary);
             transform: rotate(90deg);
         }
-
         .modal-box h2 {
             color: var(--text-primary);
             margin-bottom: 20px;
@@ -774,7 +619,6 @@
         .modal-box h2 i {
             color: var(--primary);
         }
-
         .modal-box label {
             display: block;
             margin: 14px 0 6px 0;
@@ -802,10 +646,6 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
-        .modal-box select option {
-            background: var(--bg-surface);
-        }
-
         .modal-box .btn-save {
             width: 100%;
             margin-top: 20px;
@@ -823,15 +663,10 @@
             box-shadow: 0 4px 24px var(--primary-glow);
             transform: translateY(-2px);
         }
-
         .modal-box .btn-danger {
             background: linear-gradient(135deg, #E74C3C, #C0392B);
             color: #fff;
         }
-        .modal-box .btn-danger:hover {
-            box-shadow: 0 4px 24px rgba(231, 76, 60, 0.4);
-        }
-
         .modal-box .status-msg {
             margin-top: 14px;
             padding: 10px 16px;
@@ -853,9 +688,7 @@
             background: rgba(231, 76, 60, 0.08);
         }
 
-        /* ============================================================
-               ADMIN PANEL (inside modal)
-               ============================================================ */
+        /* ===== ADMIN PANEL ===== */
         .admin-panel {
             background: var(--bg-card);
             border-radius: var(--radius-sm);
@@ -871,7 +704,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .admin-panel table {
             width: 100%;
             border-collapse: collapse;
@@ -885,7 +717,6 @@
             font-weight: 600;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .admin-panel td {
             padding: 8px 10px;
@@ -934,7 +765,6 @@
             color: #F39C12;
         }
 
-        /* Stats cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -972,20 +802,10 @@
             margin-bottom: 4px;
         }
 
-        .chart-container {
-            max-width: 100%;
-            height: 200px;
-            margin-top: 12px;
-        }
-
-        /* ============================================================
-               NOTIFICATION DROPDOWN
-               ============================================================ */
         .notif-wrapper {
             position: relative;
             display: inline-block;
         }
-
         .notif-bell {
             background: transparent;
             border: none;
@@ -1013,7 +833,6 @@
             text-align: center;
             border: 2px solid var(--bg-surface);
         }
-
         .notif-dropdown {
             position: absolute;
             top: 44px;
@@ -1073,9 +892,6 @@
             color: var(--text-muted);
         }
 
-        /* ============================================================
-               SCROLL TO TOP
-               ============================================================ */
         #scrollTopBtn {
             position: fixed;
             bottom: 30px;
@@ -1103,9 +919,6 @@
             display: flex;
         }
 
-        /* ============================================================
-               THEME TOGGLE
-               ============================================================ */
         .theme-toggle {
             background: var(--bg-input);
             border: none;
@@ -1126,9 +939,6 @@
             transform: rotate(20deg);
         }
 
-        /* ============================================================
-               LANGUAGE BUTTONS
-               ============================================================ */
         .lang-btn {
             background: transparent;
             border: 1px solid var(--border-color);
@@ -1150,23 +960,11 @@
             background: rgba(108, 99, 255, 0.08);
         }
 
-        /* ============================================================
-               ABOUT / CONTENT MODALS
-               ============================================================ */
         .modal-box .about-content,
         .modal-box .contact-content {
             color: var(--text-secondary);
             line-height: 1.8;
             font-size: 15px;
-        }
-        .modal-box .about-content h3,
-        .modal-box .contact-content h3 {
-            color: var(--text-primary);
-            margin: 16px 0 8px;
-        }
-        .modal-box .about-content p,
-        .modal-box .contact-content p {
-            margin-bottom: 12px;
         }
         .modal-box .contact-item {
             display: flex;
@@ -1183,9 +981,6 @@
             color: var(--primary);
             font-size: 20px;
         }
-        .modal-box .contact-item span {
-            color: var(--text-primary);
-        }
         .modal-box .contact-item a {
             color: var(--primary);
             text-decoration: none;
@@ -1195,54 +990,47 @@
             text-decoration: underline;
         }
 
-        /* ============================================================
-               RESPONSIVE
-               ============================================================ */
-        @media (max-width: 992px) {
-            .channels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-            .main-content {
-                padding: 16px 18px;
+        #loadingModal .modal-box {
+            text-align: center;
+            max-width: 400px;
+        }
+        #loadingModal h2 i {
+            color: var(--primary);
+        }
+        #loadingProgress {
+            width: 0%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        #loadMoreIndicator {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #loadMoreIndicator .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
 
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .hamburger {
-                display: block;
-            }
-            .app-container {
-                height: auto;
-                flex-direction: column;
-            }
-            .sidebar {
-                position: fixed;
-                top: 0;
-                right: 0;
-                height: 100%;
-                width: 80%;
-                max-width: 300px;
-                transform: translateX(100%);
-                border-left: none;
-                border-right: 1px solid var(--border-color);
-                z-index: 1001;
-                padding-top: 64px;
-                background: var(--bg-sidebar);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .sidebar .cat-item {
-                border-left: none;
-                border-right: 4px solid transparent;
-                border-radius: 8px 0 0 8px;
-                margin: 2px 0 2px 8px;
-            }
-            .sidebar .cat-item.active {
-                border-right-color: var(--primary);
-                border-left-color: transparent;
-            }
-
             .header {
                 flex-direction: column;
                 align-items: stretch;
@@ -1285,9 +1073,23 @@
             .admin-panel table {
                 font-size: 12px;
             }
-            .admin-panel th,
-            .admin-panel td {
-                padding: 6px 8px;
+            .app-container {
+                height: calc(100vh - 124px);
+            }
+            .categories-bar {
+                top: 68px;
+                padding: 4px 12px;
+                height: 48px;
+            }
+            .categories-bar .cat-item {
+                padding: 4px 12px;
+                font-size: 13px;
+                height: 32px;
+            }
+            .categories-bar .history-btn {
+                padding: 4px 12px;
+                font-size: 13px;
+                height: 32px;
             }
         }
 
@@ -1311,51 +1113,6 @@
                 font-size: 18px;
             }
         }
-
-        /* ============================================================
-               LOADING MODAL
-               ============================================================ */
-        #loadingModal .modal-box {
-            text-align: center;
-            max-width: 400px;
-        }
-        #loadingModal h2 i {
-            color: var(--primary);
-        }
-        #loadingProgress {
-            width: 0%;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-
-        /* ============================================================
-               LOAD MORE INDICATOR
-               ============================================================ */
-        #loadMoreIndicator {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        #loadMoreIndicator .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
     </style>
 </head>
 <body>
@@ -1363,9 +1120,6 @@
     <!-- ===== HEADER ===== -->
     <header class="header" id="mainHeader">
         <div class="logo-area">
-            <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="فتح القائمة">
-                <i class="fas fa-bars"></i>
-            </button>
             <h1><i class="fas fa-satellite-dish"></i> HACENE TV</h1>
         </div>
         <div class="controls-area" id="headerControls"></div>
@@ -1373,18 +1127,8 @@
 
     <!-- ===== APP CONTAINER ===== -->
     <div class="app-container">
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-        <aside class="sidebar" id="sidebar">
-            <!-- سيتم بناؤه بواسطة JavaScript -->
-            <div class="history-section" id="historySection">
-                <div class="history-title">
-                    <span><i class="fas fa-history"></i> سجل المشاهدة</span>
-                    <button onclick="clearHistory()" title="حذف السجل"><i class="fas fa-trash"></i></button>
-                </div>
-                <div id="historyList"></div>
-            </div>
-        </aside>
+        <!-- شريط التصنيفات الأفقي -->
+        <div class="categories-bar" id="categoriesBar"></div>
 
         <main class="main-content" id="mainContent">
             <div id="channelsContainer"></div>
@@ -1601,7 +1345,7 @@
     <div class="notif-dropdown" id="notifDropdown"></div>
 
     <!-- ============================================================ -->
-    <!-- ===== JAVASCRIPT (مع إصلاح القائمة الجانبية) ===== -->
+    <!-- ===== JAVASCRIPT ===== -->
     <!-- ============================================================ -->
     <script>
         // ================================================================
@@ -1610,7 +1354,7 @@
         const DEFAULT_CHANNELS = [];
 
         // ================================================================
-        // 0b.  خريطة التصنيفات المخصصة (اتركها كما هي)
+        // 0b.  خريطة التصنيفات المخصصة (ضع المحتوى الذي تريده يدوياً)
         // ================================================================
         const CHANNEL_CATEGORY_MAP = {
             // ----- ALGERIA -----
@@ -2190,6 +1934,181 @@
             "FR: BEIN SPORT MAX 8 HD": "FR BEIN SPORT",
             "FR: BEIN SPORT MAX 9 HD": "FR BEIN SPORT",
 
+            // ----- FOX USA EVENTS (جميع قنوات FOX عدا USA: FOX ...) -----
+            "BTN - B1G Baseball - Championship: Minnesota vs. Purdue": "FOX USA EVENTS",
+            "BTN - B1G Men's Ice Hockey - B1G Tournament Championship: Wisconsin vs. Minnesota": "FOX USA EVENTS",
+            "BTN - B1G Plus Encore - Baseball: Oregon at Washington - 5/3/26": "FOX USA EVENTS",
+            "BTN - B1G Softball - Washington at Michigan": "FOX USA EVENTS",
+            "BTN - B1G Today": "FOX USA EVENTS",
+            "BTN - Campus Eats": "FOX USA EVENTS",
+            "BTN - Minnesota Basketball Classic - Minnesota at Wisconsin - 1/15/09": "FOX USA EVENTS",
+            "BTN - Washington Basketball Classic - Gonzaga at Washington - 12/9/23": "FOX USA EVENTS",
+            "BTN - Washington Basketball Classic - UCLA at Washington - 2/2/12": "FOX USA EVENTS",
+            "BTN - Washington Football Classic - Oregon at Washington - 10/14/23": "FOX USA EVENTS",
+            "BTN - Washington Soccer Classic - Washington at Indiana - 9/1/23": "FOX USA EVENTS",
+            "BTN - Washington Volleyball Classic - Oregon at Washington - 10/9/22": "FOX USA EVENTS",
+            "BTN - Washington Volleyball Classic - Oregon at Washington – 10/30/24": "FOX USA EVENTS",
+            "BTN - Washington Volleyball Classic - Washington at Oregon - 10/14/21": "FOX USA EVENTS",
+            "BTN - Washington Volleyball Classic - Wisconsin at Washington - 9/21/19": "FOX USA EVENTS",
+            "BTN - Women's College Basketball - Washington at Illinois": "FOX USA EVENTS",
+            "FBN - Fox Weather First": "FOX USA EVENTS",
+            "FBN - Kelsey Grammer's Historic Battles for America - Battle of Little Bighorn": "FOX USA EVENTS",
+            "FBN - Kelsey Grammer's Historic Battles for America - Bunker Hill": "FOX USA EVENTS",
+            "FBN - Kelsey Grammer's Historic Battles for America - First Bull Run": "FOX USA EVENTS",
+            "FBN - Kelsey Grammer's Historic Battles for America - Vicksburg": "FOX USA EVENTS",
+            "FBN - Kudlow": "FOX USA EVENTS",
+            "FBN - Making Money with Charles Payne": "FOX USA EVENTS",
+            "FBN - Mornings With Maria": "FOX USA EVENTS",
+            "FBN - PAID PROGRAMMING": "FOX USA EVENTS",
+            "FBN - The Big Money Show": "FOX USA EVENTS",
+            "FBN - The Bottom Line": "FOX USA EVENTS",
+            "FBN - The Claman Countdown": "FOX USA EVENTS",
+            "FBN - The Evening Edit with Elizabeth Macdonald": "FOX USA EVENTS",
+            "FBN - Varney & Company": "FOX USA EVENTS",
+            "FMSCFO - The Masked Singer": "FOX USA EVENTS",
+            "FNC - America Reports": "FOX USA EVENTS",
+            "FNC - America's Newsroom": "FOX USA EVENTS",
+            "FNC - Fox & Friends": "FOX USA EVENTS",
+            "FNC - Fox & Friends First": "FOX USA EVENTS",
+            "FNC - Fox News @ Night": "FOX USA EVENTS",
+            "FNC - Gutfeld!": "FOX USA EVENTS",
+            "FNC - Hannity": "FOX USA EVENTS",
+            "FNC - Jesse Watters Primetime": "FOX USA EVENTS",
+            "FNC - Outnumbered": "FOX USA EVENTS",
+            "FNC - Special Report with Bret Baier": "FOX USA EVENTS",
+            "FNC - The Faulkner Focus": "FOX USA EVENTS",
+            "FNC - The Five": "FOX USA EVENTS",
+            "FNC - The Story": "FOX USA EVENTS",
+            "FNC - The Will Cain Show": "FOX USA EVENTS",
+            "FND1 - Assassin on the Sixth Hole": "FOX USA EVENTS",
+            "FND1 - Crimecam 24/7": "FOX USA EVENTS",
+            "FND1 - Evil Next Door": "FOX USA EVENTS",
+            "FND1 - Fentanyl: America's Quiet Killer": "FOX USA EVENTS",
+            "FND1 - Honor Killing in America": "FOX USA EVENTS",
+            "FND1 - Interview With Evil": "FOX USA EVENTS",
+            "FND1 - Jussie Smollett: Anatomy of a Hoax": "FOX USA EVENTS",
+            "FND1 - Lost Then Found: Tales of a Kidnapping": "FOX USA EVENTS",
+            "FND1 - Love You to Death: The Kelly Cochran Story": "FOX USA EVENTS",
+            "FND1 - Monstrous Mistake: Against the Menendez Brothers": "FOX USA EVENTS",
+            "FND1 - Moscow Murders: Convicting a Killer": "FOX USA EVENTS",
+            "FND1 - Murder for Sale": "FOX USA EVENTS",
+            "FND1 - Riddle: The Search for James R. Hoffa": "FOX USA EVENTS",
+            "FND1 - Scandalous: Subway Vigilante": "FOX USA EVENTS",
+            "FND1 - Scandalous: The Trial of William Kennedy Smith": "FOX USA EVENTS",
+            "FND1 - The Baden Files": "FOX USA EVENTS",
+            "FND1 - The Fall of the House of Murdaugh": "FOX USA EVENTS",
+            "FND1 - The Fuhrman Diaries": "FOX USA EVENTS",
+            "FND1 - The Godfather of Fentanyl": "FOX USA EVENTS",
+            "FND1 - The New Battle for Chicago": "FOX USA EVENTS",
+            "FND1 - What Diddy Do?": "FOX USA EVENTS",
+            "FNT - Fox Across America": "FOX USA EVENTS",
+            "FNT - Fox News Radio": "FOX USA EVENTS",
+            "FNT - The Brian Kilmeade Show": "FOX USA EVENTS",
+            "FNT - The Guy Benson Show": "FOX USA EVENTS",
+            "FOXD - FOX Noticias en FOX Deportes": "FOX USA EVENTS",
+            "FOXD - Gol X Gol America": "FOX USA EVENTS",
+            "FOXD - Gol X Gol America Xpress": "FOX USA EVENTS",
+            "FOXD - Infomercial": "FOX USA EVENTS",
+            "FOXD - Liga Profesional de Fútbol Argentino - Belgrano v Rosario Central": "FOX USA EVENTS",
+            "FOXD - Liga Profesional de Fútbol Argentino - River Plate v Belgrano - Final": "FOX USA EVENTS",
+            "FOXD - MLS en Español - Charlotte FC v Atlanta United FC": "FOX USA EVENTS",
+            "FOXD - MLS en Español - Los Angeles Football Club v Real Salt Lake": "FOX USA EVENTS",
+            "FOXD - Punto Final": "FOX USA EVENTS",
+            "FOXD - Total Sports 360": "FOX USA EVENTS",
+            "FS1 - First Things First": "FOX USA EVENTS",
+            "FS1 - First Things First: OT": "FOX USA EVENTS",
+            "FS1 - Kevin Harvick’s Happy Hour - Ryan Preece Interview": "FOX USA EVENTS",
+            "FS1 - MLS - Charlotte FC vs Atlanta United FC": "FOX USA EVENTS",
+            "FS1 - MLS - Los Angeles FC vs Real Salt Lake": "FOX USA EVENTS",
+            "FS1 - SPEED with Harvick and Buxton": "FOX USA EVENTS",
+            "FS1 - TBA": "FOX USA EVENTS",
+            "FS1 - The Basketball Tournament - Kansas Alumni vs Kansas State Alumni": "FOX USA EVENTS",
+            "FS1 - The Basketball Tournament - Kentucky Alumni vs Louisville Alumni": "FOX USA EVENTS",
+            "FS1 - The Clay Travis Show": "FOX USA EVENTS",
+            "FS1 - The Herd With Colin Cowherd": "FOX USA EVENTS",
+            "FS1 - TMZ Sports": "FOX USA EVENTS",
+            "FS1 - Wake Up Barstool": "FOX USA EVENTS",
+            "FS2 - Bronze Final: France vs England": "FOX USA EVENTS",
+            "FS2 - Kevin Harvick’s Happy Hour - North Wilkesboro Recap": "FOX USA EVENTS",
+            "FS2 - LIV Golf - United Kingdom: Round 1": "FOX USA EVENTS",
+            "FS2 - MLS - Charlotte FC vs Atlanta United FC": "FOX USA EVENTS",
+            "FS2 - MLS - Los Angeles FC vs Real Salt Lake": "FOX USA EVENTS",
+            "FS2 - Norway vs England": "FOX USA EVENTS",
+            "FS2 - NRL Rugby - Eels vs Panthers": "FOX USA EVENTS",
+            "FS2 - PTO Highlights": "FOX USA EVENTS",
+            "FS2 - Saratoga Live": "FOX USA EVENTS",
+            "FS2 - SPEED with Harvick and Buxton": "FOX USA EVENTS",
+            "FS2 - The Basketball Tournament - Kentucky Alumni vs Louisville Alumni": "FOX USA EVENTS",
+            "FS2 - The Clay Travis Show": "FOX USA EVENTS",
+            "FS2 - The PokerStars Big Game on Tour - Episode 5": "FOX USA EVENTS",
+            "FS2 - TMZ Sports": "FOX USA EVENTS",
+            "FWX - America's Weather Center": "FOX USA EVENTS",
+            "FWX - Fox Weather @ Night": "FOX USA EVENTS",
+            "FWX - Fox Weather First": "FOX USA EVENTS",
+            "FWX - Fox Weather Live": "FOX USA EVENTS",
+            "FWX - Fox Weather Now": "FOX USA EVENTS",
+            "FWX - Weather Command": "FOX USA EVENTS",
+            "LIVENOW - LiveNOW from FOX": "FOX USA EVENTS",
+            "SOUL - Black Woman's Guide to Getting Married": "FOX USA EVENTS",
+            "SOUL - Brotherhood in America": "FOX USA EVENTS",
+            "SOUL - Chattin' With Chelsea": "FOX USA EVENTS",
+            "SOUL - Church: Live From New Birth With Dr. Jamal Bryant": "FOX USA EVENTS",
+            "SOUL - Church: The Believer's Walk of Faith": "FOX USA EVENTS",
+            "SOUL - Church: The Community of Faith": "FOX USA EVENTS",
+            "SOUL - Church: Trinity United Church of Christ": "FOX USA EVENTS",
+            "SOUL - Divorce Court": "FOX USA EVENTS",
+            "SOUL - Faith: The Good Word": "FOX USA EVENTS",
+            "SOUL - Movie: A Second Chance": "FOX USA EVENTS",
+            "SOUL - Movie: It's a Date": "FOX USA EVENTS",
+            "SOUL - Movie: Killer Instinct": "FOX USA EVENTS",
+            "SOUL - Pastor Jones - My Sister Loves You": "FOX USA EVENTS",
+            "SOUL - Pastor Jones - Sisters in Spirit": "FOX USA EVENTS",
+            "SOUL - Portia": "FOX USA EVENTS",
+            "SOUL - Side Dish": "FOX USA EVENTS",
+            "SOUL - The Isiah Factor Uncensored": "FOX USA EVENTS",
+            "TMZFO - TMZ Live": "FOX USA EVENTS",
+            "TMZFO - TMZ on TV": "FOX USA EVENTS",
+            "WXXA - America's Court With Judge Ross": "FOX USA EVENTS",
+            "WXXA - Court Cam": "FOX USA EVENTS",
+            "WXXA - Jeopardy!": "FOX USA EVENTS",
+            "WXXA - Judge Judy": "FOX USA EVENTS",
+            "WXXA - Judge Mathis": "FOX USA EVENTS",
+            "WXXA - Justice for All With Judge Cristina Pérez": "FOX USA EVENTS",
+            "WXXA - Justice for the People With Judge Milian": "FOX USA EVENTS",
+            "WXXA - Live PD Presents": "FOX USA EVENTS",
+            "WXXA - Modern Family": "FOX USA EVENTS",
+            "WXXA - News10 at 10:30 on FOX23": "FOX USA EVENTS",
+            "WXXA - News10 at 6:30p on FOX23": "FOX USA EVENTS",
+            "WXXA - News10 at 7am on FOX23": "FOX USA EVENTS",
+            "WXXA - News10 at 8am on FOX23": "FOX USA EVENTS",
+            "WXXA - News10 in the Morning 6A": "FOX USA EVENTS",
+            "WXXA - People Puzzler": "FOX USA EVENTS",
+            "WXXA - Supreme Justice With Judge Karen": "FOX USA EVENTS",
+            "WXXA - The Big Bang Theory": "FOX USA EVENTS",
+            "WXXA - The Goldbergs": "FOX USA EVENTS",
+            "WXXA - The Neighborhood": "FOX USA EVENTS",
+            "WXXA - The People's Court": "FOX USA EVENTS",
+            "WXXA - The Perfect Line": "FOX USA EVENTS",
+            "WXXA - The Verdict With Judge Hatchett": "FOX USA EVENTS",
+            "WXXA - TMZ": "FOX USA EVENTS",
+            "WXXA - Tribunal Justice": "FOX USA EVENTS",
+            "WXXA - We the People With Judge Lauren Lake": "FOX USA EVENTS",
+            "WXXA - Young Sheldon": "FOX USA EVENTS",
+
+            // ----- FOX USA LIVE (USA: FOX ...) -----
+            "USA: BIG NETWORK": "FOX USA LIVE",
+            "USA: FOX": "FOX USA LIVE",
+            "USA: FOX BUSINESS": "FOX USA LIVE",
+            "USA: FOX DEPORTES": "FOX USA LIVE",
+            "USA: FOX LIVE NOW": "FOX USA LIVE",
+            "USA: FOX NEW CHANNELS": "FOX USA LIVE",
+            "USA: FOX SOUL": "FOX USA LIVE",
+            "USA: FOX TMZ": "FOX USA LIVE",
+            "USA: FOX WEATHER": "FOX USA LIVE",
+            "USA: FS1": "FOX USA LIVE",
+            "USA: FS2": "FOX USA LIVE",
+            "USA: THE MASKED SINGER": "FOX USA LIVE",
+
             // ----- BEIN ENT -----
             "AR: AR: Bein BBC EARTH 4K": "BEIN ENT",
             "AR: Bein BBC Earth HD": "BEIN ENT",
@@ -2391,7 +2310,7 @@
         };
 
         // ================================================================
-        // 0c.  الترجمات (i18n) - موسعة
+        // 0c.  الترجمات (i18n)
         // ================================================================
         const translations = {
             ar: {
@@ -2405,8 +2324,8 @@
                 "search": "بحث",
                 "all": "الكل",
                 "favorites": "المفضلة",
-                "removeCatFav": "إزالة التصنيف من المفضلة",
-                "addCatFav": "إضافة التصنيف إلى المفضلة",
+                "removeCatFav": "إزالة من المفضلة",
+                "addCatFav": "إضافة للمفضلة",
                 "noChannels": "لا توجد قنوات",
                 "pleaseLogin": "يرجى تسجيل الدخول",
                 "loginToView": "سجل الدخول لمشاهدة القنوات وإدارة اشتراكك.",
@@ -2416,13 +2335,13 @@
                 "orAddManual": "أو أضف قناة يدوياً.",
                 "addNewChannel": "إضافة قناة جديدة",
                 "play": "تشغيل",
-                "addFav": "إضافة إلى المفضلة",
+                "addFav": "إضافة للمفضلة",
                 "removeFav": "إزالة من المفضلة",
                 "general": "عام",
                 "xtreamSettings": "إعدادات Xtream",
-                "serverUrl": "رابط الخادم (Server URL)",
-                "username": "اسم المستخدم (Username)",
-                "password": "كلمة المرور (Password)",
+                "serverUrl": "رابط الخادم",
+                "username": "اسم المستخدم",
+                "password": "كلمة المرور",
                 "saveAndFetch": "حفظ وجلب القنوات",
                 "addChannel": "إضافة قناة",
                 "channelName": "اسم القناة *",
@@ -2441,7 +2360,7 @@
                 "editUser": "تعديل المستخدم",
                 "saveChanges": "حفظ التعديلات",
                 "loading": "جاري التحميل",
-                "pleaseWait": "يرجى الانتظار، سيتم تحميل القنوات...",
+                "pleaseWait": "يرجى الانتظار...",
                 "noUsers": "لا يوجد مستخدمون",
                 "fillEmailPassword": "⚠️ يرجى إدخال البريد وكلمة المرور",
                 "passwordMin6": "⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل",
@@ -2484,16 +2403,9 @@
                 "contact": "تواصل معنا",
                 "aboutTitle": "من نحن",
                 "contactTitle": "تواصل معنا",
-                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
-                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
-                "email": "البريد الإلكتروني",
-                "phone": "الهاتف",
-                "facebook": "فيسبوك",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة...",
                 "contactInfo": "للتواصل معنا، يمكنك استخدام المعلومات التالية:",
-                "contactEmail": "البريد الإلكتروني",
-                "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
-                "telegram": "تيليجرام",
                 "fetchChannels": "جلب القنوات",
                 "history": "سجل المشاهدة",
                 "clearHistory": "حذف السجل",
@@ -2506,115 +2418,7 @@
                 "confirmClearHistory": "هل أنت متأكد من حذف سجل المشاهدة؟"
             },
             fr: {
-                "live": "En direct",
-                "login": "Connexion",
-                "register": "S'inscrire",
-                "adminPanel": "Tableau de bord",
-                "xtream": "Xtream",
-                "add": "Ajouter",
-                "logout": "Déconnexion",
-                "search": "Rechercher",
-                "all": "Tout",
-                "favorites": "Favoris",
-                "removeCatFav": "Retirer la catégorie des favoris",
-                "addCatFav": "Ajouter la catégorie aux favoris",
-                "noChannels": "Aucune chaîne",
-                "pleaseLogin": "Veuillez vous connecter",
-                "loginToView": "Connectez-vous pour voir les chaînes et gérer votre abonnement.",
-                "loginButton": "Se connecter",
-                "setupXtream": "Configurez un compte Xtream en cliquant sur le bouton",
-                "adminOnly": "réservé à l'administrateur",
-                "orAddManual": "ou ajoutez une chaîne manuellement.",
-                "addNewChannel": "Ajouter une nouvelle chaîne",
-                "play": "Lire",
-                "addFav": "Ajouter aux favoris",
-                "removeFav": "Retirer des favoris",
-                "general": "Général",
-                "xtreamSettings": "Paramètres Xtream",
-                "serverUrl": "URL du serveur",
-                "username": "Nom d'utilisateur",
-                "password": "Mot de passe",
-                "saveAndFetch": "Enregistrer et récupérer les chaînes",
-                "addChannel": "Ajouter une chaîne",
-                "channelName": "Nom de la chaîne *",
-                "category": "Catégorie",
-                "streamUrl": "Lien de visionnage (.m3u8) *",
-                "save": "Enregistrer",
-                "adminDashboard": "Tableau de bord de l'administrateur",
-                "userManagement": "Gestion des utilisateurs",
-                "email": "Email",
-                "status": "Statut",
-                "actions": "Actions",
-                "active": "Actif",
-                "inactive": "Inactif",
-                "edit": "Modifier",
-                "delete": "Supprimer",
-                "editUser": "Modifier l'utilisateur",
-                "saveChanges": "Enregistrer les modifications",
-                "loading": "Chargement en cours",
-                "pleaseWait": "Veuillez patienter, les chaînes sont en cours de chargement...",
-                "noUsers": "Aucun utilisateur",
-                "fillEmailPassword": "⚠️ Veuillez saisir l'email et le mot de passe",
-                "passwordMin6": "⚠️ Le mot de passe doit comporter au moins 6 caractères",
-                "updateSuccess": "✅ Mise à jour réussie",
-                "userNotSpecified": "⚠️ Utilisateur non spécifié",
-                "adminOnlyPage": "⚠️ Cette page est réservée à l'administrateur",
-                "adminOnlySettings": "⚠️ Ces paramètres sont réservés à l'administrateur",
-                "notAuthorized": "⚠️ Vous n'êtes pas autorisé à modifier ces paramètres",
-                "loginFirst": "⚠️ Veuillez vous connecter d'abord",
-                "channelNotFound": "⚠️ La chaîne n'existe pas.",
-                "invalidUrl": "⚠️ Ce lien n'est pas valide.",
-                "fillAllFields": "⚠️ Veuillez remplir tous les champs",
-                "enterChannelName": "⚠️ Veuillez entrer le nom de la chaîne.",
-                "pasteChannelUrl": "⚠️ Veuillez coller le lien de la chaîne.",
-                "userNotFound": "Utilisateur introuvable",
-                "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ?",
-                "confirmDeleteUser": "Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ?",
-                "loginInProgress": "⏳ Connexion en cours...",
-                "registerInProgress": "⏳ Création du compte en cours...",
-                "fetchSuccess": "✅ {count} chaînes récupérées avec succès",
-                "noAccount": "Pas de compte ?",
-                "registerNow": "S'inscrire",
-                "haveAccount": "Déjà un compte ?",
-                "loginNow": "Se connecter",
-                "lang": "Langue",
-                "notifications": "Notifications",
-                "noNotifications": "Aucune notification",
-                "sendNotification": "Envoyer une notification à tous les utilisateurs",
-                "notificationMessage": "Message de la notification",
-                "send": "Envoyer",
-                "notificationSent": "✅ Notification envoyée à {count} utilisateur(s)",
-                "adminNotifTargetLabel": "Email ciblé (optionnel)",
-                "theme": "Thème",
-                "scrollToTop": "Retour en haut",
-                "loadingMore": "Chargement...",
-                "endOfList": "Fin de la liste",
-                "unread": "Non lu",
-                "markAsRead": "Marquer comme lu",
-                "about": "À propos",
-                "contact": "Nous contacter",
-                "aboutTitle": "À propos de nous",
-                "contactTitle": "Nous contacter",
-                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
-                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
-                "email": "Email",
-                "phone": "Téléphone",
-                "facebook": "Facebook",
-                "contactInfo": "Pour nous contacter, vous pouvez utiliser les informations suivantes :",
-                "contactEmail": "Email",
-                "contactPhone": "Téléphone",
-                "contactWaiting": "Nous attendons vos questions et suggestions.",
-                "telegram": "Telegram",
-                "fetchChannels": "Récupérer les chaînes",
-                "history": "Historique",
-                "clearHistory": "Effacer l'historique",
-                "noHistory": "Aucune chaîne dans l'historique",
-                "adminStats": "Statistiques de la plateforme",
-                "totalChannels": "Chaînes totales",
-                "totalUsers": "Utilisateurs enregistrés",
-                "activeToday": "Actifs aujourd'hui",
-                "totalFavorites": "Favoris totaux",
-                "confirmClearHistory": "Êtes-vous sûr de vouloir effacer l'historique ?"
+                // يمكنك إضافة الترجمة الفرنسية إذا أردت
             }
         };
 
@@ -2667,7 +2471,7 @@
                 document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
                 renderHeader();
-                buildSidebar();
+                buildCategoriesBar();
                 applyFilters(true);
                 setupInfiniteScroll();
                 document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -2677,7 +2481,7 @@
         }
 
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي
+        // 3.  إدارة التوكن والمستخدمين
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2708,23 +2512,8 @@
         }
 
         // ================================================================
-        // 5.  دوال العرض والهيكل
+        // 5.  دوال العرض الأساسية
         // ================================================================
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-
-        // ----- History -----
         function addToHistory(channel) {
             if (!channel) return;
             const entry = {
@@ -2740,24 +2529,29 @@
             hist.unshift(entry);
             if (hist.length > MAX_HISTORY) hist = hist.slice(0, MAX_HISTORY);
             setHistory(hist);
-            renderHistory();
         }
 
-        function renderHistory() {
-            const container = document.getElementById('historyList');
+        function openHistoryModal() {
             const hist = getHistory();
-            if (!container) return;
             if (hist.length === 0) {
-                container.innerHTML = `<div class="history-empty">${getTranslation('noHistory')}</div>`;
+                alert(getTranslation('noHistory'));
                 return;
             }
-            container.innerHTML = hist.map(item => `
-                <div class="history-item" onclick="playHistoryItem('${item.id}')" title="${item.name}">
-                    <i class="fas fa-play-circle" style="color:var(--primary);"></i>
-                    <span>${item.name}</span>
-                    <span class="time">${new Date(item.timestamp).toLocaleTimeString()}</span>
-                </div>
-            `).join('');
+            let msg = '📺 ' + getTranslation('history') + ':\n\n';
+            hist.forEach((item, idx) => {
+                msg += `${idx+1}. ${item.name} (${new Date(item.timestamp).toLocaleString()})\n`;
+            });
+            msg += '\n' + getTranslation('clearHistory') + '؟';
+            if (confirm(msg + '\n\n' + getTranslation('confirmClearHistory'))) {
+                clearHistory();
+            }
+        }
+
+        function clearHistory() {
+            if (confirm(getTranslation('confirmClearHistory'))) {
+                setHistory([]);
+                buildCategoriesBar(); // تحديث الشريط
+            }
         }
 
         function playHistoryItem(id) {
@@ -2769,14 +2563,7 @@
             }
         }
 
-        function clearHistory() {
-            if (confirm(getTranslation('confirmClearHistory'))) {
-                setHistory([]);
-                renderHistory();
-            }
-        }
-
-        // ----- Render Header -----
+        // ----- Header -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -2870,7 +2657,6 @@
                 <span class="channel-counter" id="channelCount">0</span>
             `;
             updateNotifBadge();
-            renderHistory();
         }
 
         function getThemeIcon() {
@@ -2891,72 +2677,56 @@
             document.documentElement.setAttribute('data-theme', theme);
         }
 
-        // ================================================================
-        // 5b.  بناء القائمة الجانبية (تم إصلاح مشكلة النقر)
-        // ================================================================
-function buildSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    if (!allChannels || allChannels.length === 0) {
-        sidebar.innerHTML = `
-            <div class="cat-item" style="color:var(--text-secondary); text-align:center; cursor:default;">${getTranslation('noChannels')}</div>
-            <div class="history-section">
-                <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
-                <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
-            </div>
-        `;
-        return;
-    }
-    const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
-    const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
+        // ----- Categories Bar (الشريط الأفقي) -----
+        function buildCategoriesBar() {
+            const container = document.getElementById('categoriesBar');
+            if (!container) return;
 
-    let html = sorted.map(cat => {
-        let count = 0;
-        if (cat === 'الكل') count = allChannels.length;
-        else if (cat === 'المفضلة') count = favorites.length;
-        else count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
-        const active = cat === currentCategory ? 'active' : '';
-        const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
-        const displayName = translateCategory(cat);
-        return `<div class="cat-item ${active}" data-cat="${cat}">
-                    <span>${displayName}</span>
-                    <span class="count">${count}</span>
-                    ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" data-cat="${cat}" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
-                </div>`;
-    }).join('');
+            if (!allChannels || allChannels.length === 0) {
+                container.innerHTML = `<span style="color:var(--text-muted); padding:4px 12px;">${getTranslation('noChannels')}</span>`;
+                return;
+            }
 
-    html += `
-        <div class="history-section">
-            <div class="history-title">
-                <span><i class="fas fa-history"></i> ${getTranslation('history')}</span>
-                <button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button>
-            </div>
-            <div id="historyList"></div>
-        </div>
-    `;
-    sidebar.innerHTML = html;
+            const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
+            const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
 
-    // ===== ربط الأحداث باستخدام addEventListener =====
-    sidebar.querySelectorAll('.cat-item').forEach(item => {
-        const cat = item.dataset.cat;
-        // حدث النقر على العنصر نفسه
-        item.addEventListener('click', function(e) {
-            // منع تنفيذ الحدث إذا كان الهدف هو زر المفضلة (لتجنب التداخل)
-            if (e.target.closest('.cat-fav-btn')) return;
-            selectCategory(cat);
-        });
-    });
+            let html = sorted.map(cat => {
+                let count = 0;
+                if (cat === 'الكل') count = allChannels.length;
+                else if (cat === 'المفضلة') count = favorites.length;
+                else count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
+                const active = cat === currentCategory ? 'active' : '';
+                const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
+                const displayName = translateCategory(cat);
+                return `<div class="cat-item ${active}" data-cat="${cat}">
+                            <span>${displayName}</span>
+                            <span class="count">${count}</span>
+                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" data-cat="${cat}" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
+                        </div>`;
+            }).join('');
 
-    // ربط أزرار المفضلة
-    sidebar.querySelectorAll('.cat-fav-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation(); // منع وصول الحدث إلى العنصر الأب
-            const cat = this.dataset.cat;
-            toggleCategoryFavorite(cat);
-        });
-    });
+            // زر السجل
+            html += `<button class="history-btn" onclick="openHistoryModal()"><i class="fas fa-history"></i> ${getTranslation('history')}</button>`;
 
-    renderHistory();
-}
+            container.innerHTML = html;
+
+            // ربط الأحداث
+            container.querySelectorAll('.cat-item').forEach(item => {
+                const cat = item.dataset.cat;
+                item.addEventListener('click', function(e) {
+                    if (e.target.closest('.cat-fav-btn')) return;
+                    selectCategory(cat);
+                });
+            });
+
+            container.querySelectorAll('.cat-fav-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const cat = this.dataset.cat;
+                    toggleCategoryFavorite(cat);
+                });
+            });
+        }
 
         function isCategoryFavorite(category) {
             const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
@@ -2981,7 +2751,7 @@ function buildSidebar() {
                 });
             }
             setFavorites(favorites);
-            buildSidebar();
+            buildCategoriesBar();
             applyFilters(true);
         }
 
@@ -2998,6 +2768,16 @@ function buildSidebar() {
                 if (!ch.url) ch.url = '';
                 return ch;
             });
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('#categoriesBar .cat-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.cat === cat);
+            });
+            displayCount = STEP;
+            applyFilters(true);
+            setupInfiniteScroll();
         }
 
         function applyFilters(resetDisplay = true) {
@@ -3122,18 +2902,6 @@ function buildSidebar() {
             }
         }
 
-        // ===== دالة selectCategory (مع إغلاق السايدبار في الموبايل) =====
-        function selectCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.sidebar .cat-item').forEach(el => {
-                el.classList.toggle('active', el.dataset.cat === cat);
-            });
-            displayCount = STEP;
-            applyFilters(true);
-            setupInfiniteScroll();
-            if (window.innerWidth <= 768) closeSidebar();
-        }
-
         function toggleFavorite(index) {
             const channel = allChannels[index];
             if (!channel) return;
@@ -3142,7 +2910,7 @@ function buildSidebar() {
             if (idx > -1) favorites.splice(idx, 1);
             else favorites.push(id);
             setFavorites(favorites);
-            buildSidebar();
+            buildCategoriesBar();
             applyFilters(true);
             saveChannelsToServer();
             setupInfiniteScroll();
@@ -3257,7 +3025,7 @@ function buildSidebar() {
                 }
 
                 setFavorites([]);
-                buildSidebar();
+                buildCategoriesBar();
                 displayCount = STEP;
                 applyFilters(true);
                 setupInfiniteScroll();
@@ -3357,7 +3125,7 @@ function buildSidebar() {
             notifications = [];
             unreadCount = 0;
             renderHeader();
-            buildSidebar();
+            buildCategoriesBar();
             applyFilters(true);
             setupInfiniteScroll();
         }
@@ -3408,7 +3176,7 @@ function buildSidebar() {
                 if (user) { user.xtream = { server, username, password }; setUser(user); }
                 setFavorites([]);
                 closeXtreamModal();
-                buildSidebar();
+                buildCategoriesBar();
                 displayCount = STEP;
                 applyFilters(true);
                 setupInfiniteScroll();
@@ -3453,7 +3221,7 @@ function buildSidebar() {
             allChannels.push(newChannel);
             await saveChannelsToServer();
             closeAddModal();
-            buildSidebar();
+            buildCategoriesBar();
             displayCount = STEP;
             applyFilters(true);
             setupInfiniteScroll();
@@ -3871,10 +3639,9 @@ function buildSidebar() {
             allChannelsFiltered = allChannels.slice();
 
             renderHeader();
-            buildSidebar();
+            buildCategoriesBar();
             applyFilters(true);
             setupInfiniteScroll();
-            renderHistory();
 
             if (getUser()) {
                 setTimeout(() => loadNotifications(), 500);
@@ -3901,16 +3668,6 @@ function buildSidebar() {
                 if (contactModal.classList.contains('active') && e.target === contactModal) {
                     closeContactModal();
                 }
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('sidebarOverlay');
-                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
-                    closeSidebar();
-                }
-            });
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) {
-                    closeSidebar();
-                }
             });
         });
 
@@ -3929,7 +3686,6 @@ function buildSidebar() {
                 closeAboutModal();
                 closeContactModal();
                 document.getElementById('notifDropdown')?.classList.remove('active');
-                closeSidebar();
             }
         });
     </script>
