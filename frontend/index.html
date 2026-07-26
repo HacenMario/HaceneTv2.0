@@ -350,7 +350,7 @@
         }
 
         /* ============================================================
-               SIDEBAR (slide-in)
+               SIDEBAR (slide-in) - تم إصلاح القائمة الجانبية هنا
                ============================================================ */
         .sidebar-overlay {
             display: none;
@@ -393,8 +393,9 @@
             border-radius: 10px;
         }
 
+        /* ===== تحسين عناصر التصنيف في القائمة الجانبية ===== */
         .sidebar .cat-item {
-            padding: 10px 20px;
+            padding: 14px 20px; /* زيادة padding لتوسيع منطقة النقر */
             cursor: pointer;
             transition: var(--transition);
             border-left: 4px solid transparent;
@@ -405,6 +406,9 @@
             color: var(--text-secondary);
             border-radius: 0 8px 8px 0;
             margin: 2px 8px 2px 0;
+            width: 100%;
+            box-sizing: border-box;
+            user-select: none; /* منع تحديد النص عند النقر المزدوج */
         }
         .sidebar .cat-item:hover {
             background: var(--bg-hover);
@@ -423,11 +427,14 @@
             font-size: 11px;
             color: var(--text-muted);
             font-weight: 400;
+            flex-shrink: 0;
+            margin-left: 6px;
         }
         .sidebar .cat-item.active .count {
             background: var(--primary);
             color: #fff;
         }
+        /* زر المفضلة (النجمة) - تحسين النقر */
         .sidebar .cat-item .cat-fav-btn {
             background: transparent;
             border: none;
@@ -435,7 +442,10 @@
             cursor: pointer;
             font-size: 14px;
             transition: var(--transition);
-            padding: 0 4px;
+            padding: 6px 10px; /* زيادة منطقة النقر */
+            margin-left: 4px;
+            flex-shrink: 0;
+            pointer-events: auto; /* التأكد من أنه لا يمنع النقر على الأب */
         }
         .sidebar .cat-item .cat-fav-btn:hover {
             color: var(--accent);
@@ -1588,7 +1598,7 @@
     <div class="notif-dropdown" id="notifDropdown"></div>
 
     <!-- ============================================================ -->
-    <!-- ===== JAVASCRIPT (نفس الكود الأصلي مع الحفاظ على الوظائف) ===== -->
+    <!-- ===== JAVASCRIPT (مع إصلاح القائمة الجانبية) ===== -->
     <!-- ============================================================ -->
     <script>
         // ================================================================
@@ -2177,181 +2187,6 @@
             "FR: BEIN SPORT MAX 8 HD": "FR BEIN SPORT",
             "FR: BEIN SPORT MAX 9 HD": "FR BEIN SPORT",
 
-            // ----- FOX USA EVENTS (جميع قنوات FOX عدا USA: FOX ...) -----
-            "BTN - B1G Baseball - Championship: Minnesota vs. Purdue": "FOX USA EVENTS",
-            "BTN - B1G Men's Ice Hockey - B1G Tournament Championship: Wisconsin vs. Minnesota": "FOX USA EVENTS",
-            "BTN - B1G Plus Encore - Baseball: Oregon at Washington - 5/3/26": "FOX USA EVENTS",
-            "BTN - B1G Softball - Washington at Michigan": "FOX USA EVENTS",
-            "BTN - B1G Today": "FOX USA EVENTS",
-            "BTN - Campus Eats": "FOX USA EVENTS",
-            "BTN - Minnesota Basketball Classic - Minnesota at Wisconsin - 1/15/09": "FOX USA EVENTS",
-            "BTN - Washington Basketball Classic - Gonzaga at Washington - 12/9/23": "FOX USA EVENTS",
-            "BTN - Washington Basketball Classic - UCLA at Washington - 2/2/12": "FOX USA EVENTS",
-            "BTN - Washington Football Classic - Oregon at Washington - 10/14/23": "FOX USA EVENTS",
-            "BTN - Washington Soccer Classic - Washington at Indiana - 9/1/23": "FOX USA EVENTS",
-            "BTN - Washington Volleyball Classic - Oregon at Washington - 10/9/22": "FOX USA EVENTS",
-            "BTN - Washington Volleyball Classic - Oregon at Washington – 10/30/24": "FOX USA EVENTS",
-            "BTN - Washington Volleyball Classic - Washington at Oregon - 10/14/21": "FOX USA EVENTS",
-            "BTN - Washington Volleyball Classic - Wisconsin at Washington - 9/21/19": "FOX USA EVENTS",
-            "BTN - Women's College Basketball - Washington at Illinois": "FOX USA EVENTS",
-            "FBN - Fox Weather First": "FOX USA EVENTS",
-            "FBN - Kelsey Grammer's Historic Battles for America - Battle of Little Bighorn": "FOX USA EVENTS",
-            "FBN - Kelsey Grammer's Historic Battles for America - Bunker Hill": "FOX USA EVENTS",
-            "FBN - Kelsey Grammer's Historic Battles for America - First Bull Run": "FOX USA EVENTS",
-            "FBN - Kelsey Grammer's Historic Battles for America - Vicksburg": "FOX USA EVENTS",
-            "FBN - Kudlow": "FOX USA EVENTS",
-            "FBN - Making Money with Charles Payne": "FOX USA EVENTS",
-            "FBN - Mornings With Maria": "FOX USA EVENTS",
-            "FBN - PAID PROGRAMMING": "FOX USA EVENTS",
-            "FBN - The Big Money Show": "FOX USA EVENTS",
-            "FBN - The Bottom Line": "FOX USA EVENTS",
-            "FBN - The Claman Countdown": "FOX USA EVENTS",
-            "FBN - The Evening Edit with Elizabeth Macdonald": "FOX USA EVENTS",
-            "FBN - Varney & Company": "FOX USA EVENTS",
-            "FMSCFO - The Masked Singer": "FOX USA EVENTS",
-            "FNC - America Reports": "FOX USA EVENTS",
-            "FNC - America's Newsroom": "FOX USA EVENTS",
-            "FNC - Fox & Friends": "FOX USA EVENTS",
-            "FNC - Fox & Friends First": "FOX USA EVENTS",
-            "FNC - Fox News @ Night": "FOX USA EVENTS",
-            "FNC - Gutfeld!": "FOX USA EVENTS",
-            "FNC - Hannity": "FOX USA EVENTS",
-            "FNC - Jesse Watters Primetime": "FOX USA EVENTS",
-            "FNC - Outnumbered": "FOX USA EVENTS",
-            "FNC - Special Report with Bret Baier": "FOX USA EVENTS",
-            "FNC - The Faulkner Focus": "FOX USA EVENTS",
-            "FNC - The Five": "FOX USA EVENTS",
-            "FNC - The Story": "FOX USA EVENTS",
-            "FNC - The Will Cain Show": "FOX USA EVENTS",
-            "FND1 - Assassin on the Sixth Hole": "FOX USA EVENTS",
-            "FND1 - Crimecam 24/7": "FOX USA EVENTS",
-            "FND1 - Evil Next Door": "FOX USA EVENTS",
-            "FND1 - Fentanyl: America's Quiet Killer": "FOX USA EVENTS",
-            "FND1 - Honor Killing in America": "FOX USA EVENTS",
-            "FND1 - Interview With Evil": "FOX USA EVENTS",
-            "FND1 - Jussie Smollett: Anatomy of a Hoax": "FOX USA EVENTS",
-            "FND1 - Lost Then Found: Tales of a Kidnapping": "FOX USA EVENTS",
-            "FND1 - Love You to Death: The Kelly Cochran Story": "FOX USA EVENTS",
-            "FND1 - Monstrous Mistake: Against the Menendez Brothers": "FOX USA EVENTS",
-            "FND1 - Moscow Murders: Convicting a Killer": "FOX USA EVENTS",
-            "FND1 - Murder for Sale": "FOX USA EVENTS",
-            "FND1 - Riddle: The Search for James R. Hoffa": "FOX USA EVENTS",
-            "FND1 - Scandalous: Subway Vigilante": "FOX USA EVENTS",
-            "FND1 - Scandalous: The Trial of William Kennedy Smith": "FOX USA EVENTS",
-            "FND1 - The Baden Files": "FOX USA EVENTS",
-            "FND1 - The Fall of the House of Murdaugh": "FOX USA EVENTS",
-            "FND1 - The Fuhrman Diaries": "FOX USA EVENTS",
-            "FND1 - The Godfather of Fentanyl": "FOX USA EVENTS",
-            "FND1 - The New Battle for Chicago": "FOX USA EVENTS",
-            "FND1 - What Diddy Do?": "FOX USA EVENTS",
-            "FNT - Fox Across America": "FOX USA EVENTS",
-            "FNT - Fox News Radio": "FOX USA EVENTS",
-            "FNT - The Brian Kilmeade Show": "FOX USA EVENTS",
-            "FNT - The Guy Benson Show": "FOX USA EVENTS",
-            "FOXD - FOX Noticias en FOX Deportes": "FOX USA EVENTS",
-            "FOXD - Gol X Gol America": "FOX USA EVENTS",
-            "FOXD - Gol X Gol America Xpress": "FOX USA EVENTS",
-            "FOXD - Infomercial": "FOX USA EVENTS",
-            "FOXD - Liga Profesional de Fútbol Argentino - Belgrano v Rosario Central": "FOX USA EVENTS",
-            "FOXD - Liga Profesional de Fútbol Argentino - River Plate v Belgrano - Final": "FOX USA EVENTS",
-            "FOXD - MLS en Español - Charlotte FC v Atlanta United FC": "FOX USA EVENTS",
-            "FOXD - MLS en Español - Los Angeles Football Club v Real Salt Lake": "FOX USA EVENTS",
-            "FOXD - Punto Final": "FOX USA EVENTS",
-            "FOXD - Total Sports 360": "FOX USA EVENTS",
-            "FS1 - First Things First": "FOX USA EVENTS",
-            "FS1 - First Things First: OT": "FOX USA EVENTS",
-            "FS1 - Kevin Harvick’s Happy Hour - Ryan Preece Interview": "FOX USA EVENTS",
-            "FS1 - MLS - Charlotte FC vs Atlanta United FC": "FOX USA EVENTS",
-            "FS1 - MLS - Los Angeles FC vs Real Salt Lake": "FOX USA EVENTS",
-            "FS1 - SPEED with Harvick and Buxton": "FOX USA EVENTS",
-            "FS1 - TBA": "FOX USA EVENTS",
-            "FS1 - The Basketball Tournament - Kansas Alumni vs Kansas State Alumni": "FOX USA EVENTS",
-            "FS1 - The Basketball Tournament - Kentucky Alumni vs Louisville Alumni": "FOX USA EVENTS",
-            "FS1 - The Clay Travis Show": "FOX USA EVENTS",
-            "FS1 - The Herd With Colin Cowherd": "FOX USA EVENTS",
-            "FS1 - TMZ Sports": "FOX USA EVENTS",
-            "FS1 - Wake Up Barstool": "FOX USA EVENTS",
-            "FS2 - Bronze Final: France vs England": "FOX USA EVENTS",
-            "FS2 - Kevin Harvick’s Happy Hour - North Wilkesboro Recap": "FOX USA EVENTS",
-            "FS2 - LIV Golf - United Kingdom: Round 1": "FOX USA EVENTS",
-            "FS2 - MLS - Charlotte FC vs Atlanta United FC": "FOX USA EVENTS",
-            "FS2 - MLS - Los Angeles FC vs Real Salt Lake": "FOX USA EVENTS",
-            "FS2 - Norway vs England": "FOX USA EVENTS",
-            "FS2 - NRL Rugby - Eels vs Panthers": "FOX USA EVENTS",
-            "FS2 - PTO Highlights": "FOX USA EVENTS",
-            "FS2 - Saratoga Live": "FOX USA EVENTS",
-            "FS2 - SPEED with Harvick and Buxton": "FOX USA EVENTS",
-            "FS2 - The Basketball Tournament - Kentucky Alumni vs Louisville Alumni": "FOX USA EVENTS",
-            "FS2 - The Clay Travis Show": "FOX USA EVENTS",
-            "FS2 - The PokerStars Big Game on Tour - Episode 5": "FOX USA EVENTS",
-            "FS2 - TMZ Sports": "FOX USA EVENTS",
-            "FWX - America's Weather Center": "FOX USA EVENTS",
-            "FWX - Fox Weather @ Night": "FOX USA EVENTS",
-            "FWX - Fox Weather First": "FOX USA EVENTS",
-            "FWX - Fox Weather Live": "FOX USA EVENTS",
-            "FWX - Fox Weather Now": "FOX USA EVENTS",
-            "FWX - Weather Command": "FOX USA EVENTS",
-            "LIVENOW - LiveNOW from FOX": "FOX USA EVENTS",
-            "SOUL - Black Woman's Guide to Getting Married": "FOX USA EVENTS",
-            "SOUL - Brotherhood in America": "FOX USA EVENTS",
-            "SOUL - Chattin' With Chelsea": "FOX USA EVENTS",
-            "SOUL - Church: Live From New Birth With Dr. Jamal Bryant": "FOX USA EVENTS",
-            "SOUL - Church: The Believer's Walk of Faith": "FOX USA EVENTS",
-            "SOUL - Church: The Community of Faith": "FOX USA EVENTS",
-            "SOUL - Church: Trinity United Church of Christ": "FOX USA EVENTS",
-            "SOUL - Divorce Court": "FOX USA EVENTS",
-            "SOUL - Faith: The Good Word": "FOX USA EVENTS",
-            "SOUL - Movie: A Second Chance": "FOX USA EVENTS",
-            "SOUL - Movie: It's a Date": "FOX USA EVENTS",
-            "SOUL - Movie: Killer Instinct": "FOX USA EVENTS",
-            "SOUL - Pastor Jones - My Sister Loves You": "FOX USA EVENTS",
-            "SOUL - Pastor Jones - Sisters in Spirit": "FOX USA EVENTS",
-            "SOUL - Portia": "FOX USA EVENTS",
-            "SOUL - Side Dish": "FOX USA EVENTS",
-            "SOUL - The Isiah Factor Uncensored": "FOX USA EVENTS",
-            "TMZFO - TMZ Live": "FOX USA EVENTS",
-            "TMZFO - TMZ on TV": "FOX USA EVENTS",
-            "WXXA - America's Court With Judge Ross": "FOX USA EVENTS",
-            "WXXA - Court Cam": "FOX USA EVENTS",
-            "WXXA - Jeopardy!": "FOX USA EVENTS",
-            "WXXA - Judge Judy": "FOX USA EVENTS",
-            "WXXA - Judge Mathis": "FOX USA EVENTS",
-            "WXXA - Justice for All With Judge Cristina Pérez": "FOX USA EVENTS",
-            "WXXA - Justice for the People With Judge Milian": "FOX USA EVENTS",
-            "WXXA - Live PD Presents": "FOX USA EVENTS",
-            "WXXA - Modern Family": "FOX USA EVENTS",
-            "WXXA - News10 at 10:30 on FOX23": "FOX USA EVENTS",
-            "WXXA - News10 at 6:30p on FOX23": "FOX USA EVENTS",
-            "WXXA - News10 at 7am on FOX23": "FOX USA EVENTS",
-            "WXXA - News10 at 8am on FOX23": "FOX USA EVENTS",
-            "WXXA - News10 in the Morning 6A": "FOX USA EVENTS",
-            "WXXA - People Puzzler": "FOX USA EVENTS",
-            "WXXA - Supreme Justice With Judge Karen": "FOX USA EVENTS",
-            "WXXA - The Big Bang Theory": "FOX USA EVENTS",
-            "WXXA - The Goldbergs": "FOX USA EVENTS",
-            "WXXA - The Neighborhood": "FOX USA EVENTS",
-            "WXXA - The People's Court": "FOX USA EVENTS",
-            "WXXA - The Perfect Line": "FOX USA EVENTS",
-            "WXXA - The Verdict With Judge Hatchett": "FOX USA EVENTS",
-            "WXXA - TMZ": "FOX USA EVENTS",
-            "WXXA - Tribunal Justice": "FOX USA EVENTS",
-            "WXXA - We the People With Judge Lauren Lake": "FOX USA EVENTS",
-            "WXXA - Young Sheldon": "FOX USA EVENTS",
-
-            // ----- FOX USA LIVE (USA: FOX ...) -----
-            "USA: BIG NETWORK": "FOX USA LIVE",
-            "USA: FOX": "FOX USA LIVE",
-            "USA: FOX BUSINESS": "FOX USA LIVE",
-            "USA: FOX DEPORTES": "FOX USA LIVE",
-            "USA: FOX LIVE NOW": "FOX USA LIVE",
-            "USA: FOX NEW CHANNELS": "FOX USA LIVE",
-            "USA: FOX SOUL": "FOX USA LIVE",
-            "USA: FOX TMZ": "FOX USA LIVE",
-            "USA: FOX WEATHER": "FOX USA LIVE",
-            "USA: FS1": "FOX USA LIVE",
-            "USA: FS2": "FOX USA LIVE",
-            "USA: THE MASKED SINGER": "FOX USA LIVE",
-
             // ----- BEIN ENT -----
             "AR: AR: Bein BBC EARTH 4K": "BEIN ENT",
             "AR: Bein BBC Earth HD": "BEIN ENT",
@@ -2553,7 +2388,7 @@
         };
 
         // ================================================================
-        // 0c.  الترجمات (i18n) - موسعة (نفس النسخة الأصلية)
+        // 0c.  الترجمات (i18n) - موسعة
         // ================================================================
         const translations = {
             ar: {
@@ -2781,7 +2616,7 @@
         };
 
         // ================================================================
-        // 1.  الإعدادات العامة (نفس الأصل)
+        // 1.  الإعدادات العامة
         // ================================================================
         const API_URL = 'https://hacenetv2-0-ua0u.onrender.com/api';
 
@@ -2803,7 +2638,7 @@
         let categoryChart = null;
 
         // ================================================================
-        // 2.  دوال الترجمة (نفس الأصل)
+        // 2.  دوال الترجمة
         // ================================================================
         function getTranslation(key, params = {}) {
             const langData = translations[currentLang] || translations.ar;
@@ -2828,7 +2663,6 @@
                 localStorage.setItem('hacene_lang', lang);
                 document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-                updateAllTexts();
                 renderHeader();
                 buildSidebar();
                 applyFilters(true);
@@ -2839,12 +2673,8 @@
             }
         }
 
-        function updateAllTexts() {
-            // يتم تحديث النصوص عند فتح النوافذ
-        }
-
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي (نفس الأصل)
+        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2856,38 +2686,26 @@
         function setHistory(h) { history = h; localStorage.setItem('hacene_history', JSON.stringify(h)); }
 
         // ================================================================
-        // 4.  API (نفس الأصل)
+        // 4.  API
         // ================================================================
         function getAuthHeaders() {
             const t = getToken();
             return t ? { 'Authorization': 'Bearer ' + t } : {};
         }
 
-async function apiCall(method, endpoint, body = null) {
-    const options = { method, headers: { 'Content-Type': 'application/json', ...getAuthHeaders() } };
-    if (body) options.body = JSON.stringify(body);
-    try {
-        const response = await fetch(API_URL + endpoint, options);
-        // إذا كان الرد غير ناجح، نحاول قراءة النص كـ JSON، وإلا نرمي خطأ مع status
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Request failed');
-            return data;
-        } else {
-            // إذا لم يكن JSON، نقرأ النص ونرمي خطأ
-            const text = await response.text();
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
-            return { success: true }; // في حالة نجاح بدون JSON (نادر)
+        async function apiCall(method, endpoint, body = null) {
+            const options = { method, headers: { 'Content-Type': 'application/json', ...getAuthHeaders() } };
+            if (body) options.body = JSON.stringify(body);
+            try {
+                const response = await fetch(API_URL + endpoint, options);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Request failed');
+                return data;
+            } catch (err) { console.error('API Call Error:', err); throw err; }
         }
-    } catch (err) {
-        console.error('API Call Error:', err);
-        throw err;
-    }
-}
 
         // ================================================================
-        // 5.  دوال العرض والهيكل (نفس الأصل مع تحسينات التصميم)
+        // 5.  دوال العرض والهيكل
         // ================================================================
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -2903,7 +2721,7 @@ async function apiCall(method, endpoint, body = null) {
             overlay.classList.remove('active');
         }
 
-        // ----- History (نفس الأصل) -----
+        // ----- History -----
         function addToHistory(channel) {
             if (!channel) return;
             const entry = {
@@ -2955,7 +2773,7 @@ async function apiCall(method, endpoint, body = null) {
             }
         }
 
-        // ----- Render Header, Sidebar, Filters (نفس الأصل مع تحسينات الأزرار) -----
+        // ----- Render Header -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -3070,11 +2888,14 @@ async function apiCall(method, endpoint, body = null) {
             document.documentElement.setAttribute('data-theme', theme);
         }
 
+        // ================================================================
+        // 5b.  بناء القائمة الجانبية (تم إصلاح مشكلة النقر)
+        // ================================================================
         function buildSidebar() {
             const sidebar = document.getElementById('sidebar');
             if (!allChannels || allChannels.length === 0) {
                 sidebar.innerHTML = `
-                    <div class="cat-item" style="color:var(--text-secondary); text-align:center;">${getTranslation('noChannels')}</div>
+                    <div class="cat-item" style="color:var(--text-secondary); text-align:center; cursor:default;">${getTranslation('noChannels')}</div>
                     <div class="history-section">
                         <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
                         <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
@@ -3277,6 +3098,7 @@ async function apiCall(method, endpoint, body = null) {
             }
         }
 
+        // ===== دالة selectCategory (مع إغلاق السايدبار في الموبايل) =====
         function selectCategory(cat) {
             currentCategory = cat;
             document.querySelectorAll('.sidebar .cat-item').forEach(el => {
@@ -3303,7 +3125,7 @@ async function apiCall(method, endpoint, body = null) {
         }
 
         // ================================================================
-        // 6.  المصادقة (نفس الأصل)
+        // 6.  المصادقة
         // ================================================================
         function openLoginModal() {
             document.getElementById('loginModal').classList.add('active');
@@ -3367,7 +3189,6 @@ async function apiCall(method, endpoint, body = null) {
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
-        // ===== Fetch Channels (نفس الأصل) =====
         async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
@@ -3438,7 +3259,6 @@ async function apiCall(method, endpoint, body = null) {
             }
         }
 
-        // ===== Login / Register / Logout (نفس الأصل) =====
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -3519,7 +3339,7 @@ async function apiCall(method, endpoint, body = null) {
         }
 
         // ================================================================
-        // 7.  Xtream (نفس الأصل)
+        // 7.  Xtream
         // ================================================================
         function openXtreamModal() {
             const user = getUser();
@@ -3578,7 +3398,7 @@ async function apiCall(method, endpoint, body = null) {
         }
 
         // ================================================================
-        // 8.  القنوات (تشغيل مع إضافة للسجل) (نفس الأصل)
+        // 8.  القنوات (تشغيل)
         // ================================================================
         function openAddModal() {
             const user = getUser();
@@ -3647,7 +3467,7 @@ async function apiCall(method, endpoint, body = null) {
         }
 
         // ================================================================
-        // 9.  Admin (مع الإحصائيات المتقدمة) (نفس الأصل)
+        // 9.  Admin
         // ================================================================
         async function openAdminModal() {
             const user = getUser();
@@ -3830,31 +3650,20 @@ async function apiCall(method, endpoint, body = null) {
         }
 
         // ================================================================
-        // 10.  الإشعارات (نفس الأصل)
+        // 10.  الإشعارات
         // ================================================================
-let isLoadingNotifications = false;
-
-async function loadNotifications() {
-    if (!getUser()) return;
-    if (isLoadingNotifications) return; // منع التكرار
-    isLoadingNotifications = true;
-    try {
-        const data = await apiCall('GET', '/user/notifications');
-        notifications = data.notifications || [];
-        unreadCount = notifications.filter(n => !n.read).length;
-        updateNotifBadge();
-        renderNotifDropdown();
-    } catch (err) {
-        // في حالة 404 أو أي خطأ، نعتبر أنه لا توجد إشعارات
-        console.warn('⚠️ تعذر تحميل الإشعارات (سيتم تجاهل هذا الخطأ):', err.message);
-        notifications = [];
-        unreadCount = 0;
-        updateNotifBadge();
-        renderNotifDropdown();
-    } finally {
-        isLoadingNotifications = false;
-    }
-}
+        async function loadNotifications() {
+            if (!getUser()) return;
+            try {
+                const data = await apiCall('GET', '/user/notifications');
+                notifications = data.notifications || [];
+                unreadCount = notifications.filter(n => !n.read).length;
+                updateNotifBadge();
+                renderNotifDropdown();
+            } catch (err) {
+                console.error('Failed to load notifications:', err);
+            }
+        }
 
         function updateNotifBadge() {
             const badge = document.getElementById('notifBadge');
@@ -3916,7 +3725,7 @@ async function loadNotifications() {
         }
 
         // ================================================================
-        // 11.  About & Contact Modals (نفس الأصل)
+        // 11.  About & Contact Modals
         // ================================================================
         function openAboutModal() {
             const modal = document.getElementById('aboutModal');
@@ -3954,7 +3763,7 @@ async function loadNotifications() {
         }
 
         // ================================================================
-        // 12.  Scroll to Top (نفس الأصل)
+        // 12.  Scroll to Top
         // ================================================================
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3970,7 +3779,7 @@ async function loadNotifications() {
         }
 
         // ================================================================
-        // 13.  التهيئة (نفس الأصل)
+        // 13.  التهيئة
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -4049,7 +3858,7 @@ async function loadNotifications() {
         }
 
         // ================================================================
-        // 14.  بدء التطبيق (نفس الأصل مع إضافة مستمع للأحداث)
+        // 14.  بدء التطبيق
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
