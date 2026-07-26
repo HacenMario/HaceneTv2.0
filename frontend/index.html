@@ -394,65 +394,68 @@
         }
 
         /* ===== تحسين عناصر التصنيف في القائمة الجانبية ===== */
-        .sidebar .cat-item {
-            padding: 14px 20px; /* زيادة padding لتوسيع منطقة النقر */
-            cursor: pointer;
-            transition: var(--transition);
-            border-left: 4px solid transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            border-radius: 0 8px 8px 0;
-            margin: 2px 8px 2px 0;
-            width: 100%;
-            box-sizing: border-box;
-            user-select: none; /* منع تحديد النص عند النقر المزدوج */
-        }
-        .sidebar .cat-item:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-        .sidebar .cat-item.active {
-            background: rgba(108, 99, 255, 0.15);
-            border-left-color: var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-        }
-        .sidebar .cat-item .count {
-            background: var(--bg-input);
-            padding: 0 12px;
-            border-radius: 50px;
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 400;
-            flex-shrink: 0;
-            margin-left: 6px;
-        }
-        .sidebar .cat-item.active .count {
-            background: var(--primary);
-            color: #fff;
-        }
-        /* زر المفضلة (النجمة) - تحسين النقر */
-        .sidebar .cat-item .cat-fav-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 14px;
-            transition: var(--transition);
-            padding: 6px 10px; /* زيادة منطقة النقر */
-            margin-left: 4px;
-            flex-shrink: 0;
-            pointer-events: auto; /* التأكد من أنه لا يمنع النقر على الأب */
-        }
-        .sidebar .cat-item .cat-fav-btn:hover {
-            color: var(--accent);
-        }
-        .sidebar .cat-item .cat-fav-btn.active {
-            color: var(--accent);
-        }
+.sidebar .cat-item {
+    padding: 16px 20px;          /* زيادة كبيرة لسهولة النقر */
+    cursor: pointer;
+    transition: var(--transition);
+    border-left: 4px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    color: var(--text-secondary);
+    border-radius: 0 8px 8px 0;
+    margin: 2px 8px 2px 0;
+    width: 100%;
+    box-sizing: border-box;
+    user-select: none;
+    min-height: 50px;           /* ارتفاع مناسب */
+    background: transparent;     /* للتأكد من أنه قابل للنقر */
+}
+.sidebar .cat-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+.sidebar .cat-item.active {
+    background: rgba(108, 99, 255, 0.15);
+    border-left-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+}
+.sidebar .cat-item .count {
+    background: var(--bg-input);
+    padding: 0 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+.sidebar .cat-item.active .count {
+    background: var(--primary);
+    color: #fff;
+}
+.sidebar .cat-item .cat-fav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition);
+    padding: 8px 12px;           /* منطقة نقر أوسع */
+    margin-left: 4px;
+    flex-shrink: 0;
+    pointer-events: auto;        /* التأكد من أنه قابل للنقر */
+    border-radius: 6px;
+}
+.sidebar .cat-item .cat-fav-btn:hover {
+    background: rgba(255, 101, 132, 0.15);
+    color: var(--accent);
+}
+.sidebar .cat-item .cat-fav-btn.active {
+    color: var(--accent);
+}
 
         /* History */
         .sidebar .history-section {
@@ -2891,48 +2894,69 @@
         // ================================================================
         // 5b.  بناء القائمة الجانبية (تم إصلاح مشكلة النقر)
         // ================================================================
-        function buildSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            if (!allChannels || allChannels.length === 0) {
-                sidebar.innerHTML = `
-                    <div class="cat-item" style="color:var(--text-secondary); text-align:center; cursor:default;">${getTranslation('noChannels')}</div>
-                    <div class="history-section">
-                        <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
-                        <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
-                    </div>
-                `;
-                return;
-            }
-            const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
-            const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
+function buildSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!allChannels || allChannels.length === 0) {
+        sidebar.innerHTML = `
+            <div class="cat-item" style="color:var(--text-secondary); text-align:center; cursor:default;">${getTranslation('noChannels')}</div>
+            <div class="history-section">
+                <div class="history-title"><span><i class="fas fa-history"></i> ${getTranslation('history')}</span><button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button></div>
+                <div id="historyList"><div class="history-empty">${getTranslation('noHistory')}</div></div>
+            </div>
+        `;
+        return;
+    }
+    const cats = new Set(allChannels.map(ch => ch.category || 'عام'));
+    const sorted = ['الكل', 'المفضلة', ...Array.from(cats).sort()];
 
-            let html = sorted.map(cat => {
-                let count = 0;
-                if (cat === 'الكل') count = allChannels.length;
-                else if (cat === 'المفضلة') count = favorites.length;
-                else count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
-                const active = cat === currentCategory ? 'active' : '';
-                const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
-                const displayName = translateCategory(cat);
-                return `<div class="cat-item ${active}" data-cat="${cat}" onclick="selectCategory('${cat}')">
-                            <span>${displayName}</span>
-                            <span class="count">${count}</span>
-                            ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleCategoryFavorite('${cat}')" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
-                        </div>`;
-            }).join('');
+    let html = sorted.map(cat => {
+        let count = 0;
+        if (cat === 'الكل') count = allChannels.length;
+        else if (cat === 'المفضلة') count = favorites.length;
+        else count = allChannels.filter(ch => (ch.category || 'عام') === cat).length;
+        const active = cat === currentCategory ? 'active' : '';
+        const isCatFav = cat !== 'الكل' && cat !== 'المفضلة' && isCategoryFavorite(cat);
+        const displayName = translateCategory(cat);
+        return `<div class="cat-item ${active}" data-cat="${cat}">
+                    <span>${displayName}</span>
+                    <span class="count">${count}</span>
+                    ${cat !== 'الكل' && cat !== 'المفضلة' ? `<button class="cat-fav-btn ${isCatFav ? 'active' : ''}" data-cat="${cat}" title="${isCatFav ? getTranslation('removeCatFav') : getTranslation('addCatFav')}"><i class="fas fa-star"></i></button>` : ''}
+                </div>`;
+    }).join('');
 
-            html += `
-                <div class="history-section">
-                    <div class="history-title">
-                        <span><i class="fas fa-history"></i> ${getTranslation('history')}</span>
-                        <button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <div id="historyList"></div>
-                </div>
-            `;
-            sidebar.innerHTML = html;
-            renderHistory();
-        }
+    html += `
+        <div class="history-section">
+            <div class="history-title">
+                <span><i class="fas fa-history"></i> ${getTranslation('history')}</span>
+                <button onclick="clearHistory()" title="${getTranslation('clearHistory')}"><i class="fas fa-trash"></i></button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    `;
+    sidebar.innerHTML = html;
+
+    // ===== ربط الأحداث باستخدام addEventListener =====
+    sidebar.querySelectorAll('.cat-item').forEach(item => {
+        const cat = item.dataset.cat;
+        // حدث النقر على العنصر نفسه
+        item.addEventListener('click', function(e) {
+            // منع تنفيذ الحدث إذا كان الهدف هو زر المفضلة (لتجنب التداخل)
+            if (e.target.closest('.cat-fav-btn')) return;
+            selectCategory(cat);
+        });
+    });
+
+    // ربط أزرار المفضلة
+    sidebar.querySelectorAll('.cat-fav-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // منع وصول الحدث إلى العنصر الأب
+            const cat = this.dataset.cat;
+            toggleCategoryFavorite(cat);
+        });
+    });
+
+    renderHistory();
+}
 
         function isCategoryFavorite(category) {
             const catChannels = allChannels.filter(ch => (ch.category || 'عام') === category);
