@@ -58,9 +58,9 @@ const UserSchema = new mongoose.Schema({
         username: { type: String, default: '' },
         password: { type: String, default: '' }
     },
-    // ===== سجل المشاهدة =====
-    history: { type: Array, default: [] }, // [{ channelId, channelName, watchedAt }]
-    createdAt: { type: Date, default: Date.now }
+    history: { type: Array, default: [] },
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: { type: Date } // أضفنا هذا الحقل للإحصائيات
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -70,17 +70,23 @@ const ChannelSchema = new mongoose.Schema({
     channels: { type: Array, default: [] },
     updatedAt: { type: Date, default: Date.now }
 });
-
 const Channel = mongoose.model('Channel', ChannelSchema);
 
-// ===== إحصائيات المدير (مخزنة مؤقتاً في الذاكرة أو قاعدة بيانات) =====
-// نستخدم نموذجاً لتخزين الإحصائيات
 const StatsSchema = new mongoose.Schema({
     totalViews: { type: Number, default: 0 },
     activeUsersToday: { type: Number, default: 0 },
     lastUpdated: { type: Date, default: Date.now }
 });
 const Stats = mongoose.model('Stats', StatsSchema);
+
+// ===== NEW: نموذج الإشعارات =====
+const NotificationSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', NotificationSchema);
 
 // ===== Helpers =====
 function generateToken(userId, email, role) {
@@ -168,6 +174,10 @@ app.post('/api/auth/login', async (req, res) => {
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
+
+        // تحديث آخر دخول
+        user.lastLogin = new Date();
+        await user.save();
 
         const token = generateToken(user._id, user.email, user.role);
         res.json({
@@ -308,15 +318,12 @@ app.post('/api/user/history', authMiddleware, async (req, res) => {
         const user = await User.findById(req.user.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // إزالة أي سجل مكرر لهذه القناة
         user.history = user.history.filter(item => item.channelId !== channelId);
-        // إضافة القناة إلى البداية
         user.history.unshift({
             channelId,
             channelName,
             watchedAt: new Date().toISOString()
         });
-        // الاحتفاظ بآخر 50 مشاهدة فقط
         if (user.history.length > 50) user.history = user.history.slice(0, 50);
 
         await user.save();
@@ -339,16 +346,12 @@ app.get('/api/user/history', authMiddleware, async (req, res) => {
 // ===== إحصائيات المدير =====
 app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        // عدد المستخدمين الكلي
         const totalUsers = await User.countDocuments();
-        // عدد المستخدمين النشطين اليوم (الذين سجلوا دخول خلال 24 ساعة)
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const activeUsers = await User.countDocuments({ lastLogin: { $gte: oneDayAgo } });
-        // إجمالي القنوات المحفوظة (من جميع المستخدمين)
         const channelsDocs = await Channel.find({});
         let totalChannels = 0;
         channelsDocs.forEach(doc => { totalChannels += doc.channels.length; });
-        // عدد مرات تشغيل القنوات (تقريباً)
         const stats = await Stats.findOne();
         const totalViews = stats ? stats.totalViews : 0;
 
@@ -364,7 +367,6 @@ app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) =>
     }
 });
 
-// تحديث الإحصائيات عند تشغيل قناة (يتم استدعاؤها من الواجهة)
 app.post('/api/admin/stats/view', authMiddleware, async (req, res) => {
     try {
         let stats = await Stats.findOne();
@@ -372,11 +374,9 @@ app.post('/api/admin/stats/view', authMiddleware, async (req, res) => {
             stats = new Stats({ totalViews: 0, activeUsersToday: 0 });
         }
         stats.totalViews += 1;
-        // تحديث وقت آخر تحديث
         stats.lastUpdated = new Date();
         await stats.save();
 
-        // تحديث آخر دخول للمستخدم
         await User.findByIdAndUpdate(req.user.userId, { lastLogin: new Date() });
 
         res.json({ success: true });
@@ -385,7 +385,7 @@ app.post('/api/admin/stats/view', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== Admin endpoints =====
+// ===== Admin users management =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -435,13 +435,19 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
         if (userId === req.user.userId) return res.status(403).json({ error: 'Cannot delete self' });
         await User.findByIdAndDelete(userId);
         await Channel.findOneAndDelete({ userId });
+        // حذف إشعارات المستخدم أيضاً
+        await Notification.deleteMany({ userId });
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// ===== Admin Notification (مع دعم البريد المستهدف) =====
+// ============================================================
+// ===== NEW: نظام الإشعارات الكامل =====
+// ============================================================
+
+// 1. إرسال إشعار (للمدير فقط)
 app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { message, targetEmail } = req.body;
@@ -456,14 +462,78 @@ app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req
             users = await User.find({});
         }
 
-        // هنا يمكن حفظ الإشعارات في قاعدة بيانات، لكن حالياً نعيد العدد
-        res.json({ success: true, count: users.length, message });
+        // إنشاء إشعار لكل مستخدم
+        const notifications = users.map(user => ({
+            userId: user._id,
+            message: message,
+            read: false,
+            createdAt: new Date()
+        }));
+
+        if (notifications.length > 0) {
+            await Notification.insertMany(notifications);
+        }
+
+        res.json({
+            success: true,
+            count: notifications.length,
+            message: `✅ تم إرسال الإشعار إلى ${notifications.length} مستخدم`
+        });
+    } catch (err) {
+        console.error('Error sending notification:', err);
+        res.status(500).json({ error: 'Server error: ' + err.message });
+    }
+});
+
+// 2. جلب إشعارات المستخدم الحالي
+app.get('/api/user/notifications', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const notifications = await Notification.find({ userId })
+            .sort({ createdAt: -1 })
+            .limit(100); // حد أقصى 100 إشعار
+        res.json({ notifications });
+    } catch (err) {
+        console.error('Error fetching notifications:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 3. تعيين إشعار كمقروء
+app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.userId;
+
+        const notification = await Notification.findOne({ _id: id, userId });
+        if (!notification) {
+            return res.status(404).json({ error: 'Notification not found' });
+        }
+
+        notification.read = true;
+        await notification.save();
+
+        res.json({ success: true, notification });
+    } catch (err) {
+        console.error('Error marking notification as read:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// (اختياري) حذف جميع الإشعارات المقروءة للمستخدم
+app.delete('/api/user/notifications/read', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        await Notification.deleteMany({ userId, read: true });
+        res.json({ success: true, message: 'تم حذف الإشعارات المقروءة' });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
 });
 
+// ============================================================
 // ===== Proxy عام (احتياطي) =====
+// ============================================================
 app.get('/api/proxy', async (req, res) => {
     try {
         const target = req.query.url;
