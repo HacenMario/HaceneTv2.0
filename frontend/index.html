@@ -12,8 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- ===== Chart.js ===== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ===== Shaka Player (البديل القوي لـ HLS.js) ===== -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.js"></script>
 
     <style>
         /* ============================================================
@@ -692,7 +690,7 @@
         }
 
         /* ============================================================
-               MODALS (عامة)
+               MODALS
                ============================================================ */
         .modal-overlay {
             display: none;
@@ -840,64 +838,6 @@
             color: #E74C3C;
             border-color: #E74C3C;
             background: rgba(231, 76, 60, 0.08);
-        }
-
-        /* ============================================================
-               PLAYER MODAL (مخصص للمشغل)
-               ============================================================ */
-        #playerModal .modal-box {
-            max-width: 900px;
-            padding: 20px;
-            background: #0a0a12;
-        }
-        #playerModal .modal-box .close-modal {
-            color: #fff;
-            z-index: 10;
-        }
-        #playerModal .modal-box .close-modal:hover {
-            color: var(--primary);
-        }
-        #playerModal .player-container {
-            position: relative;
-            width: 100%;
-            background: #000;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-        }
-        #playerModal .player-container video {
-            width: 100%;
-            max-height: 70vh;
-            display: block;
-            background: #000;
-        }
-        #playerModal .player-title {
-            color: var(--text-primary);
-            font-size: 18px;
-            font-weight: 700;
-            padding: 12px 4px 8px 4px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #playerModal .player-title i {
-            color: var(--secondary);
-        }
-        #playerModal .player-error {
-            color: #E74C3C;
-            background: rgba(231, 76, 60, 0.1);
-            border: 1px solid #E74C3C;
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            margin-top: 10px;
-            display: none;
-            font-size: 14px;
-        }
-        #playerModal .player-error.show {
-            display: block;
-        }
-        /* تخصيص أزرار Shaka (اختياري) */
-        .shaka-controls {
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent) !important;
         }
 
         /* ============================================================
@@ -1336,12 +1276,6 @@
             .admin-panel td {
                 padding: 6px 8px;
             }
-            #playerModal .modal-box {
-                padding: 10px;
-            }
-            #playerModal .player-title {
-                font-size: 15px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -1450,27 +1384,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ============================================================ -->
-    <!-- ===== MODAL: PLAYER (Shaka Player) ===== -->
-    <!-- ============================================================ -->
-    <div class="modal-overlay" id="playerModal">
-        <div class="modal-box">
-            <button class="close-modal" onclick="closePlayerModal()">✕</button>
-            <div class="player-title">
-                <i class="fas fa-broadcast-tower"></i>
-                <span id="playerModalTitle">القناة</span>
-            </div>
-            <div class="player-container">
-                <video id="playerVideo" controls autoplay playsinline></video>
-            </div>
-            <div class="player-error" id="playerError">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span id="playerErrorText">فشل تحميل البث. يرجى المحاولة مرة أخرى.</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== MODALS (أخرى) ===== -->
+    <!-- ===== MODALS ===== -->
     <!-- Login / Register -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-box">
@@ -1674,7 +1588,7 @@
     <div class="notif-dropdown" id="notifDropdown"></div>
 
     <!-- ============================================================ -->
-    <!-- ===== JAVASCRIPT (مع دمج Shaka Player) ===== -->
+    <!-- ===== JAVASCRIPT (نفس الكود الأصلي مع الحفاظ على الوظائف) ===== -->
     <!-- ============================================================ -->
     <script>
         // ================================================================
@@ -1728,6 +1642,7 @@
             "ALG: A3 4K": "ALGERIA",
             "ALG: A FAJR HD": "ALGERIA",
             "ALG: 4KIDS HD": "ALGERIA",
+
             // ----- BEIN HD & SD -----
             "beIN AFC SD (S1)": "BEIN HD & SD",
             "beIN AFC1 SD (S1)": "BEIN HD & SD",
@@ -1799,6 +1714,7 @@
             "beIN XTRA 6 HD (S1)": "BEIN HD & SD",
             "beIN Xtra 6 HD (S2)": "BEIN HD & SD",
             "beIN XTRA 6 SD (S1)": "BEIN HD & SD",
+
             // ----- BEIN HEVC & FHD -----
             "beIN 4K HDR": "BEIN HEVC & FHD",
             "beIN EN 1 4k (S1)": "BEIN HEVC & FHD",
@@ -1854,6 +1770,7 @@
             "beIN Xtra 5 4K (S2)": "BEIN HEVC & FHD",
             "beIN XTRA 6 4K (S1)": "BEIN HEVC & FHD",
             "beIN Xtra 6 4K (S2)": "BEIN HEVC & FHD",
+
             // ----- TUNISIA -----
             "Tun: Al Insen": "TUNISIA",
             "TUN: Al janoubia": "TUNISIA",
@@ -1869,6 +1786,7 @@
             "TUN: Tunisia NAT 1 FHD": "TUNISIA",
             "TUN: Tunisia Nat 2": "TUNISIA",
             "TUN: ZaytounaTV": "TUNISIA",
+
             // ----- MBC -----
             "AR: MBC DRAMA": "MBC",
             "AR: MBC + ELIFE": "MBC",
@@ -1937,6 +1855,7 @@
             "AR: MBC+DRAMA HD": "MBC",
             "AR: MBC1 HD": "MBC",
             "AR: MBC POWER + 4k": "MBC",
+
             // ----- ROTANA -----
             "AR: ROTANA CINEMA": "ROTANA",
             "AR: ROTANA CINEMA MASR": "ROTANA",
@@ -1946,6 +1865,7 @@
             "AR: ROTANA DRAMA": "ROTANA",
             "AR: ROTANA KHALIJEAH": "ROTANA",
             "AR: ROTANA MUSIC": "ROTANA",
+
             // ----- SHAHID LIVE -----
             "SHAHID: ABDUL MAJEED ABDULLAH": "SHAHID LIVE",
             "SHAHID: AFLAM": "SHAHID LIVE",
@@ -2002,6 +1922,7 @@
             "SHAHID: The Holy Quran Recited By Al Sudais": "SHAHID LIVE",
             "SHAHID: THIKRAYAT": "SHAHID LIVE",
             "SHAHID: UNBEATEN": "SHAHID LIVE",
+
             // ----- EGYPT -----
             "EGY: Al Ahly HD": "EGYPT",
             "EGY: Al Ahly SD": "EGYPT",
@@ -2055,6 +1976,7 @@
             "EGY: ZEE AFLAM": "EGYPT",
             "EGY: ZEE ALWAN": "EGYPT",
             "PALESTINE TODAY": "EGYPT",
+
             // ----- SYRIA -----
             "SYR: Halab Today": "SYRIA",
             "SYR: Lana +": "SYRIA",
@@ -2066,6 +1988,7 @@
             "SYR: Syria TV FHD": "SYRIA",
             "SYR: Syria TV HD": "SYRIA",
             "SYR: Syria TV SD": "SYRIA",
+
             // ----- QURAN & ROQIA -----
             "ISLAMIC: أدعية بصوت الشيخ ماهر المعيقلي": "QURAN & ROQIA",
             "ISLAMIC: التكــــبيرات": "QURAN & ROQIA",
@@ -2081,6 +2004,7 @@
             "Quran: القرآن الكريم كاملا بصوت سعد الغامدي": "QURAN & ROQIA",
             "Quran: القرآن الكريم كاملا بصوت ماهر المعيقلي": "QURAN & ROQIA",
             "Quran: القرآن الكريم كاملا هزاع البلوشي": "QURAN & ROQIA",
+
             // ----- LIBYA -----
             "Libya: AL Jamahiria TV": "LIBYA",
             "Libya: Al Salam": "LIBYA",
@@ -2088,6 +2012,7 @@
             "Libya: Libya Al Hadath": "LIBYA",
             "Libya: LIBYA SPORT 1 HD": "LIBYA",
             "Libya: Tanasuh TV": "LIBYA",
+
             // ----- MOROCO -----
             "MOR HQ: 2M TV": "MOROCO",
             "MOR HQ: Al Aoula Inter": "MOROCO",
@@ -2105,6 +2030,7 @@
             "MOR: M24 MAROC": "MOROCO",
             "MOR: Medi1 TV": "MOROCO",
             "MOR: TV Tamazight Maroc": "MOROCO",
+
             // ----- ISLAMIC -----
             "AR: Ahel Al Quran": "ISLAMIC",
             "AR: Al Nas": "ISLAMIC",
@@ -2119,6 +2045,7 @@
             "AR: Quran TV": "ISLAMIC",
             "AR: Safa TV": "ISLAMIC",
             "AR: Sunnah TV": "ISLAMIC",
+
             // ----- FR TNT FHD -----
             "FR: 6TER FHD": "FR TNT FHD",
             "FR: ARTE FHD": "FR TNT FHD",
@@ -2142,6 +2069,7 @@
             "FR: TFX FHD": "FR TNT FHD",
             "FR: TMC FHD": "FR TNT FHD",
             "FR: W9 FHD": "FR TNT FHD",
+
             // ----- FR TNT HD -----
             "FR: 6TER HD": "FR TNT HD",
             "FR: ARTE HD": "FR TNT HD",
@@ -2158,6 +2086,7 @@
             "FR: TFX HD": "FR TNT HD",
             "FR: TMC HD": "FR TNT HD",
             "FR: W9 HD": "FR TNT HD",
+
             // ----- FR DIVERT & CULTURE -----
             "FR: 13EME RUE HD": "FR DIVERT & CULTURE",
             "FR: AB1 HD": "FR DIVERT & CULTURE",
@@ -2203,6 +2132,7 @@
             "FR: TREK HD": "FR DIVERT & CULTURE",
             "FR: TV BREIZH HD": "FR DIVERT & CULTURE",
             "FR: USHUAIA TV HD": "FR DIVERT & CULTURE",
+
             // ----- FR Enfants -----
             "FR: BOOMERANG HD": "FR Enfants",
             "FR: BOOMERANG MAX HD": "FR Enfants",
@@ -2228,6 +2158,7 @@
             "FR: TFOU MAX": "FR Enfants",
             "FR: TIJI HD": "FR Enfants",
             "FR: TOONAMI MAX": "FR Enfants",
+
             // ----- FR BEIN SPORT -----
             "FR: BEIN SPORT 1 FHD": "FR BEIN SPORT",
             "FR: BEIN SPORT 1 HD": "FR BEIN SPORT",
@@ -2245,7 +2176,8 @@
             "FR: BEIN SPORT MAX 7 HD": "FR BEIN SPORT",
             "FR: BEIN SPORT MAX 8 HD": "FR BEIN SPORT",
             "FR: BEIN SPORT MAX 9 HD": "FR BEIN SPORT",
-            // ----- FOX USA EVENTS -----
+
+            // ----- FOX USA EVENTS (جميع قنوات FOX عدا USA: FOX ...) -----
             "BTN - B1G Baseball - Championship: Minnesota vs. Purdue": "FOX USA EVENTS",
             "BTN - B1G Men's Ice Hockey - B1G Tournament Championship: Wisconsin vs. Minnesota": "FOX USA EVENTS",
             "BTN - B1G Plus Encore - Baseball: Oregon at Washington - 5/3/26": "FOX USA EVENTS",
@@ -2405,7 +2337,8 @@
             "WXXA - Tribunal Justice": "FOX USA EVENTS",
             "WXXA - We the People With Judge Lauren Lake": "FOX USA EVENTS",
             "WXXA - Young Sheldon": "FOX USA EVENTS",
-            // ----- FOX USA LIVE -----
+
+            // ----- FOX USA LIVE (USA: FOX ...) -----
             "USA: BIG NETWORK": "FOX USA LIVE",
             "USA: FOX": "FOX USA LIVE",
             "USA: FOX BUSINESS": "FOX USA LIVE",
@@ -2418,6 +2351,7 @@
             "USA: FS1": "FOX USA LIVE",
             "USA: FS2": "FOX USA LIVE",
             "USA: THE MASKED SINGER": "FOX USA LIVE",
+
             // ----- BEIN ENT -----
             "AR: AR: Bein BBC EARTH 4K": "BEIN ENT",
             "AR: Bein BBC Earth HD": "BEIN ENT",
@@ -2475,6 +2409,7 @@
             "AR: Bein TCM HD": "BEIN ENT",
             "AR: Bein Travel 4K": "BEIN ENT",
             "AR: Bein Travel HD": "BEIN ENT",
+
             // ----- NETFLIX NEW -----
             "NETFLIX New: ARABIC 1": "NETFLIX NEW",
             "NETFLIX New: ARABIC 2": "NETFLIX NEW",
@@ -2513,6 +2448,7 @@
             "NETFLIX New: TURKISH 2": "NETFLIX NEW",
             "NETFLIX New: TURKISH 3": "NETFLIX NEW",
             "NETFLIX New: TURKISH 4": "NETFLIX NEW",
+
             // ----- NETFLIX+ -----
             "NETFLIX+: ACTION 1": "NETFLIX+",
             "NETFLIX+: ACTION 10": "NETFLIX+",
@@ -2552,6 +2488,7 @@
             "NETFLIX+: HORROR 8": "NETFLIX+",
             "NETFLIX+: S-FICTION 1": "NETFLIX+",
             "NETFLIX+: S-FICTION 2": "NETFLIX+",
+
             // ----- NETFLIX (العادي) -----
             "Netflix: Action 2 HD": "NETFLIX",
             "Netflix: Action 3 HD": "NETFLIX",
@@ -2580,6 +2517,7 @@
             "Netflix: Turkish 1 HD": "NETFLIX",
             "Netflix: Turkish 2 HD": "NETFLIX",
             "Netflix: Turkish 3 HD": "NETFLIX",
+
             // ----- SHAHID VIP -----
             "SHAHID VIP: ACTION 1": "SHAHID VIP",
             "SHAHID VIP: ACTION 2": "SHAHID VIP",
@@ -2615,7 +2553,7 @@
         };
 
         // ================================================================
-        // 0c.  الترجمات (i18n) - مختصرة للحفاظ على المساحة
+        // 0c.  الترجمات (i18n) - موسعة (نفس النسخة الأصلية)
         // ================================================================
         const translations = {
             ar: {
@@ -2708,10 +2646,16 @@
                 "contact": "تواصل معنا",
                 "aboutTitle": "من نحن",
                 "contactTitle": "تواصل معنا",
-                "aboutDesc": "HACENE TV هو منصة IPTV متطورة...",
-                "contactDesc": "يسعدنا تواصلك معنا...",
+                "aboutDesc": "HACENE TV هو منصة IPTV متطورة تتيح لك مشاهدة آلاف القنوات الرياضية، الترفيهية، الوثائقية، والأطفال بجودة عالية. نحن نقدم خدمة مستقرة وسريعة مع دعم للعديد من المصادر، بالإضافة إلى إمكانية إضافة قنواتك المفضلة يدوياً. تم تطوير المنصة باستخدام أحدث التقنيات لضمان تجربة مشاهدة سلسة على جميع الأجهزة. نسعى دائماً لتقديم الأفضل لمستخدمينا.",
+                "contactDesc": "يسعدنا تواصلك معنا، يمكنك مراسلتنا عبر القنوات التالية:",
+                "email": "البريد الإلكتروني",
+                "phone": "الهاتف",
+                "facebook": "فيسبوك",
                 "contactInfo": "للتواصل معنا، يمكنك استخدام المعلومات التالية:",
+                "contactEmail": "البريد الإلكتروني",
+                "contactPhone": "رقم الهاتف",
                 "contactWaiting": "نحن في انتظار استفساراتكم واقتراحاتكم.",
+                "telegram": "تيليجرام",
                 "fetchChannels": "جلب القنوات",
                 "history": "سجل المشاهدة",
                 "clearHistory": "حذف السجل",
@@ -2738,9 +2682,9 @@
                 "addCatFav": "Ajouter la catégorie aux favoris",
                 "noChannels": "Aucune chaîne",
                 "pleaseLogin": "Veuillez vous connecter",
-                "loginToView": "Connectez-vous pour voir les chaînes...",
+                "loginToView": "Connectez-vous pour voir les chaînes et gérer votre abonnement.",
                 "loginButton": "Se connecter",
-                "setupXtream": "Configurez un compte Xtream...",
+                "setupXtream": "Configurez un compte Xtream en cliquant sur le bouton",
                 "adminOnly": "réservé à l'administrateur",
                 "orAddManual": "ou ajoutez une chaîne manuellement.",
                 "addNewChannel": "Ajouter une nouvelle chaîne",
@@ -2770,7 +2714,7 @@
                 "editUser": "Modifier l'utilisateur",
                 "saveChanges": "Enregistrer les modifications",
                 "loading": "Chargement en cours",
-                "pleaseWait": "Veuillez patienter...",
+                "pleaseWait": "Veuillez patienter, les chaînes sont en cours de chargement...",
                 "noUsers": "Aucun utilisateur",
                 "fillEmailPassword": "⚠️ Veuillez saisir l'email et le mot de passe",
                 "passwordMin6": "⚠️ Le mot de passe doit comporter au moins 6 caractères",
@@ -2778,7 +2722,7 @@
                 "userNotSpecified": "⚠️ Utilisateur non spécifié",
                 "adminOnlyPage": "⚠️ Cette page est réservée à l'administrateur",
                 "adminOnlySettings": "⚠️ Ces paramètres sont réservés à l'administrateur",
-                "notAuthorized": "⚠️ Vous n'êtes pas autorisé",
+                "notAuthorized": "⚠️ Vous n'êtes pas autorisé à modifier ces paramètres",
                 "loginFirst": "⚠️ Veuillez vous connecter d'abord",
                 "channelNotFound": "⚠️ La chaîne n'existe pas.",
                 "invalidUrl": "⚠️ Ce lien n'est pas valide.",
@@ -2813,9 +2757,16 @@
                 "contact": "Nous contacter",
                 "aboutTitle": "À propos de nous",
                 "contactTitle": "Nous contacter",
-                "aboutDesc": "HACENE TV est une plateforme IPTV avancée...",
+                "aboutDesc": "HACENE TV est une plateforme IPTV avancée qui vous permet de regarder des milliers de chaînes sportives, de divertissement, documentaires et pour enfants en haute qualité. Nous offrons un service stable et rapide avec le support de nombreuses sources, ainsi que la possibilité d'ajouter manuellement vos chaînes préférées. La plateforme a été développée avec les dernières technologies pour garantir une expérience de visionnage fluide sur tous les appareils. Nous nous efforçons toujours d'offrir le meilleur à nos utilisateurs.",
+                "contactDesc": "Nous sommes heureux de vous entendre, vous pouvez nous contacter via les canaux suivants :",
+                "email": "Email",
+                "phone": "Téléphone",
+                "facebook": "Facebook",
                 "contactInfo": "Pour nous contacter, vous pouvez utiliser les informations suivantes :",
+                "contactEmail": "Email",
+                "contactPhone": "Téléphone",
                 "contactWaiting": "Nous attendons vos questions et suggestions.",
+                "telegram": "Telegram",
                 "fetchChannels": "Récupérer les chaînes",
                 "history": "Historique",
                 "clearHistory": "Effacer l'historique",
@@ -2830,7 +2781,7 @@
         };
 
         // ================================================================
-        // 1.  الإعدادات العامة
+        // 1.  الإعدادات العامة (نفس الأصل)
         // ================================================================
         const API_URL = 'https://hacenetv2-0-ua0u.onrender.com/api';
 
@@ -2851,12 +2802,8 @@
         const MAX_HISTORY = 20;
         let categoryChart = null;
 
-        // ===== متغيرات Shaka Player =====
-        let shakaPlayer = null;
-        let shakaVideo = null;
-
         // ================================================================
-        // 2.  دوال الترجمة
+        // 2.  دوال الترجمة (نفس الأصل)
         // ================================================================
         function getTranslation(key, params = {}) {
             const langData = translations[currentLang] || translations.ar;
@@ -2881,6 +2828,7 @@
                 localStorage.setItem('hacene_lang', lang);
                 document.documentElement.lang = lang === 'ar' ? 'ar' : 'fr';
                 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                updateAllTexts();
                 renderHeader();
                 buildSidebar();
                 applyFilters(true);
@@ -2891,8 +2839,12 @@
             }
         }
 
+        function updateAllTexts() {
+            // يتم تحديث النصوص عند فتح النوافذ
+        }
+
         // ================================================================
-        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي
+        // 3.  إدارة التوكن والمستخدمين والتخزين المحلي (نفس الأصل)
         // ================================================================
         function getToken() { return localStorage.getItem('hacene_token'); }
         function setToken(t) { token = t; if (t) localStorage.setItem('hacene_token', t); else localStorage.removeItem('hacene_token'); }
@@ -2904,7 +2856,7 @@
         function setHistory(h) { history = h; localStorage.setItem('hacene_history', JSON.stringify(h)); }
 
         // ================================================================
-        // 4.  API
+        // 4.  API (نفس الأصل)
         // ================================================================
         function getAuthHeaders() {
             const t = getToken();
@@ -2923,7 +2875,7 @@
         }
 
         // ================================================================
-        // 5.  دوال العرض والهيكل
+        // 5.  دوال العرض والهيكل (نفس الأصل مع تحسينات التصميم)
         // ================================================================
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -2939,7 +2891,7 @@
             overlay.classList.remove('active');
         }
 
-        // ----- History -----
+        // ----- History (نفس الأصل) -----
         function addToHistory(channel) {
             if (!channel) return;
             const entry = {
@@ -2991,7 +2943,7 @@
             }
         }
 
-        // ----- Render Header -----
+        // ----- Render Header, Sidebar, Filters (نفس الأصل مع تحسينات الأزرار) -----
         function renderHeader() {
             const container = document.getElementById('headerControls');
             const user = getUser();
@@ -3339,7 +3291,7 @@
         }
 
         // ================================================================
-        // 6.  المصادقة
+        // 6.  المصادقة (نفس الأصل)
         // ================================================================
         function openLoginModal() {
             document.getElementById('loginModal').classList.add('active');
@@ -3403,6 +3355,7 @@
             if (window._loadingInterval) { clearInterval(window._loadingInterval); window._loadingInterval = null; }
         }
 
+        // ===== Fetch Channels (نفس الأصل) =====
         async function fetchChannelsForUser(showLoading = true) {
             const user = getUser();
             if (!user) {
@@ -3473,6 +3426,7 @@
             }
         }
 
+        // ===== Login / Register / Logout (نفس الأصل) =====
         async function login() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -3490,7 +3444,7 @@
                 setUser(data.user);
                 closeLoginModal();
                 await initializeApp(true);
-               // await loadNotifications(); //
+                await loadNotifications();
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -3523,7 +3477,7 @@
                 setUser(data.user);
                 closeLoginModal();
                 await initializeApp(true);
-               // await loadNotifications(); //
+                await loadNotifications();
                 const userData = getUser();
                 if (userData && userData.xtream && userData.xtream.server) {
                     await fetchChannelsForUser(true);
@@ -3536,8 +3490,6 @@
 
         function logout() {
             if (!confirm(getTranslation('confirmLogout'))) return;
-            // إيقاف المشغل إذا كان مفتوحاً
-            closePlayerModal();
             setToken(null);
             setUser(null);
             setFavorites([]);
@@ -3555,7 +3507,7 @@
         }
 
         // ================================================================
-        // 7.  Xtream
+        // 7.  Xtream (نفس الأصل)
         // ================================================================
         function openXtreamModal() {
             const user = getUser();
@@ -3614,7 +3566,7 @@
         }
 
         // ================================================================
-        // 8.  القنوات (مع مشغل Shaka)
+        // 8.  القنوات (تشغيل مع إضافة للسجل) (نفس الأصل)
         // ================================================================
         function openAddModal() {
             const user = getUser();
@@ -3658,6 +3610,21 @@
             } catch (err) { console.error('Failed to save channels:', err); }
         }
 
+        function playChannel(index) {
+            const channel = allChannels[index];
+            if (!channel) { alert(getTranslation('channelNotFound')); return; }
+            addToHistory(channel);
+
+            let url = channel.url;
+            const user = getUser();
+            if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
+                const { server, username, password } = user.xtream;
+                url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
+            }
+            if (!url || url === '#') { alert(getTranslation('invalidUrl')); return; }
+            window.location.href = url;
+        }
+
         function applyCategoryMap() {
             allChannels = allChannels.map(ch => {
                 const newCat = CHANNEL_CATEGORY_MAP[ch.name];
@@ -3668,119 +3635,7 @@
         }
 
         // ================================================================
-        // 8b. مشغل Shaka Player
-        // ================================================================
-function initShakaPlayer() {
-    if (shakaPlayer) {
-        shakaPlayer.destroy();
-        shakaPlayer = null;
-    }
-    shakaVideo = document.getElementById('playerVideo');
-    if (!shakaVideo) return null;
-    try {
-        // الطريقة الجديدة: إنشاء اللاعب ثم ربطه بالعنصر
-        shakaPlayer = new shaka.Player();
-        shakaPlayer.attach(shakaVideo);
-        shakaPlayer.addEventListener('error', onShakaError);
-        return shakaPlayer;
-    } catch (e) {
-        console.error('Shaka init error:', e);
-        return null;
-    }
-}
-
-        function onShakaError(event) {
-            const error = event.detail;
-            const errorEl = document.getElementById('playerError');
-            const errorText = document.getElementById('playerErrorText');
-            let msg = 'فشل تحميل البث.';
-            if (error && error.category === 1) { // NETWORK
-                msg = '⚠️ مشكلة في الشبكة أو CORS. تأكد من أن الخادم يسمح بالوصول.';
-            } else if (error && error.code === 3012) {
-                msg = '⚠️ الرابط غير صالح أو منتهي الصلاحية.';
-            } else if (error && error.message) {
-                msg = '⚠️ ' + error.message;
-            }
-            errorText.textContent = msg;
-            errorEl.classList.add('show');
-            console.error('Shaka Error:', error);
-        }
-
-        function closePlayerModal() {
-            const modal = document.getElementById('playerModal');
-            modal.classList.remove('active');
-            // إيقاف المشغل لإيقاف استهلاك البيانات
-            if (shakaPlayer) {
-                shakaPlayer.unload();
-                shakaPlayer.destroy();
-                shakaPlayer = null;
-            }
-            if (shakaVideo) {
-                shakaVideo.pause();
-                shakaVideo.removeAttribute('src');
-                shakaVideo.load();
-            }
-            // إخفاء رسالة الخطأ
-            document.getElementById('playerError').classList.remove('show');
-        }
-
-        // ===== دالة التشغيل الرئيسية (مع Shaka) =====
-function playChannel(index) {
-    const channel = allChannels[index];
-    if (!channel) { alert(getTranslation('channelNotFound')); return; }
-
-    addToHistory(channel);
-
-    let url = channel.url;
-    const user = getUser();
-    if (channel.stream_id && user?.xtream?.server && user?.xtream?.username && user?.xtream?.password) {
-        const { server, username, password } = user.xtream;
-        url = `${server}/live/${encodeURIComponent(username)}/${encodeURIComponent(password)}/${channel.stream_id}.m3u8`;
-    }
-    if (!url || url === '#') {
-        alert(getTranslation('invalidUrl'));
-        return;
-    }
-
-    // لا نقوم بتحويل الرابط إلى HTTPS تلقائياً، بل نتركه كما هو.
-    // إذا كان الموقع يعمل عبر HTTPS، فإن المتصفح سيمنع الطلب إلى HTTP، وسنعرض رسالة.
-    // يمكنك إضافة خيار للمستخدم لتجربة HTTP إذا كان الرابط HTTP.
-
-    const modal = document.getElementById('playerModal');
-    const title = document.getElementById('playerModalTitle');
-    title.textContent = channel.name || 'بدون اسم';
-
-    const errorEl = document.getElementById('playerError');
-    errorEl.classList.remove('show');
-    modal.classList.add('active');
-
-    const player = initShakaPlayer();
-    if (!player) {
-        const errorText = document.getElementById('playerErrorText');
-        errorText.textContent = '⚠️ فشل تهيئة المشغل. يرجى تحديث الصفحة.';
-        errorEl.classList.add('show');
-        return;
-    }
-
-    // محاولة التحميل مع إظهار رسالة مناسبة
-    player.load(url).catch(err => {
-        console.error('Load error:', err);
-        const errorText = document.getElementById('playerErrorText');
-        let msg = '⚠️ تعذر تحميل البث.';
-        if (err.message && err.message.includes('CERT_AUTHORITY_INVALID')) {
-            msg = '⚠️ شهادة الأمان غير صالحة للخادم. يرجى استخدام رابط HTTPS موثوق أو الاتصال بالدعم.';
-        } else if (err.message && err.message.includes('Mixed Content')) {
-            msg = '⚠️ المتصفح يمنع تحميل محتوى غير آمن (HTTP) من موقع آمن (HTTPS). يرجى استخدام رابط HTTPS.';
-        } else if (err.message) {
-            msg = '⚠️ ' + err.message;
-        }
-        errorText.textContent = msg;
-        errorEl.classList.add('show');
-    });
-}
-
-        // ================================================================
-        // 9.  Admin
+        // 9.  Admin (مع الإحصائيات المتقدمة) (نفس الأصل)
         // ================================================================
         async function openAdminModal() {
             const user = getUser();
@@ -3963,7 +3818,7 @@ function playChannel(index) {
         }
 
         // ================================================================
-        // 10.  الإشعارات
+        // 10.  الإشعارات (نفس الأصل)
         // ================================================================
         async function loadNotifications() {
             if (!getUser()) return;
@@ -4038,7 +3893,7 @@ function playChannel(index) {
         }
 
         // ================================================================
-        // 11.  About & Contact Modals
+        // 11.  About & Contact Modals (نفس الأصل)
         // ================================================================
         function openAboutModal() {
             const modal = document.getElementById('aboutModal');
@@ -4076,7 +3931,7 @@ function playChannel(index) {
         }
 
         // ================================================================
-        // 12.  Scroll to Top
+        // 12.  Scroll to Top (نفس الأصل)
         // ================================================================
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4092,7 +3947,7 @@ function playChannel(index) {
         }
 
         // ================================================================
-        // 13.  التهيئة
+        // 13.  التهيئة (نفس الأصل)
         // ================================================================
         async function initializeApp(forceRefresh = false) {
             if (appInitialized && !forceRefresh) return;
@@ -4134,7 +3989,7 @@ function playChannel(index) {
                             allChannels = [];
                         }
                     }
-                   // await loadNotifications(); //
+                    await loadNotifications();
                 } catch (err) {
                     console.error('❌ Error initializing:', err.message);
                     setToken(null);
@@ -4171,7 +4026,7 @@ function playChannel(index) {
         }
 
         // ================================================================
-        // 14.  بدء التطبيق
+        // 14.  بدء التطبيق (نفس الأصل مع إضافة مستمع للأحداث)
         // ================================================================
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp(false);
@@ -4217,7 +4072,6 @@ function playChannel(index) {
                 closeEditUserModal();
                 closeAboutModal();
                 closeContactModal();
-                closePlayerModal();
                 document.getElementById('notifDropdown')?.classList.remove('active');
                 closeSidebar();
             }
