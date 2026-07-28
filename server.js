@@ -33,6 +33,14 @@ app.use(cors({
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: '🚀 HACENE TV API is running',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
@@ -555,6 +563,10 @@ app.get('/api/health', (req, res) => {
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
 });
+
+setInterval(() => {
+  io.emit('ping', { timestamp: Date.now() });
+}, 60000);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
