@@ -16,8 +16,6 @@ app.use(cors({
             'http://localhost:3000',
             'http://localhost:5500',
             'https://hacenetv2-0.onrender.com',
-            'https://hacenetv2-0-ua0u.onrender.com',
-            'https://hacenetvstalker.onrender.com'
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
