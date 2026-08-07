@@ -229,7 +229,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
 });
 
 // ===== جلب القنوات باستخدام وكيل cors-anywhere =====
-const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-tfit.onrender.com';
+const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-nlwj.onrender.com';
 
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
@@ -246,7 +246,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         const response = await fetch(proxyUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Origin': 'https://hacenetv2-0-ua0u.onrender.com',
+                'Origin': 'https://hacenetv2-0.onrender.com',
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
             }
