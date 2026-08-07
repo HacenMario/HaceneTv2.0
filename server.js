@@ -12,9 +12,6 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
         const allowed = [
-            'https://hacene-tv2-0.vercel.app',
-            'http://localhost:3000',
-            'http://localhost:5500',
             'https://hacenetv2-0.onrender.com',
         ];
         const clean = origin.replace(/\/$/, '');
