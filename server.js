@@ -37,9 +37,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// ✅ تحقق من وجود JWT_SECRET عند بدء التشغيل
-const JWT_SECRET = process.env.JWT_SECRET || 'hacene_tv_secret_key_2025';
-console.log(`🔑 JWT_SECRET is ${JWT_SECRET === 'hacene_tv_secret_key_2025' ? 'using default' : 'set from environment'}`);
+// ✅ Health check endpoint (ضروري لـ Railway)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+});
 
 // MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -55,7 +60,11 @@ mongoose.connect(MONGODB_URI)
         process.exit(1);
     });
 
-// ===== Schemas (كما هي) =====
+// ===== JWT Secret =====
+const JWT_SECRET = process.env.JWT_SECRET || 'hacene_tv_secret_key_2025';
+console.log(`🔑 JWT_SECRET is ${JWT_SECRET === 'hacene_tv_secret_key_2025' ? 'using default' : 'set from environment'}`);
+
+// ===== Schemas =====
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
@@ -104,7 +113,7 @@ function generateToken(userId, email, role) {
     );
 }
 
-// ===== ✅ MIDDLEWARE محسّن مع سجلات تشخيصية =====
+// ===== Auth Middleware =====
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     console.log(`🔍 Auth header received: ${authHeader ? 'Yes' : 'No'}`);
@@ -298,7 +307,7 @@ app.get('/api/proxy/fetch', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== جلب القنوات =====
+// ===== جلب القنوات باستخدام الوكيل المدمج =====
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
@@ -357,7 +366,6 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== باقي المسارات (نفسها) =====
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const doc = await Channel.findOne({ userId: req.user.userId });
@@ -607,22 +615,26 @@ app.get('/api/proxy', async (req, res) => {
     }
 });
 
-// ===== Health =====
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-    });
-});
-
-// ===== بدء الخادم =====
+// ===== بدء الخادم مع معالجة الإشارات والأخطاء =====
 const PORT = process.env.PORT || 3001;
+
 const server = app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`🌐 API Base URL: ${process.env.API_BASE || `hacenetv20-production.up.railway.app:${PORT}`}`);
 });
 
+console.log('🚀 Server is ready to accept requests.');
+
+// منع الخروج بسبب أخطاء غير معالجة
+process.on('uncaughtException', (err) => {
+    console.error('💥 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// استقبال SIGTERM بشكل آمن
 process.on('SIGTERM', () => {
     console.log('🛑 SIGTERM received, closing gracefully...');
     server.close(() => {
@@ -634,6 +646,7 @@ process.on('SIGTERM', () => {
     });
 });
 
+// استقبال SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
     console.log('🛑 SIGINT received, closing gracefully...');
     server.close(() => {
@@ -643,12 +656,4 @@ process.on('SIGINT', () => {
             process.exit(0);
         });
     });
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('💥 Uncaught Exception:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 Unhandled Rejection:', reason);
 });
