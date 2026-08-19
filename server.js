@@ -12,7 +12,7 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
         const allowed = [
-            'https://hacenetv2-0.onrender.com',
+            'https://hacenetv20-production.up.railway.app',
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
@@ -246,7 +246,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         const response = await fetch(proxyUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Origin': 'https://hacenetv2-0.onrender.com',
+                'Origin': 'https://hacenetv20-production.up.railway.app',
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
             }
