@@ -37,6 +37,10 @@ app.get('/', (req, res) => {
   });
 });
 
+// ✅ تحقق من وجود JWT_SECRET عند بدء التشغيل
+const JWT_SECRET = process.env.JWT_SECRET || 'hacene_tv_secret_key_2025';
+console.log(`🔑 JWT_SECRET is ${JWT_SECRET === 'hacene_tv_secret_key_2025' ? 'using default' : 'set from environment'}`);
+
 // MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
@@ -51,7 +55,7 @@ mongoose.connect(MONGODB_URI)
         process.exit(1);
     });
 
-// ===== Schemas =====
+// ===== Schemas (كما هي) =====
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
@@ -83,7 +87,6 @@ const StatsSchema = new mongoose.Schema({
 });
 const Stats = mongoose.model('Stats', StatsSchema);
 
-// ===== نموذج الإشعارات =====
 const NotificationSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     message: { type: String, required: true },
@@ -96,18 +99,18 @@ const Notification = mongoose.model('Notification', NotificationSchema);
 function generateToken(userId, email, role) {
     return jwt.sign(
         { userId, email, role },
-        process.env.JWT_SECRET || 'hacene_tv_secret_key_2025',
+        JWT_SECRET,
         { expiresIn: '30d' }
     );
 }
 
-// ===== تحسين middleware للتوثيق =====
+// ===== ✅ MIDDLEWARE محسّن مع سجلات تشخيصية =====
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
+    console.log(`🔍 Auth header received: ${authHeader ? 'Yes' : 'No'}`);
     
-    // ✅ تحقق من وجود التوكن
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.log('❌ No token provided');
+        console.log('❌ No Bearer token found in headers');
         return res.status(401).json({ 
             error: 'Unauthorized',
             message: 'No token provided'
@@ -115,15 +118,15 @@ function authMiddleware(req, res, next) {
     }
     
     const token = authHeader.split(' ')[1];
+    console.log(`🔑 Token received (first 20 chars): ${token.substring(0, 20)}...`);
     
     try {
-        // ✅ تحقق من صحة التوكن
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hacene_tv_secret_key_2025');
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
-        console.log(`✅ User authenticated: ${decoded.email}`);
+        console.log(`✅ User authenticated: ${decoded.email} (${decoded.role})`);
         next();
     } catch (err) {
-        console.log(`❌ Invalid token: ${err.message}`);
+        console.log(`❌ Token verification failed: ${err.message}`);
         return res.status(401).json({ 
             error: 'Unauthorized',
             message: 'Invalid or expired token'
@@ -194,11 +197,12 @@ app.post('/api/auth/login', async (req, res) => {
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
 
-        // تحديث آخر دخول
         user.lastLogin = new Date();
         await user.save();
 
         const token = generateToken(user._id, user.email, user.role);
+        console.log(`✅ Login successful for ${user.email}, token generated`);
+        
         res.json({
             success: true,
             token,
@@ -264,7 +268,7 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== وكيل مدمج (بدون خدمات خارجية) =====
+// ===== وكيل مدمج =====
 app.get('/api/proxy/fetch', authMiddleware, async (req, res) => {
     try {
         const targetUrl = req.query.url;
@@ -272,7 +276,6 @@ app.get('/api/proxy/fetch', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'URL parameter required' });
         }
 
-        // التحقق من صحة الرابط
         if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
             return res.status(400).json({ error: 'Invalid URL format' });
         }
@@ -295,7 +298,7 @@ app.get('/api/proxy/fetch', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== جلب القنوات باستخدام الوكيل المدمج =====
+// ===== جلب القنوات =====
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
@@ -308,16 +311,14 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        // التحقق من صحة الرابط
         if (!server.startsWith('http://') && !server.startsWith('https://')) {
             return res.status(400).json({ error: 'Invalid server URL' });
         }
 
-        // بناء رابط Xtream
         const targetUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        
-        // استخدام الوكيل المدمج
         const proxyUrl = `${req.protocol}://${req.get('host')}/api/proxy/fetch?url=${encodeURIComponent(targetUrl)}`;
+        
+        console.log(`📡 Fetching channels via proxy: ${proxyUrl}`);
         
         const response = await fetch(proxyUrl);
         
@@ -356,6 +357,7 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     }
 });
 
+// ===== باقي المسارات (نفسها) =====
 app.get('/api/user/channels', authMiddleware, async (req, res) => {
     try {
         const doc = await Channel.findOne({ userId: req.user.userId });
@@ -380,7 +382,6 @@ app.post('/api/user/channels', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== سجل المشاهدة (History) =====
 app.post('/api/user/history', authMiddleware, async (req, res) => {
     try {
         const { channelId, channelName } = req.body;
@@ -415,7 +416,6 @@ app.get('/api/user/history', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== إحصائيات المدير =====
 app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const totalUsers = await User.countDocuments();
@@ -457,7 +457,6 @@ app.post('/api/admin/stats/view', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== Admin users management =====
 app.get('/api/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const users = await User.find({}).select('-password');
@@ -514,11 +513,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
     }
 });
 
-// ============================================================
-// ===== نظام الإشعارات الكامل =====
-// ============================================================
-
-// 1. إرسال إشعار (للمدير فقط)
+// ===== نظام الإشعارات =====
 app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { message, targetEmail } = req.body;
@@ -555,7 +550,6 @@ app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req
     }
 });
 
-// 2. جلب إشعارات المستخدم الحالي
 app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -569,7 +563,6 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
     }
 });
 
-// 3. تعيين إشعار كمقروء
 app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -590,7 +583,6 @@ app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => 
     }
 });
 
-// حذف جميع الإشعارات المقروءة للمستخدم
 app.delete('/api/user/notifications/read', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -601,9 +593,7 @@ app.delete('/api/user/notifications/read', authMiddleware, async (req, res) => {
     }
 });
 
-// ============================================================
-// ===== Proxy عام (احتياطي) =====
-// ============================================================
+// ===== Proxy عام =====
 app.get('/api/proxy', async (req, res) => {
     try {
         const target = req.query.url;
@@ -626,20 +616,17 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// ===== بدء الخادم مع معالجة الإشارات والأخطاء =====
+// ===== بدء الخادم =====
 const PORT = process.env.PORT || 3001;
-
-// ✅ بدء الخادم مع حفظ المرجع
 const server = app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`🌐 API Base URL: ${process.env.API_BASE || `hacenetv20-production.up.railway.app:${PORT}`}`);
 });
 
-// ✅ معالجة إشارة SIGTERM (يستخدمها Railway لإيقاف التطبيق)
 process.on('SIGTERM', () => {
-    console.log('🛑 SIGTERM signal received: closing HTTP server gracefully');
+    console.log('🛑 SIGTERM received, closing gracefully...');
     server.close(() => {
-        console.log('✅ HTTP server closed');
+        console.log('✅ Server closed');
         mongoose.connection.close(false, () => {
             console.log('✅ MongoDB connection closed');
             process.exit(0);
@@ -647,11 +634,10 @@ process.on('SIGTERM', () => {
     });
 });
 
-// ✅ معالجة إشارة SIGINT (Ctrl+C)
 process.on('SIGINT', () => {
-    console.log('🛑 SIGINT signal received: closing HTTP server gracefully');
+    console.log('🛑 SIGINT received, closing gracefully...');
     server.close(() => {
-        console.log('✅ HTTP server closed');
+        console.log('✅ Server closed');
         mongoose.connection.close(false, () => {
             console.log('✅ MongoDB connection closed');
             process.exit(0);
@@ -659,13 +645,10 @@ process.on('SIGINT', () => {
     });
 });
 
-// ✅ معالجة الأخطاء غير المتوقعة (تمنع التطبيق من التوقف فجأة)
 process.on('uncaughtException', (err) => {
     console.error('💥 Uncaught Exception:', err);
-    // لا نغلق التطبيق، فقط نسجل الخطأ
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
-    // لا نغلق التطبيق، فقط نسجل الخطأ
+    console.error('💥 Unhandled Rejection:', reason);
 });
