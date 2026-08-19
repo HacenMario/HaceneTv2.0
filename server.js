@@ -4,8 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-// ✅ إصلاح fetch لـ Node.js v16
 const fetch = require('node-fetch');
 
 const app = express();
@@ -85,7 +83,7 @@ const StatsSchema = new mongoose.Schema({
 });
 const Stats = mongoose.model('Stats', StatsSchema);
 
-// ===== NEW: نموذج الإشعارات =====
+// ===== نموذج الإشعارات =====
 const NotificationSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     message: { type: String, required: true },
@@ -103,18 +101,33 @@ function generateToken(userId, email, role) {
     );
 }
 
+// ===== تحسين middleware للتوثيق =====
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
+    
+    // ✅ تحقق من وجود التوكن
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        console.log('❌ No token provided');
+        return res.status(401).json({ 
+            error: 'Unauthorized',
+            message: 'No token provided'
+        });
     }
+    
     const token = authHeader.split(' ')[1];
+    
     try {
+        // ✅ تحقق من صحة التوكن
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hacene_tv_secret_key_2025');
         req.user = decoded;
+        console.log(`✅ User authenticated: ${decoded.email}`);
         next();
     } catch (err) {
-        return res.status(401).json({ error: 'Invalid token' });
+        console.log(`❌ Invalid token: ${err.message}`);
+        return res.status(401).json({ 
+            error: 'Unauthorized',
+            message: 'Invalid or expired token'
+        });
     }
 }
 
@@ -209,6 +222,26 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
         const user = await User.findById(req.user.userId).select('-password');
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json({ user });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ===== اختبار صلاحية التوكن =====
+app.get('/api/auth/verify', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json({ 
+            valid: true, 
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role
+            }
+        });
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -482,7 +515,7 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
 });
 
 // ============================================================
-// ===== NEW: نظام الإشعارات الكامل =====
+// ===== نظام الإشعارات الكامل =====
 // ============================================================
 
 // 1. إرسال إشعار (للمدير فقط)
