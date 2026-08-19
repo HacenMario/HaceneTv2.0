@@ -596,7 +596,7 @@ const PORT = process.env.PORT || 3001;
 // ✅ بدء الخادم مع حفظ المرجع
 const server = app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`🌐 API Base URL: ${process.env.API_BASE || `http://localhost:${PORT}`}`);
+    console.log(`🌐 API Base URL: ${process.env.API_BASE || `hacenetv20-production.up.railway.app:${PORT}`}`);
 });
 
 // ✅ معالجة إشارة SIGTERM (يستخدمها Railway لإيقاف التطبيق)
