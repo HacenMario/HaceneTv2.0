@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// ✅ إصلاح fetch لـ Node.js v16
+const fetch = require('node-fetch');
+
 const app = express();
 
 // CORS
