@@ -228,51 +228,81 @@ app.post('/api/user/xtream', authMiddleware, async (req, res) => {
     }
 });
 
-// ===== جلب القنوات باستخدام وكيل cors-anywhere =====
-const PROXY_URL = process.env.PROXY_URL || 'https://cors-anywhere-nlwj.onrender.com';
+// ===== وكيل مدمج (بدون خدمات خارجية) =====
+app.get('/api/proxy/fetch', authMiddleware, async (req, res) => {
+    try {
+        const targetUrl = req.query.url;
+        if (!targetUrl) {
+            return res.status(400).json({ error: 'URL parameter required' });
+        }
 
+        // التحقق من صحة الرابط
+        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+            return res.status(400).json({ error: 'Invalid URL format' });
+        }
+
+        const response = await fetch(targetUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error('Proxy error:', err);
+        res.status(500).json({ error: 'Proxy error: ' + err.message });
+    }
+});
+
+// ===== جلب القنوات باستخدام الوكيل المدمج =====
 app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
         const { server, username, password } = user.xtream;
         if (!server || !username || !password) {
             return res.status(400).json({ error: 'Xtream not configured' });
         }
 
-        const targetUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
-        const proxyUrl = `${PROXY_URL}/${targetUrl}`;
-
-        const response = await fetch(proxyUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Origin': 'https://hacenetv20-production.up.railway.app',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        // التحقق من صحة الرابط
+        if (!server.startsWith('http://') && !server.startsWith('https://')) {
+            return res.status(400).json({ error: 'Invalid server URL' });
         }
 
+        // بناء رابط Xtream
+        const targetUrl = `${server}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&action=get_live_streams`;
+        
+        // استخدام الوكيل المدمج
+        const proxyUrl = `${req.protocol}://${req.get('host')}/api/proxy/fetch?url=${encodeURIComponent(targetUrl)}`;
+        
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
-        if (!Array.isArray(data)) throw new Error('Invalid response');
+        
+        if (!Array.isArray(data)) {
+            throw new Error('Invalid response format');
+        }
 
-        const channels = data.map(item => {
-            let streamId = item.stream_id;
-            if (streamId && String(streamId).includes('/')) {
-                const parts = String(streamId).split('/');
-                streamId = parts[parts.length - 1];
-            }
-            return {
-                name: item.name || 'بدون اسم',
-                category: item.category_name || 'عام',
-                stream_id: streamId,
-                icon: item.stream_icon || '',
-                url: ''
-            };
-        });
+        const channels = data.map(item => ({
+            name: item.name || 'بدون اسم',
+            category: item.category_name || 'عام',
+            stream_id: item.stream_id || '',
+            icon: item.stream_icon || '',
+            url: ''
+        }));
 
         await Channel.findOneAndUpdate(
             { userId: user._id },
@@ -283,7 +313,10 @@ app.get('/api/user/fetch-channels', authMiddleware, async (req, res) => {
         res.json({ success: true, channels, count: channels.length });
     } catch (err) {
         console.error('Fetch channels error:', err);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ 
+            error: err.message,
+            details: 'Failed to fetch channels. Please check your Xtream credentials or try again later.'
+        });
     }
 });
 
