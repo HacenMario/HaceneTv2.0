@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
     },
     history: { type: Array, default: [] },
     createdAt: { type: Date, default: Date.now },
-    lastLogin: { type: Date } // أضفنا هذا الحقل للإحصائيات
+    lastLogin: { type: Date }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -438,7 +438,6 @@ app.delete('/api/admin/users/:userId', authMiddleware, adminMiddleware, async (r
         if (userId === req.user.userId) return res.status(403).json({ error: 'Cannot delete self' });
         await User.findByIdAndDelete(userId);
         await Channel.findOneAndDelete({ userId });
-        // حذف إشعارات المستخدم أيضاً
         await Notification.deleteMany({ userId });
         res.json({ success: true });
     } catch (err) {
@@ -465,7 +464,6 @@ app.post('/api/admin/notifications', authMiddleware, adminMiddleware, async (req
             users = await User.find({});
         }
 
-        // إنشاء إشعار لكل مستخدم
         const notifications = users.map(user => ({
             userId: user._id,
             message: message,
@@ -494,7 +492,7 @@ app.get('/api/user/notifications', authMiddleware, async (req, res) => {
         const userId = req.user.userId;
         const notifications = await Notification.find({ userId })
             .sort({ createdAt: -1 })
-            .limit(100); // حد أقصى 100 إشعار
+            .limit(100);
         res.json({ notifications });
     } catch (err) {
         console.error('Error fetching notifications:', err);
@@ -523,7 +521,7 @@ app.put('/api/user/notifications/:id/read', authMiddleware, async (req, res) => 
     }
 });
 
-// (اختياري) حذف جميع الإشعارات المقروءة للمستخدم
+// حذف جميع الإشعارات المقروءة للمستخدم
 app.delete('/api/user/notifications/read', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -559,7 +557,46 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// ===== بدء الخادم مع معالجة الإشارات والأخطاء =====
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+
+// ✅ بدء الخادم مع حفظ المرجع
+const server = app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
+    console.log(`🌐 API Base URL: ${process.env.API_BASE || `http://localhost:${PORT}`}`);
+});
+
+// ✅ معالجة إشارة SIGTERM (يستخدمها Railway لإيقاف التطبيق)
+process.on('SIGTERM', () => {
+    console.log('🛑 SIGTERM signal received: closing HTTP server gracefully');
+    server.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
+});
+
+// ✅ معالجة إشارة SIGINT (Ctrl+C)
+process.on('SIGINT', () => {
+    console.log('🛑 SIGINT signal received: closing HTTP server gracefully');
+    server.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
+});
+
+// ✅ معالجة الأخطاء غير المتوقعة (تمنع التطبيق من التوقف فجأة)
+process.on('uncaughtException', (err) => {
+    console.error('💥 Uncaught Exception:', err);
+    // لا نغلق التطبيق، فقط نسجل الخطأ
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+    // لا نغلق التطبيق، فقط نسجل الخطأ
 });
