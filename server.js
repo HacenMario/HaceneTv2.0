@@ -13,7 +13,7 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
         const allowed = [
-            'https://hacenetv20-production.up.railway.app',
+            'https://hacenetv20-production-7596.up.railway.app',
         ];
         const clean = origin.replace(/\/$/, '');
         if (allowed.includes(clean) || allowed.includes(origin)) {
