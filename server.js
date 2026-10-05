@@ -620,7 +620,7 @@ const PORT = process.env.PORT || 3001;
 
 const server = app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`🌐 API Base URL: ${process.env.API_BASE || `hacenetv20-production.up.railway.app:${PORT}`}`);
+    console.log(`🌐 API Base URL: ${process.env.API_BASE || `https://hacenetv20-production-7596.up.railway.app:${PORT}`}`);
 });
 
 console.log('🚀 Server is ready to accept requests.');
